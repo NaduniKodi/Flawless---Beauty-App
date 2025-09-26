@@ -1,5 +1,6 @@
 import 'package:flawless_beauty_app/interface/intro_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flawless_beauty_app/interface/login_page.dart';
 
 void main() {
   runApp(const MyApp());

@@ -1,3 +1,4 @@
+import 'package:flawless_beauty_app/interface/login_page.dart';
 import 'package:flutter/material.dart';
 
 class IntroPage extends StatelessWidget {
@@ -70,7 +71,7 @@ class IntroPage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const NextPage()),
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
                 );
               },
               child: const Text(

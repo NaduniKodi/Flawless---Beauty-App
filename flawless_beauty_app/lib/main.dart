@@ -1,6 +1,8 @@
 import 'package:flawless_beauty_app/interface/intro_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flawless_beauty_app/interface/login_page.dart';
+import 'package:flawless_beauty_app/auth/login_page.dart';
+import 'package:flawless_beauty_app/auth/create_account_page.dart';
+import 'package:flawless_beauty_app/interface/homepage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,7 +34,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: IntroPage(),
+      home: const IntroPage(),
     );
   }
 }

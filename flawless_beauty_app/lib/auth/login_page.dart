@@ -1,5 +1,7 @@
 import 'package:flawless_beauty_app/main.dart';
 import 'package:flutter/material.dart';
+import 'package:flawless_beauty_app/auth/create_account_page.dart';
+import 'package:flawless_beauty_app/interface/homepage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -20,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             // Pink header background
             Container(
-              height: 100,
+              height: 80,
               decoration: const BoxDecoration(
                 color: Color(0xFFF8AFCB),
                 borderRadius: BorderRadius.only(
@@ -160,7 +162,7 @@ class _LoginPageState extends State<LoginPage> {
             // Continue button
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 238, 139, 172),
+                backgroundColor: Color(0xFFF8AFCB),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 150,
                   vertical: 15,
@@ -171,10 +173,10 @@ class _LoginPageState extends State<LoginPage> {
                 elevation: 4,
               ),
               onPressed: () {
-                /*Navigator.push(
+                Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ),
-                );*/
+                  MaterialPageRoute(builder: (context) => const HomePage()),
+                );
               },
               child: const Text(
                 "Continue",
@@ -196,9 +198,15 @@ class _LoginPageState extends State<LoginPage> {
                   "Not yet Registered? ",
                   style: TextStyle(fontSize: 14, color: Colors.black),
                 ),
-                GestureDetector(
-                  onTap: () {
+                TextButton(
+                  onPressed: () {
                     // Navigate to Register Page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CreateAccountPage(),
+                      ),
+                    );
                   },
                   child: const Text(
                     "Register Here",

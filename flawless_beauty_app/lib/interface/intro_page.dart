@@ -1,5 +1,8 @@
-import 'package:flawless_beauty_app/interface/login_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flawless_beauty_app/auth/login_page.dart';
+import 'package:flawless_beauty_app/interface/homepage.dart';
+import 'package:flawless_beauty_app/auth/create_account_page.dart';
+import 'package:flawless_beauty_app/main.dart';
 
 class IntroPage extends StatelessWidget {
   const IntroPage({super.key});
@@ -9,92 +12,78 @@ class IntroPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Center(
-              child: Column(
-                children: [
-                  Container(
-                    height: 300,
-                    width: 300,
-                    decoration: BoxDecoration(
-                      color: Colors.pink[200],
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 8,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ClipOval(
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                ],
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Logo (lighter version: smaller + no heavy shadow)
+              CircleAvatar(
+                radius: 100,
+                backgroundColor: Colors.pink[100],
+                backgroundImage: const AssetImage("assets/images/logo.png"),
               ),
-            ),
-            const SizedBox(height: 40),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40),
-              child: Text(
+
+              const SizedBox(height: 40),
+
+              // Intro text
+              const Text(
                 "From flawless skin to the perfect eyeliner — "
                 "see what enhances your natural beauty with AI",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 20,
-                  height: 1.5,
+                  fontSize: 18,
+                  height: 1.4,
                   color: Colors.black87,
                   fontStyle: FontStyle.italic,
                 ),
               ),
-            ),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 238, 139, 172),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+
+              const SizedBox(height: 50),
+
+              // Get Started button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEE8BAC),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    "Get Started",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 100,
-                  vertical: 15,
-                ),
-                elevation: 4,
               ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                );
-              },
-              child: const Text(
-                "Get Started",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
+// Dummy next page (optional)
 class NextPage extends StatelessWidget {
   const NextPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Text("Welcome to Flawless App")));
+    return const Scaffold(body: Center(child: Text("Welcome to Flawless App")));
   }
 }

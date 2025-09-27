@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flawless_beauty_app/main.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -10,7 +11,7 @@ class HomePage extends StatelessWidget {
 
       // Bottom Navigation
       bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.pink,
+        selectedItemColor: Color.fromARGB(255, 207, 140, 255),
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
         items: const [
@@ -40,7 +41,7 @@ class HomePage extends StatelessWidget {
                   ),
                   const CircleAvatar(
                     radius: 20,
-                    backgroundImage: AssetImage("assets/images/profile.png"),
+                    backgroundImage: AssetImage("assets/images/profile.webp"),
                   ),
                 ],
               ),
@@ -97,7 +98,7 @@ class HomePage extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.asset(
-                        "assets/images/banner.png",
+                        "assets/images/banner.webp",
                         width: 90,
                         height: 90,
                         fit: BoxFit.cover,
@@ -115,7 +116,7 @@ class HomePage extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.purple[200],
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 50,
+                      horizontal: 100,
                       vertical: 12,
                     ),
                     shape: RoundedRectangleBorder(
@@ -146,12 +147,17 @@ class HomePage extends StatelessWidget {
                   _buildCategoryCard(
                     "Make up",
                     "Your personalized makeup with AI guidance",
-                    "assets/images/makeup.png",
+                    "assets/images/makeup.webp",
                   ),
                   _buildCategoryCard(
                     "Cosmetics",
                     "Your personalized makeup with AI guidance",
                     "assets/images/cosmetics.jpg",
+                  ),
+                  _buildCategoryCard(
+                    "Face Yoga",
+                    "Your personalized makeup with AI guidance",
+                    "assets/images/faceyoga.avif",
                   ),
                   _buildCategoryCard(
                     "Skin Care",

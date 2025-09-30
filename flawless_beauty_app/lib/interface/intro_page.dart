@@ -19,7 +19,7 @@ class IntroPage extends StatelessWidget {
             children: [
               // Logo (lighter version: smaller + no heavy shadow)
               CircleAvatar(
-                radius: 100,
+                radius: 200,
                 backgroundColor: Colors.pink[100],
                 backgroundImage: const AssetImage("assets/images/logo.png"),
               ),

@@ -16,6 +16,8 @@ class _AICameraPageState extends State<AICameraPage> {
   late FaceDetector _faceDetector;
   bool _isDetecting = false;
   bool _isInitialized = false;
+  List<Face> _faces = [];
+
 
   @override
   void initState() {

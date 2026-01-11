@@ -3,7 +3,6 @@ import 'package:flawless_beauty_app/interface/profilepage.dart';
 import 'package:flawless_beauty_app/interface/settings_page.dart';
 import 'package:flawless_beauty_app/screens/aicamera_page.dart ';
 
-
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -12,13 +11,40 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      // Bottom Navigation with animation
+      // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: const Color.fromARGB(255, 207, 140, 255),
+        selectedItemColor: Color.fromARGB(255, 207, 140, 255),
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
-        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home, color: Color.fromARGB(255, 174, 92, 144)),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.camera_alt, color: Color.fromARGB(255, 174, 92, 144)),
+            label: 'AI Scan',
+          ),
+          BottomNavigationBarItem(
+            icon: CircleAvatar(
+              radius: 12,
+              backgroundImage: AssetImage("assets/images/logo.png"),
+              backgroundColor: Colors.transparent,
+            ),
+            label: 'Logo',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications, color: Color.fromARGB(255, 174, 92, 144)),
+            label: 'Notifications',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person, color: Color.fromARGB(255, 174, 92, 144)),
+            label: 'Profile',
+          ),
+        ],
+        currentIndex: 0,
         onTap: (index) {
+          // navigation logic 
           if (index == 2) {
             Navigator.push(
               context,
@@ -28,6 +54,27 @@ class HomePage extends StatelessWidget {
                     FadeTransition(opacity: anim, child: child),
               ),
             );
+          } 
+           else if (index == 1) {
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const AICameraPage(),
+                transitionsBuilder: (_, anim, __, child) =>
+                    FadeTransition(opacity: anim, child: child),
+              ),
+            );
+            } 
+           else if (index == 0) {
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const HomePage(),
+                transitionsBuilder: (_, anim, __, child) =>
+                    FadeTransition(opacity: anim, child: child),
+              ),
+            );
+            
           } else if (index == 3) {
             Navigator.push(
               context,
@@ -44,16 +91,9 @@ class HomePage extends StatelessWidget {
             );
           }
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.face), label: "AI Scan"),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: "Settings",
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-        ],
       ),
+
+   
 
       body: SafeArea(
         child: SingleChildScrollView(
@@ -160,14 +200,12 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 25),
 
               // Face Scan Button with scaling animation
-            Center(
+              Center(
                 child: GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => const AICameraPage(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const AICameraPage()),
                     );
                   },
                   child: AnimatedContainer(
@@ -222,12 +260,12 @@ class HomePage extends StatelessWidget {
                     "Cosmetics",
                     "Your personalized makeup with AI guidance",
                     "assets/images/cosmetics.jpg",
-                  ),
+                  ),/*
                   _buildAnimatedCategoryCard(
                     "Face Yoga",
                     "Your personalized makeup with AI guidance",
                     "assets/images/faceyoga.jpg",
-                  ),
+                  ),*/
                   _buildAnimatedCategoryCard(
                     "Skin Care",
                     "Your personalized makeup with AI guidance",

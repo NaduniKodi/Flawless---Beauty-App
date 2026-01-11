@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flawless_beauty_app/interface/profilepage.dart';
 import 'package:flawless_beauty_app/interface/settings_page.dart';
+import 'package:flawless_beauty_app/screens/aicamera_page.dart ';
+
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -158,10 +160,16 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 25),
 
               // Face Scan Button with scaling animation
-              Center(
+            Center(
                 child: GestureDetector(
-                  onTapDown: (_) {},
-                  onTapUp: (_) {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AICameraPage(),
+                      ),
+                    );
+                  },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeOut,
@@ -218,7 +226,7 @@ class HomePage extends StatelessWidget {
                   _buildAnimatedCategoryCard(
                     "Face Yoga",
                     "Your personalized makeup with AI guidance",
-                    "assets/images/faceyoga.avif",
+                    "assets/images/faceyoga.jpg",
                   ),
                   _buildAnimatedCategoryCard(
                     "Skin Care",

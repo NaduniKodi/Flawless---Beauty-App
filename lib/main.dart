@@ -6,6 +6,7 @@ import 'package:flawless_beauty_app/auth/create_account_page.dart';
 import 'package:flawless_beauty_app/interface/homepage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flawless_beauty_app/auth/create_account_page.dart';
+import 'package:flawless_beauty_app/screens/aicamera_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +47,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       debugShowCheckedModeBanner: false,
-      home: CreateAccountPage(),
+      home: HomePage(),
     );
   }
 }

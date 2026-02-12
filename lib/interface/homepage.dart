@@ -27,7 +27,7 @@ class HomePage extends StatelessWidget {
           ),
           BottomNavigationBarItem(
             icon: CircleAvatar(
-              radius: 12,
+              radius: 25,
               backgroundImage: AssetImage("assets/images/logo.png"),
               backgroundColor: Colors.transparent,
             ),
@@ -44,12 +44,13 @@ class HomePage extends StatelessWidget {
         ],
         currentIndex: 0,
         onTap: (index) {
-          // navigation logic 
+          // navigation logic
+          // 
           if (index == 2) {
             Navigator.push(
               context,
               PageRouteBuilder(
-                pageBuilder: (_, __, ___) => const SettingsPage(),
+                pageBuilder: (_, __, ___) => const SettingsPage(),//
                 transitionsBuilder: (_, anim, __, child) =>
                     FadeTransition(opacity: anim, child: child),
               ),
@@ -59,7 +60,7 @@ class HomePage extends StatelessWidget {
             Navigator.push(
               context,
               PageRouteBuilder(
-                pageBuilder: (_, __, ___) => const AICameraPage(),
+                pageBuilder: (_, __, ___) => const AICameraPage(),//aicamera
                 transitionsBuilder: (_, anim, __, child) =>
                     FadeTransition(opacity: anim, child: child),
               ),
@@ -69,7 +70,7 @@ class HomePage extends StatelessWidget {
             Navigator.push(
               context,
               PageRouteBuilder(
-                pageBuilder: (_, __, ___) => const HomePage(),
+                pageBuilder: (_, __, ___) => const HomePage(),//home
                 transitionsBuilder: (_, anim, __, child) =>
                     FadeTransition(opacity: anim, child: child),
               ),
@@ -260,12 +261,13 @@ class HomePage extends StatelessWidget {
                     "Cosmetics",
                     "Your personalized makeup with AI guidance",
                     "assets/images/cosmetics.jpg",
-                  ),/*
+                  ),
+                  
                   _buildAnimatedCategoryCard(
                     "Face Yoga",
                     "Your personalized makeup with AI guidance",
                     "assets/images/faceyoga.jpg",
-                  ),*/
+                  ),
                   _buildAnimatedCategoryCard(
                     "Skin Care",
                     "Your personalized makeup with AI guidance",

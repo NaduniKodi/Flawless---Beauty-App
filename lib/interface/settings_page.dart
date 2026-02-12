@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flawless_beauty_app/interface/homepage.dart';
 import 'package:flawless_beauty_app/main.dart';
+import 'package:flawless_beauty_app/screens/aicamera_page.dart';
+import 'package:flawless_beauty_app/interface/profilepage.dart'; 
+
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -51,19 +54,19 @@ class SettingsPage extends StatelessWidget {
         ],
       ),
 
-      // Bottom Navigation Bar
+       // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: Color.fromARGB(255, 207, 140, 255),
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home, color: Colors.black),
+            icon: Icon(Icons.home, color: Color.fromARGB(255, 174, 92, 144)),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search, color: Colors.black),
-            label: 'Search',
+            icon: Icon(Icons.camera_alt, color: Color.fromARGB(255, 174, 92, 144)),
+            label: 'AI Scan',
           ),
           BottomNavigationBarItem(
             icon: CircleAvatar(
@@ -74,19 +77,65 @@ class SettingsPage extends StatelessWidget {
             label: 'Logo',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_none, color: Colors.black),
+            icon: Icon(Icons.notifications, color: Color.fromARGB(255, 174, 92, 144)),
             label: 'Notifications',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline, color: Colors.black),
+            icon: Icon(Icons.person, color: Color.fromARGB(255, 174, 92, 144)),
             label: 'Profile',
           ),
         ],
         currentIndex: 0,
         onTap: (index) {
-          // Handle navigation logic here
+          // navigation logic 
+          if (index == 2) {
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const SettingsPage(),
+                transitionsBuilder: (_, anim, __, child) =>
+                    FadeTransition(opacity: anim, child: child),
+              ),
+            );
+          } 
+           else if (index == 1) {
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const AICameraPage(),
+                transitionsBuilder: (_, anim, __, child) =>
+                    FadeTransition(opacity: anim, child: child),
+              ),
+            );
+            } 
+           else if (index == 0) {
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const HomePage(),
+                transitionsBuilder: (_, anim, __, child) =>
+                    FadeTransition(opacity: anim, child: child),
+              ),
+            );
+            
+          } else if (index == 3) {
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const ProfilePage(),
+                transitionsBuilder: (_, anim, __, child) => SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(1, 0),
+                    end: Offset.zero,
+                  ).animate(anim),
+                  child: child,
+                ),
+              ),
+            );
+          }
         },
       ),
+      
     );
   }
 

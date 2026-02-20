@@ -5,6 +5,8 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
+import '../interface/skin_report_page.dart'; 
+import 'package:flawless_beauty_app/services/skin_analysis_service.dart';
 
 /// ================= FACE PAINTER =================
 class FacePainter extends CustomPainter {
@@ -70,6 +72,118 @@ class FacePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant FacePainter oldDelegate) => true;
+}
+
+
+/// ================= ANALYZING SCREEN =================
+class _AnalyzingScreen extends StatefulWidget {
+  final String imagePath;
+  const _AnalyzingScreen({required this.imagePath});
+
+  @override
+  State<_AnalyzingScreen> createState() => _AnalyzingScreenState();
+}
+
+class _AnalyzingScreenState extends State<_AnalyzingScreen> {
+  String _statusMessage = 'Analyzing your skin...';
+
+  @override
+  void initState() {
+    super.initState();
+    _analyze();
+  }
+
+  Future<void> _analyze() async {
+    try {
+      // Update message after 5 seconds so user knows it's still working
+      Future.delayed(const Duration(seconds: 5), () {
+        if (mounted) {
+          setState(() => _statusMessage = 'Finding available AI model...');
+        }
+      });
+
+      Future.delayed(const Duration(seconds: 15), () {
+        if (mounted) {
+          setState(() => _statusMessage = 'Almost done, please wait...');
+        }
+      });
+
+      final result = await SkinAnalysisService.analyzeImage(widget.imagePath);
+
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SkinReportPage(
+              result: result,
+              imagePath: widget.imagePath,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Analysis Failed'),
+            content: const Text(
+              'All free AI models are currently busy.\nPlease wait 1 minute and try again.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  // Retry automatically
+                  _analyze();
+                },
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F2ED),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.file(
+                File(widget.imagePath),
+                height: 200,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(height: 32),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 20),
+            Text(
+              _statusMessage,  // ✅ Dynamic message
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'This may take up to 30 seconds',
+              style: TextStyle(color: Colors.black54, fontSize: 13),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// ================= AI CAMERA PAGE =================
@@ -213,6 +327,12 @@ class _AICameraPageState extends State<AICameraPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Photo saved: ${file.path}")),
         );
+        Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => _AnalyzingScreen(imagePath: file.path),
+      ),
+    );
       }
     } catch (e) {
       debugPrint("Capture error: $e");
@@ -223,6 +343,8 @@ class _AICameraPageState extends State<AICameraPage> {
       }
     }
   }
+
+  
 
   @override
   Widget build(BuildContext context) {

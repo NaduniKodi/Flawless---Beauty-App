@@ -12,8 +12,8 @@ import 'package:flawless_beauty_app/services/skin_analysis_service.dart';
 
 // ── Colour tokens ─────────────────────────────────────────────────────────────
 const Color _rose       = Color(0xFFE8708A);
-const Color _orchid     = Color(0xFFBF6FD8);
-const Color _orchidDark = Color(0xFF9847BE);
+const Color _orchid      = Color(0xFFF8AFCB);
+const Color _orchidDark  = Color.fromARGB(255, 255, 152, 191);
 
 /// ================= FACE PAINTER =================
 class FacePainter extends CustomPainter {

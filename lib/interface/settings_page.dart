@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flawless_beauty_app/interface/homepage.dart';
 import 'package:flawless_beauty_app/interface/profilepage.dart';
 import 'package:flawless_beauty_app/screens/aicamera_page.dart';
+import 'package:flawless_beauty_app/interface/analytics_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -22,7 +23,7 @@ class _SettingsPageState extends State<SettingsPage> {
   static const Color _textPrimary= Color(0xFF1C1224);
   static const Color _textMuted  = Color(0xFF9E8DA8);
 
-  int _currentIndex = 2; // Settings = logo tap (index 2)
+  int _currentIndex = 4; // Settings
 
   void _onNavTap(int index) {
     if (index == _currentIndex) return;
@@ -34,8 +35,11 @@ class _SettingsPageState extends State<SettingsPage> {
       case 1:
         Navigator.push(context, _fadeRoute(const AICameraPage()));
         break;
-      case 4:
+      case 2:
         Navigator.push(context, _slideRoute(const ProfilePage()));
+        break;
+      case 3:
+        Navigator.push(context, _fadeRoute(const AnalyticsPage()));
         break;
     }
   }
@@ -234,8 +238,8 @@ class _SettingsPageState extends State<SettingsPage> {
               _navItem(icon: Icons.home_rounded,            index: 0),
               _navItem(icon: Icons.auto_awesome_rounded,    index: 1),
               _navLogo(),
-              _navItem(icon: Icons.notifications_rounded,   index: 3),
-              _navItem(icon: Icons.person_rounded,          index: 4),
+              _navItem(icon: Icons.analytics_rounded,   index: 3),
+              _navItem(icon: Icons.settings_rounded,          index: 4),
             ],
           ),
         ),

@@ -1,3 +1,4 @@
+import 'package:flawless_beauty_app/interface/analytics_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flawless_beauty_app/services/user_data.dart';
 import 'package:flawless_beauty_app/interface/profilepage.dart';
@@ -50,13 +51,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         Navigator.push(context,
             _fadeRoute(const AICameraPage()));
         break;
-      case 2:
+        case 2:
         Navigator.push(context,
-            _fadeRoute(const SettingsPage()));
+            _fadeRoute(const ProfilePage()));
+        break;
+      case 3:
+        Navigator.push(context,
+            _fadeRoute(const AnalyticsPage()));
         break;
       case 4:
         Navigator.push(context,
-            _slideRoute(const ProfilePage()));
+            _slideRoute(const SettingsPage()));
         break;
     }
   }
@@ -135,8 +140,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               _navItem(icon: Icons.home_rounded,        index: 0),
               _navItem(icon: Icons.auto_awesome_rounded, index: 1),
               _navLogo(),
-              _navItem(icon: Icons.notifications_rounded, index: 3),
-              _navItem(icon: Icons.person_rounded,       index: 4),
+              _navItem(icon: Icons.analytics_rounded, index: 3),
+              _navItem(icon: Icons.settings_rounded,       index: 4),
             ],
           ),
         ),

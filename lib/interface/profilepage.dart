@@ -5,6 +5,7 @@ import 'package:flawless_beauty_app/services/user_data.dart';
 import 'package:flawless_beauty_app/interface/homepage.dart';
 import 'package:flawless_beauty_app/interface/settings_page.dart';
 import 'package:flawless_beauty_app/screens/aicamera_page.dart ';
+import 'package:flawless_beauty_app/interface/analytics_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -23,7 +24,7 @@ class _ProfilePageState extends State<ProfilePage> {
   static const Color _textPrimary = Color(0xFF1C1224);
   static const Color _textMuted   = Color(0xFF9E8DA8);
 
-  int _currentIndex = 4; // profile tab
+  int _currentIndex = 2; // profile tab
 
   // Controllers pre-filled from shared model
   late final TextEditingController _nameCtrl;
@@ -86,10 +87,15 @@ class _ProfilePageState extends State<ProfilePage> {
         Navigator.push(context,
             _fadeRoute(const AICameraPage()));
         break;
-      case 2:
+      case 4:
         Navigator.push(context,
             _fadeRoute(const SettingsPage()));
         break;
+        case 3:
+        Navigator.push(context,
+            _fadeRoute(const AnalyticsPage()));
+        break;
+
     }
   }
 
@@ -498,8 +504,8 @@ class _ProfilePageState extends State<ProfilePage> {
               _navItem(icon: Icons.home_rounded,           index: 0),
               _navItem(icon: Icons.auto_awesome_rounded,   index: 1),
               _navLogo(),
-              _navItem(icon: Icons.notifications_rounded,  index: 3),
-              _navItem(icon: Icons.person_rounded,         index: 4),
+              _navItem(icon: Icons.analytics_rounded,  index: 3),
+              _navItem(icon: Icons.settings_rounded,         index: 4),
             ],
           ),
         ),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import '../services/skin_analysis_service.dart';
+import 'homepage.dart';
 
-class SkinReportPage extends StatelessWidget {
+class SkinReportPage extends StatefulWidget {
   final SkinAnalysisResult result;
   final String imagePath;
 
@@ -11,6 +12,13 @@ class SkinReportPage extends StatelessWidget {
     required this.result,
     required this.imagePath,
   });
+
+  @override
+  State<SkinReportPage> createState() => _SkinReportPageState();
+}
+
+class _SkinReportPageState extends State<SkinReportPage> {
+  bool? _feedbackSubmitted;
 
   @override
   Widget build(BuildContext context) {
@@ -51,10 +59,82 @@ class SkinReportPage extends StatelessWidget {
               // ── Buttons ──
               _buildButtons(context),
 
+              const SizedBox(height: 16),
+
+              // ── Feedback ──
+              _buildFeedbackWidget(),
+
               const SizedBox(height: 20),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _submitFeedback(bool isPositive) {
+    setState(() {
+      _feedbackSubmitted = isPositive;
+    });
+    
+    // Show confirmation
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isPositive 
+            ? 'Thank you for your positive feedback!' 
+            : 'Thank you for your feedback. We\'ll work to improve our analysis.',
+        ),
+        duration: const Duration(seconds: 2),
+        backgroundColor: isPositive ? Colors.green : Colors.orange,
+      ),
+    );
+    
+    // TODO: Send feedback to backend/analytics
+    print('Feedback submitted: ${isPositive ? "Positive" : "Negative"}');
+  }
+
+  Widget _buildFeedbackWidget() {
+    if (_feedbackSubmitted != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              _feedbackSubmitted! ? Icons.thumb_up : Icons.thumb_down,
+              color: _feedbackSubmitted! ? Colors.green : Colors.orange,
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Thanks for your feedback!',
+              style: TextStyle(color: Colors.black54),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            'Was this analysis accurate?',
+            style: TextStyle(color: Colors.black87),
+          ),
+          IconButton(
+            icon: const Icon(Icons.thumb_up_outlined),
+            onPressed: () => _submitFeedback(true),
+            color: Colors.green,
+          ),
+          IconButton(
+            icon: const Icon(Icons.thumb_down_outlined),
+            onPressed: () => _submitFeedback(false),
+            color: Colors.orange,
+          ),
+        ],
       ),
     );
   }
@@ -75,7 +155,7 @@ class SkinReportPage extends StatelessWidget {
           ),
           child: ClipOval(
             child: Image.file(
-              File(imagePath),
+              File(widget.imagePath),
               fit: BoxFit.cover,
             ),
           ),
@@ -104,9 +184,9 @@ class SkinReportPage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _summaryItem('${result.skinAge}', 'Skin Age', fontSize: 32),
-          _summaryItem(result.faceShape, 'Face Shape', fontSize: 22),
-          _summaryItem('${result.overallScore}', 'Overall Score', fontSize: 32),
+          _summaryItem('${widget.result.skinAge}', 'Skin Age', fontSize: 32),
+          _summaryItem(widget.result.faceShape, 'Face Shape', fontSize: 22),
+          _summaryItem('${widget.result.overallScore}', 'Overall Score', fontSize: 32),
         ],
       ),
     );
@@ -174,7 +254,7 @@ class SkinReportPage extends StatelessWidget {
                   // Indicator arrow
                   Align(
                     alignment: Alignment(
-                      (result.overallScore / 50) - 1.0, // map 0-100 to -1..1
+                      (widget.result.overallScore / 50) - 1.0, // map 0-100 to -1..1
                       0,
                     ),
                     child: Container(
@@ -196,7 +276,7 @@ class SkinReportPage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            result.summary,
+            widget.result.summary,
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 13, color: Colors.black54),
           ),
@@ -222,9 +302,9 @@ class SkinReportPage extends StatelessWidget {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: result.concerns.length,
+            itemCount: widget.result.concerns.length,
             itemBuilder: (context, index) {
-              final concern = result.concerns[index];
+              final concern = widget.result.concerns[index];
               return _buildConcernCard(concern);
             },
           ),
@@ -288,7 +368,13 @@ class SkinReportPage extends StatelessWidget {
         children: [
           Expanded(
             child: ElevatedButton.icon(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomePage()),
+                  (route) => false,
+                );
+              },
               icon: const Text('»'),
               label: const Text('Home'),
               style: ElevatedButton.styleFrom(
@@ -310,7 +396,7 @@ class SkinReportPage extends StatelessWidget {
               icon: const Text('»'),
               label: const Text('Beauty Plan'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF5B5FBF),
+                backgroundColor: const Color(0xFFF8AFCB),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(

@@ -60,6 +60,8 @@ class SkinAnalysisService {
  static const List<String> _freeModels = [
   'google/gemma-3-27b-it:free',
   'qwen/qwen2.5-vl-7b-instruct:free',
+  'mistralai/mistral-small-3.1-24b-instruct:free',
+  'nvidia/nemotron-nano-12b-v2-vl:free',
   'microsoft/phi-4-multimodal-instruct:free',
   'google/gemini-2.0-flash-exp:free',
   'meta-llama/llama-3.2-11b-vision-instruct:free',
@@ -147,7 +149,8 @@ Return this exact structure:
 
     final responseJson = jsonDecode(response.body);
     final content = responseJson['choices'][0]['message']['content'] as String;
-
+    debugPrint('🤖 Raw AI Response: $content'); 
+    
     final cleanJson = content
         .replaceAll('```json', '')
         .replaceAll('```', '')

@@ -17,8 +17,8 @@ class _ProfilePageState extends State<ProfilePage> {
   // ── Colour tokens (mirror HomePage) ────────────────────────────────────────
   static const Color _rose        = Color(0xFFE8708A);
   static const Color _roseDark    = Color(0xFFC2516B);
-  static const Color _orchid      = Color(0xFFBF6FD8);
-  static const Color _orchidDark  = Color(0xFF9847BE);
+  static const Color _orchid      = Color(0xFFF8AFCB);
+  static const Color _orchidDark  = Color.fromARGB(255, 255, 152, 191);
   static const Color _surface     = Color(0xFFFDF7FA);
   static const Color _textPrimary = Color(0xFF1C1224);
   static const Color _textMuted   = Color(0xFF9E8DA8);

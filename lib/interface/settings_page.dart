@@ -6,6 +6,16 @@ import 'package:flawless_beauty_app/interface/profilepage.dart';
 import 'package:flawless_beauty_app/screens/aicamera_page.dart';
 import 'package:flawless_beauty_app/interface/analytics_page.dart';
 
+// ── Sub-page imports ──────────────────────────────────────────────────────────
+import 'package:flawless_beauty_app/interface/profilepage.dart';
+import 'package:flawless_beauty_app/interface/notification_page.dart';
+import 'package:flawless_beauty_app/interface/interests_page.dart';
+import 'package:flawless_beauty_app/interface/terms_conditions.dart';
+import 'package:flawless_beauty_app/interface/privacy_policy.dart';
+import 'package:flawless_beauty_app/services/security.dart';
+import 'package:flawless_beauty_app/auth/delete_account_page.dart';
+import 'package:flawless_beauty_app/auth/logout_page.dart';
+
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -15,16 +25,17 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   // ── Colour tokens ────────────────────────────────────────────────────────────
-  static const Color _rose       = Color(0xFFE8708A);
-  static const Color _roseDark   = Color(0xFFC2516B);
- static const Color _orchid      = Color(0xFFF8AFCB);
+  static const Color _rose        = Color(0xFFE8708A);
+  static const Color _roseDark    = Color(0xFFC2516B);
+  static const Color _orchid      = Color(0xFFF8AFCB);
   static const Color _orchidDark  = Color.fromARGB(255, 255, 152, 191);
-  static const Color _surface    = Color(0xFFFDF7FA);
-  static const Color _textPrimary= Color(0xFF1C1224);
-  static const Color _textMuted  = Color(0xFF9E8DA8);
+  static const Color _surface     = Color(0xFFFDF7FA);
+  static const Color _textPrimary = Color(0xFF1C1224);
+  static const Color _textMuted   = Color(0xFF9E8DA8);
 
-  int _currentIndex = 4; // Settings
+  int _currentIndex = 4; // Settings tab
 
+  // ── Bottom-nav routing ────────────────────────────────────────────────────────
   void _onNavTap(int index) {
     if (index == _currentIndex) return;
     setState(() => _currentIndex = index);
@@ -52,6 +63,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   PageRoute _slideRoute(Widget page) => PageRouteBuilder(
         pageBuilder: (_, __, ___) => page,
+        transitionDuration: const Duration(milliseconds: 300),
         transitionsBuilder: (_, anim, __, child) => SlideTransition(
           position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
               .animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
@@ -59,24 +71,47 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       );
 
-  // ── Settings data ────────────────────────────────────────────────────────────
+  // ── Settings destination map ──────────────────────────────────────────────────
+  /// Returns the destination page for each tile title.
+  Widget? _destinationFor(String title) {
+    switch (title) {
+      case "Account Settings":   return const ProfilePage();
+      case "Notifications":      return const NotificationsPage();
+      case "Interests":          return const InterestsPage();
+      case "Terms & Conditions": return const TermsAndConditionsPage();
+      case "Privacy Policy":     return const PrivacyPolicyPage();
+      case "Security":           return const SecurityPage();
+      case "Delete Account":     return const DeleteAccountPage();
+      case "Log Out":            return const LogOutPage();
+      default:                   return null;
+    }
+  }
+
+  void _navigate(String title) {
+    final destination = _destinationFor(title);
+    if (destination == null) return;
+    Navigator.push(context, _slideRoute(destination));
+  }
+
+  // ── Settings data ─────────────────────────────────────────────────────────────
   static const _generalTiles = [
-    (Icons.person_outline_rounded,      "Account Settings",      _orchid),
-    (Icons.notifications_outlined,      "Notifications",         Color(0xFF58C4DC)),
-    (Icons.people_alt_outlined,         "Interests",             Color(0xFF78C97A)),
+    (Icons.person_outline_rounded,  "Account Settings",   _orchid),
+    (Icons.notifications_outlined,  "Notifications",      Color(0xFF58C4DC)),
+    (Icons.people_alt_outlined,     "Interests",          Color(0xFF78C97A)),
   ];
 
   static const _legalTiles = [
-    (Icons.description_outlined,        "Terms & Conditions",    Color(0xFFE8A25A)),
-    (Icons.privacy_tip_outlined,        "Privacy Policy",        Color(0xFF9E8DA8)),
-    (Icons.lock_outline_rounded,        "Security",              Color(0xFF5A8AE8)),
+    (Icons.description_outlined,    "Terms & Conditions", Color(0xFFE8A25A)),
+    (Icons.privacy_tip_outlined,    "Privacy Policy",     Color(0xFF9E8DA8)),
+    (Icons.lock_outline_rounded,    "Security",           Color(0xFF5A8AE8)),
   ];
 
   static const _dangerTiles = [
-    (Icons.delete_outline_rounded,      "Delete Account",        Color(0xFFE05A5A)),
-    (Icons.logout_rounded,              "Log Out",               Color(0xFFE8708A)),
+    (Icons.delete_outline_rounded,  "Delete Account",     Color(0xFFE05A5A)),
+    (Icons.logout_rounded,          "Log Out",            Color(0xFFE8708A)),
   ];
 
+  // ── Build ─────────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,7 +150,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  // ── Gradient header ──────────────────────────────────────────────────────────
+  // ── Gradient header ───────────────────────────────────────────────────────────
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
@@ -153,7 +188,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ),
-          // Spacer for symmetry
           const SizedBox(width: 38),
         ],
       ),
@@ -193,29 +227,20 @@ class _SettingsPageState extends State<SettingsPage> {
           final i = entry.key;
           final (icon, title, color) = entry.value;
           final isLast = i == tiles.length - 1;
-          return _buildTile(icon, title, color, isLast: isLast, isDanger: isDanger);
+          return _SettingsTile(
+            icon: icon,
+            title: title,
+            color: color,
+            isLast: isLast,
+            isDanger: isDanger,
+            onTap: () => _navigate(title),   // ← navigation wired here
+          );
         }).toList(),
       ),
     );
   }
 
-  Widget _buildTile(
-    IconData icon,
-    String title,
-    Color color, {
-    bool isLast = false,
-    bool isDanger = false,
-  }) {
-    return _SettingsTile(
-      icon: icon,
-      title: title,
-      color: color,
-      isLast: isLast,
-      isDanger: isDanger,
-    );
-  }
-
-  // ── Bottom nav ───────────────────────────────────────────────────────────────
+  // ── Bottom nav ────────────────────────────────────────────────────────────────
   Widget _buildBottomNav() {
     return Container(
       decoration: BoxDecoration(
@@ -235,11 +260,11 @@ class _SettingsPageState extends State<SettingsPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _navItem(icon: Icons.home_rounded,            index: 0),
-              _navItem(icon: Icons.auto_awesome_rounded,    index: 1),
+              _navItem(icon: Icons.home_rounded,          index: 0),
+              _navItem(icon: Icons.auto_awesome_rounded,  index: 1),
               _navLogo(),
-              _navItem(icon: Icons.analytics_rounded,   index: 3),
-              _navItem(icon: Icons.settings_rounded,          index: 4),
+              _navItem(icon: Icons.analytics_rounded,     index: 3),
+              _navItem(icon: Icons.settings_rounded,      index: 4),
             ],
           ),
         ),
@@ -296,7 +321,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 }
 
-// ── Individual animated tile ─────────────────────────────────────────────────
+// ── Individual animated tile ──────────────────────────────────────────────────
 class _SettingsTile extends StatefulWidget {
   const _SettingsTile({
     required this.icon,
@@ -304,13 +329,15 @@ class _SettingsTile extends StatefulWidget {
     required this.color,
     required this.isLast,
     required this.isDanger,
+    required this.onTap,
   });
 
-  final IconData icon;
-  final String title;
-  final Color color;
-  final bool isLast;
-  final bool isDanger;
+  final IconData     icon;
+  final String       title;
+  final Color        color;
+  final bool         isLast;
+  final bool         isDanger;
+  final VoidCallback onTap;
 
   @override
   State<_SettingsTile> createState() => _SettingsTileState();
@@ -322,10 +349,10 @@ class _SettingsTileState extends State<_SettingsTile> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTap: () {},
+      onTapDown:   (_) => setState(() => _pressed = true),
+      onTapUp:     (_) => setState(() => _pressed = false),
+      onTapCancel: ()  => setState(() => _pressed = false),
+      onTap:       widget.onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 120),
         color: _pressed ? widget.color.withOpacity(0.05) : Colors.transparent,
@@ -342,8 +369,7 @@ class _SettingsTileState extends State<_SettingsTile> {
                     color: widget.color.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(widget.icon, size: 19,
-                      color: widget.isDanger ? widget.color : widget.color),
+                  child: Icon(widget.icon, size: 19, color: widget.color),
                 ),
                 title: Text(
                   widget.title,

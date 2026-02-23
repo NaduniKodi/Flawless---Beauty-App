@@ -8,7 +8,6 @@ import 'package:flawless_beauty_app/interface/profilepage.dart';
 import 'package:flawless_beauty_app/interface/settings_page.dart';
 import 'package:flawless_beauty_app/screens/aicamera_page.dart';
 import 'package:flawless_beauty_app/interface/skin_report_page.dart';
-import 'package:flawless_beauty_app/services/skin_analysis_service.dart';
 
 class AnalyticsPage extends StatefulWidget {
   const AnalyticsPage({super.key});
@@ -19,23 +18,24 @@ class AnalyticsPage extends StatefulWidget {
 
 class _AnalyticsPageState extends State<AnalyticsPage>
     with SingleTickerProviderStateMixin {
-  // ── Colour tokens ────────────────────────────────────────────────────────────
+  // ── Colour tokens ─────────────────────────────────────────────────────────
   static const Color _rose       = Color(0xFFE8708A);
   static const Color _roseDark   = Color(0xFFC2516B);
-  static const Color _orchid      = Color(0xFFF8AFCB);
-  static const Color _orchidDark  = Color.fromARGB(255, 255, 152, 191);
+  static const Color _orchid     = Color(0xFFBF6FD8);
+  static const Color _orchidDark = Color(0xFF9847BE);
   static const Color _surface    = Color(0xFFFDF7FA);
   static const Color _textPrimary= Color(0xFF1C1224);
   static const Color _textMuted  = Color(0xFF9E8DA8);
 
-  int _currentIndex = 3; // notifications tab = analytics
-
+  int _currentIndex = 3;
   late TabController _tabCtrl;
 
   @override
   void initState() {
     super.initState();
     _tabCtrl = TabController(length: 2, vsync: this);
+    // Trigger load when page opens
+    ScanHistory.instance.load();
   }
 
   @override
@@ -55,10 +55,10 @@ class _AnalyticsPageState extends State<AnalyticsPage>
         Navigator.push(context, _fadeRoute(const AICameraPage()));
         break;
       case 2:
-        Navigator.push(context, _fadeRoute(const ProfilePage()));
+        Navigator.push(context, _fadeRoute(const SettingsPage()));
         break;
       case 4:
-        Navigator.push(context, _slideRoute(const SettingsPage()));
+        Navigator.push(context, _slideRoute(const ProfilePage()));
         break;
     }
   }
@@ -73,8 +73,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
         pageBuilder: (_, __, ___) => page,
         transitionsBuilder: (_, anim, __, child) => SlideTransition(
           position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
-              .animate(
-                  CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
+              .animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
           child: child,
         ),
       );
@@ -106,7 +105,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
     );
   }
 
-  // ── Gradient header ──────────────────────────────────────────────────────────
+  // ── Gradient header ───────────────────────────────────────────────────────
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
@@ -144,14 +143,12 @@ class _AnalyticsPageState extends State<AnalyticsPage>
               ),
             ),
           ),
-          // Total count badge
           ListenableBuilder(
             listenable: ScanHistory.instance,
             builder: (_, __) {
               final count = ScanHistory.instance.records.length;
               return Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.25),
                   borderRadius: BorderRadius.circular(20),
@@ -171,7 +168,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
     );
   }
 
-  // ── Tab bar ──────────────────────────────────────────────────────────────────
+  // ── Tab bar ───────────────────────────────────────────────────────────────
   Widget _buildTabBar() {
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 4),
@@ -196,8 +193,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
         dividerColor: Colors.transparent,
         labelColor: Colors.white,
         unselectedLabelColor: _textMuted,
-        labelStyle:
-            const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+        labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
         tabs: const [
           Tab(text: "Scan History"),
           Tab(text: "Trends"),
@@ -206,7 +202,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
     );
   }
 
-  // ── Bottom nav ───────────────────────────────────────────────────────────────
+  // ── Bottom nav ────────────────────────────────────────────────────────────
   Widget _buildBottomNav() {
     return Container(
       decoration: BoxDecoration(
@@ -226,11 +222,11 @@ class _AnalyticsPageState extends State<AnalyticsPage>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _navItem(icon: Icons.home_rounded,           index: 0),
-              _navItem(icon: Icons.auto_awesome_rounded,   index: 1),
+              _navItem(icon: Icons.home_rounded,          index: 0),
+              _navItem(icon: Icons.auto_awesome_rounded,  index: 1),
               _navLogo(),
-              _navItem(icon: Icons.analytics_rounded,      index: 3),
-              _navItem(icon: Icons.settings,         index: 4),
+              _navItem(icon: Icons.bar_chart_rounded,     index: 3),
+              _navItem(icon: Icons.person_rounded,        index: 4),
             ],
           ),
         ),
@@ -251,8 +247,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
           color: active ? _orchid.withOpacity(0.12) : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
         ),
-        child:
-            Icon(icon, size: 24, color: active ? _orchidDark : _textMuted),
+        child: Icon(icon, size: 24, color: active ? _orchidDark : _textMuted),
       ),
     );
   }
@@ -291,8 +286,8 @@ class _AnalyticsPageState extends State<AnalyticsPage>
 // ║  HISTORY TAB                                                                 ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 class _HistoryTab extends StatelessWidget {
-  static const Color _orchid      = Color(0xFFF8AFCB);
-  static const Color _orchidDark  = Color.fromARGB(255, 255, 152, 191);
+  static const Color _orchid     = Color(0xFFBF6FD8);
+  static const Color _orchidDark = Color(0xFF9847BE);
   static const Color _rose       = Color(0xFFE8708A);
   static const Color _textMuted  = Color(0xFF9E8DA8);
 
@@ -301,109 +296,176 @@ class _HistoryTab extends StatelessWidget {
     return ListenableBuilder(
       listenable: ScanHistory.instance,
       builder: (context, _) {
-        final records = ScanHistory.instance.records;
+        final history = ScanHistory.instance;
 
-        if (records.isEmpty) return _buildEmpty(context);
+        // ── Loading ─────────────────────────────────────────────────────────
+        if (history.isLoading) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    valueColor: AlwaysStoppedAnimation<Color>(_orchid),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text("Loading your scans…",
+                    style: TextStyle(color: _textMuted, fontSize: 14)),
+              ],
+            ),
+          );
+        }
 
-        return ListView.builder(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
-          itemCount: records.length,
-          itemBuilder: (context, i) =>
-              _ScanCard(record: records[i], index: i),
-        );
-      },
-    );
-  }
-
-  Widget _buildEmpty(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 90,
-            height: 90,
-            decoration: BoxDecoration(
-              color: Color(0xFFF8AFCB).withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.face_retouching_natural,
-                size: 44, color: Color(0xFFF8AFCB)),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            "No scans yet",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF1C1224),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "Run your first AI face scan\nto see results here",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: _textMuted,
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 28),
-          GestureDetector(
-            onTap: () => Navigator.push(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (_, __, ___) => const AICameraPage(),
-                transitionsBuilder: (_, anim, __, child) =>
-                    FadeTransition(opacity: anim, child: child),
-              ),
-            ),
-            child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                    colors: [_rose, _orchid]),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: _orchid.withOpacity(0.35),
-                    blurRadius: 14,
-                    offset: const Offset(0, 5),
-                  )
-                ],
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
+        // ── Error ───────────────────────────────────────────────────────────
+        if (history.error != null) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.camera_alt_rounded,
-                      color: Colors.white, size: 18),
-                  SizedBox(width: 8),
+                  const Icon(Icons.cloud_off_rounded,
+                      size: 48, color: Color(0xFFE05A5A)),
+                  const SizedBox(height: 16),
+                  const Text("Couldn't load scans",
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1C1224))),
+                  const SizedBox(height: 8),
                   Text(
-                    "Start a Scan",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
+                    "Check your connection and try again",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: _textMuted, fontSize: 13),
+                  ),
+                  const SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () => ScanHistory.instance.load(force: true),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: _orchid.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: _orchid.withOpacity(0.3)),
+                      ),
+                      child: const Text("Retry",
+                          style: TextStyle(
+                              color: _orchidDark,
+                              fontWeight: FontWeight.w700)),
                     ),
                   ),
                 ],
               ),
             ),
+          );
+        }
+
+        // ── Empty ────────────────────────────────────────────────────────────
+        if (history.records.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: _orchid.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.face_retouching_natural,
+                      size: 44, color: _orchid),
+                ),
+                const SizedBox(height: 20),
+                const Text("No scans yet",
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1C1224))),
+                const SizedBox(height: 8),
+                Text(
+                  "Run your first AI face scan\nto see results here",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 14, color: _textMuted, height: 1.5),
+                ),
+                const SizedBox(height: 28),
+                GestureDetector(
+                  onTap: () => Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                      pageBuilder: (_, __, ___) => const AICameraPage(),
+                      transitionsBuilder: (_, anim, __, child) =>
+                          FadeTransition(opacity: anim, child: child),
+                    ),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 28, vertical: 14),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                          colors: [_rose, _orchid]),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _orchid.withOpacity(0.35),
+                          blurRadius: 14,
+                          offset: const Offset(0, 5),
+                        )
+                      ],
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.camera_alt_rounded,
+                            color: Colors.white, size: 18),
+                        SizedBox(width: 8),
+                        Text("Start a Scan",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // ── List ─────────────────────────────────────────────────────────────
+        return RefreshIndicator(
+          color: _orchid,
+          onRefresh: () => ScanHistory.instance.load(force: true),
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics()),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
+            itemCount: history.records.length,
+            itemBuilder: (context, i) {
+              return _ScanCard(
+                record: history.records[i],
+                scanNumber: history.records.length - i,
+              );
+            },
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
 
-// ── Individual scan card ─────────────────────────────────────────────────────
+// ── Individual scan card ──────────────────────────────────────────────────────
 class _ScanCard extends StatefulWidget {
-  const _ScanCard({required this.record, required this.index});
+  const _ScanCard({required this.record, required this.scanNumber});
   final ScanRecord record;
-  final int index;
+  final int scanNumber;
 
   @override
   State<_ScanCard> createState() => _ScanCardState();
@@ -426,12 +488,90 @@ class _ScanCardState extends State<_ScanCard> {
     return "Needs Care";
   }
 
+  Future<void> _confirmDelete(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text("Delete Scan?",
+            style: TextStyle(fontWeight: FontWeight.w700)),
+        content: const Text(
+            "This scan and its image will be permanently removed. This cannot be undone."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Cancel",
+                style: TextStyle(color: Color(0xFF9E8DA8))),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("Delete",
+                style: TextStyle(
+                    color: Color(0xFFE05A5A), fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      await ScanHistory.instance.remove(widget.record.id);
+    }
+  }
+
+  // ── Thumbnail: supports both local file and remote URL ────────────────────
+  Widget _thumbnail() {
+    final path = widget.record.imagePath;
+    if (path.isEmpty) {
+      return Container(
+        width: 68,
+        height: 68,
+        decoration: BoxDecoration(
+          color: const Color(0xFFBF6FD8).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: const Icon(Icons.face_outlined,
+            color: Color(0xFFBF6FD8), size: 32),
+      );
+    }
+    final isRemote = widget.record.isRemote;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: isRemote
+          ? Image.network(
+              path,
+              width: 68,
+              height: 68,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _fallbackThumb(),
+            )
+          : Image.file(
+              File(path),
+              width: 68,
+              height: 68,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _fallbackThumb(),
+            ),
+    );
+  }
+
+  Widget _fallbackThumb() {
+    return Container(
+      width: 68,
+      height: 68,
+      decoration: BoxDecoration(
+        color: const Color(0xFFBF6FD8).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: const Icon(Icons.broken_image_outlined,
+          color: Color(0xFFBF6FD8), size: 28),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final r = widget.record;
+    final r     = widget.record;
     final color = _scoreColor(r.result.overallScore);
     final dateStr =
-        "${r.scannedAt.day}/${r.scannedAt.month}/${r.scannedAt.year}";
+        "${r.scannedAt.day.toString().padLeft(2, '0')}/${r.scannedAt.month.toString().padLeft(2, '0')}/${r.scannedAt.year}";
     final timeStr =
         "${r.scannedAt.hour.toString().padLeft(2, '0')}:${r.scannedAt.minute.toString().padLeft(2, '0')}";
 
@@ -442,10 +582,8 @@ class _ScanCardState extends State<_ScanCard> {
         Navigator.push(
           context,
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => SkinReportPage(
-              result: r.result,
-              imagePath: r.imagePath,
-            ),
+            pageBuilder: (_, __, ___) =>
+                SkinReportPage(result: r.result, imagePath: r.imagePath),
             transitionsBuilder: (_, anim, __, child) =>
                 FadeTransition(opacity: anim, child: child),
           ),
@@ -456,14 +594,44 @@ class _ScanCardState extends State<_ScanCard> {
         scale: _pressed ? 0.97 : 1.0,
         duration: const Duration(milliseconds: 120),
         child: Dismissible(
-          key: Key("scan_${widget.index}_${r.scannedAt.millisecondsSinceEpoch}"),
+          key: Key(r.id),
           direction: DismissDirection.endToStart,
+          confirmDismiss: (_) async {
+            // Show confirm dialog before allowing dismiss
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
+                title: const Text("Delete Scan?",
+                    style: TextStyle(fontWeight: FontWeight.w700)),
+                content: const Text(
+                    "This scan and its image will be permanently removed."),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text("Cancel",
+                        style: TextStyle(color: Color(0xFF9E8DA8))),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: const Text("Delete",
+                        style: TextStyle(
+                            color: Color(0xFFE05A5A),
+                            fontWeight: FontWeight.w700)),
+                  ),
+                ],
+              ),
+            );
+            return confirm ?? false;
+          },
+          onDismissed: (_) => ScanHistory.instance.remove(r.id),
           background: Container(
             alignment: Alignment.centerRight,
             padding: const EdgeInsets.only(right: 20),
             margin: const EdgeInsets.only(bottom: 14),
             decoration: BoxDecoration(
-              color: const Color(0xFFE05A5A).withOpacity(0.12),
+              color: const Color(0xFFE05A5A).withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Column(
@@ -480,7 +648,6 @@ class _ScanCardState extends State<_ScanCard> {
               ],
             ),
           ),
-          onDismissed: (_) => ScanHistory.instance.remove(widget.index),
           child: Container(
             margin: const EdgeInsets.only(bottom: 14),
             padding: const EdgeInsets.all(14),
@@ -489,27 +656,15 @@ class _ScanCardState extends State<_ScanCard> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
-                  blurRadius: 14,
-                  offset: const Offset(0, 4),
-                ),
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4))
               ],
             ),
             child: Row(
               children: [
-                // Thumbnail
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: Image.file(
-                    File(r.imagePath),
-                    width: 68,
-                    height: 68,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                _thumbnail(),
                 const SizedBox(width: 14),
-
-                // Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -517,7 +672,7 @@ class _ScanCardState extends State<_ScanCard> {
                       Row(
                         children: [
                           Text(
-                            "Scan #${ScanHistory.instance.records.length - widget.index}",
+                            "Scan #${widget.scanNumber}",
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
@@ -535,40 +690,50 @@ class _ScanCardState extends State<_ScanCard> {
                             child: Text(
                               _scoreLabel(r.result.overallScore),
                               style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: color,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: color),
+                            ),
+                          ),
+                          // Delete icon button
+                          GestureDetector(
+                            onTap: () => _confirmDelete(context),
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 8),
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE05A5A).withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(8),
                               ),
+                              child: const Icon(Icons.delete_outline_rounded,
+                                  size: 16, color: Color(0xFFE05A5A)),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 5),
-                      Text(
-                        "$dateStr · $timeStr",
-                        style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF9E8DA8)),
-                      ),
+                      Text("$dateStr · $timeStr",
+                          style: const TextStyle(
+                              fontSize: 12, color: Color(0xFF9E8DA8))),
                       const SizedBox(height: 10),
-
-                      // Mini stat row
                       Row(
                         children: [
-                          _miniStat("Score", "${r.result.overallScore}", color),
-                          const SizedBox(width: 10),
-                          _miniStat("Skin Age", "${r.result.skinAge}", const Color(0xFFBF6FD8)),
-                          const SizedBox(width: 10),
-                          _miniStat("Shape", r.result.faceShape, const Color(0xFFE8708A)),
+                          _miniStat("Score",
+                              "${r.result.overallScore}", color),
+                          const SizedBox(width: 14),
+                          _miniStat("Skin Age",
+                              "${r.result.skinAge}", const Color(0xFFBF6FD8)),
+                          const SizedBox(width: 14),
+                          _miniStat("Shape",
+                              r.result.faceShape, const Color(0xFFE8708A)),
                         ],
                       ),
                     ],
                   ),
                 ),
-
-                // Arrow
-                const SizedBox(width: 8),
+                const SizedBox(width: 6),
                 const Icon(Icons.arrow_forward_ios_rounded,
-                    size: 14, color: Color(0xFF9E8DA8)),
+                    size: 13, color: Color(0xFF9E8DA8)),
               ],
             ),
           ),
@@ -588,9 +753,7 @@ class _ScanCardState extends State<_ScanCard> {
                 fontWeight: FontWeight.w500)),
         Text(value,
             style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: color)),
+                fontSize: 13, fontWeight: FontWeight.w700, color: color)),
       ],
     );
   }
@@ -600,18 +763,28 @@ class _ScanCardState extends State<_ScanCard> {
 // ║  TRENDS TAB                                                                  ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 class _TrendsTab extends StatelessWidget {
-  static const Color _orchid      = Color(0xFFF8AFCB);
-  static const Color _orchidDark  = Color.fromARGB(255, 255, 152, 191);
-  static const Color _rose       = Color(0xFFE8708A);
-  static const Color _textPrimary= Color(0xFF1C1224);
-  static const Color _textMuted  = Color(0xFF9E8DA8);
+  static const Color _orchid      = Color(0xFFBF6FD8);
+  static const Color _orchidDark  = Color(0xFF9847BE);
+  static const Color _rose        = Color(0xFFE8708A);
+  static const Color _textPrimary = Color(0xFF1C1224);
+  static const Color _textMuted   = Color(0xFF9E8DA8);
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: ScanHistory.instance,
       builder: (context, _) {
-        final records = ScanHistory.instance.records;
+        final history = ScanHistory.instance;
+
+        if (history.isLoading) {
+          return Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(_orchid),
+            ),
+          );
+        }
+
+        final records = history.records;
 
         if (records.length < 2) {
           return Center(
@@ -649,17 +822,14 @@ class _TrendsTab extends StatelessWidget {
           );
         }
 
-        // Compute averages
         final avg = records
                 .map((r) => r.result.overallScore)
                 .reduce((a, b) => a + b) /
             records.length;
-        final best = records
-            .map((r) => r.result.overallScore)
-            .reduce((a, b) => a > b ? a : b);
+        final best   = records.map((r) => r.result.overallScore).reduce((a, b) => a > b ? a : b);
         final latest = records.first.result.overallScore;
-        final previous = records.length > 1 ? records[1].result.overallScore : latest;
-        final trend = latest - previous;
+        final prev   = records[1].result.overallScore;
+        final trend  = latest - prev;
 
         return SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -667,29 +837,26 @@ class _TrendsTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Summary chips ─────────────────────────────────────────────
               Row(
                 children: [
-                  Expanded(child: _statChip("Latest", "$latest", _orchid,
-                      sub: trend >= 0
-                          ? "▲ +$trend vs prev"
-                          : "▼ $trend vs prev",
-                      subColor: trend >= 0
-                          ? const Color(0xFF5BB87A)
-                          : const Color(0xFFE05A5A))),
+                  Expanded(
+                    child: _statChip("Latest", "$latest", _orchid,
+                        sub: trend >= 0 ? "▲ +$trend vs prev" : "▼ $trend vs prev",
+                        subColor: trend >= 0
+                            ? const Color(0xFF5BB87A)
+                            : const Color(0xFFE05A5A)),
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                       child: _statChip(
                           "Average", avg.toStringAsFixed(1), _rose)),
                   const SizedBox(width: 12),
                   Expanded(
-                      child: _statChip("Best", "$best",
-                          const Color(0xFF5BB87A))),
+                      child: _statChip(
+                          "Best", "$best", const Color(0xFF5BB87A))),
                 ],
               ),
               const SizedBox(height: 24),
-
-              // ── Score over time chart ──────────────────────────────────────
               const Text("Overall Score Over Time",
                   style: TextStyle(
                       fontSize: 16,
@@ -698,8 +865,6 @@ class _TrendsTab extends StatelessWidget {
               const SizedBox(height: 14),
               _buildLineChart(records),
               const SizedBox(height: 24),
-
-              // ── Concern breakdown ─────────────────────────────────────────
               const Text("Latest Concern Breakdown",
                   style: TextStyle(
                       fontSize: 16,
@@ -739,7 +904,7 @@ class _TrendsTab extends StatelessWidget {
           const SizedBox(height: 4),
           Text(value,
               style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 22,
                   fontWeight: FontWeight.w800,
                   color: color,
                   letterSpacing: -0.5)),
@@ -756,7 +921,6 @@ class _TrendsTab extends StatelessWidget {
     );
   }
 
-  // ── Simple custom line chart ─────────────────────────────────────────────────
   Widget _buildLineChart(List<ScanRecord> records) {
     return Container(
       height: 180,
@@ -782,7 +946,6 @@ class _TrendsTab extends StatelessWidget {
     );
   }
 
-  // ── Concern progress bars ─────────────────────────────────────────────────────
   Widget _buildConcernBars(ScanRecord record) {
     return Container(
       padding: const EdgeInsets.all(18),
@@ -798,16 +961,11 @@ class _TrendsTab extends StatelessWidget {
       ),
       child: Column(
         children: record.result.concerns.map((c) {
-          final pct = c.score / 100.0;
           Color barColor;
-          if (c.score < 20)
-            barColor = const Color(0xFF5BB87A);
-          else if (c.score < 50)
-            barColor = const Color(0xFFD4B84A);
-          else if (c.score < 75)
-            barColor = const Color(0xFFE8956A);
-          else
-            barColor = const Color(0xFFE05A5A);
+          if (c.score < 20)      barColor = const Color(0xFF5BB87A);
+          else if (c.score < 50) barColor = const Color(0xFFD4B84A);
+          else if (c.score < 75) barColor = const Color(0xFFE8956A);
+          else                   barColor = const Color(0xFFE05A5A);
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 14),
@@ -833,7 +991,7 @@ class _TrendsTab extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: LinearProgressIndicator(
-                    value: pct,
+                    value: c.score / 100.0,
                     minHeight: 8,
                     backgroundColor: barColor.withOpacity(0.1),
                     valueColor: AlwaysStoppedAnimation<Color>(barColor),
@@ -857,79 +1015,57 @@ class _LineChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (scores.length < 2) return;
 
-   const Color _orchid      = Color(0xFFF8AFCB);
-   const Color _orchidDark  = Color.fromARGB(255, 255, 152, 191);
-  const Color _rose   = Color(0xFFE8708A);
+    const Color orchid = Color(0xFFBF6FD8);
+    const Color rose   = Color(0xFFE8708A);
 
     final linePaint = Paint()
-      ..shader = LinearGradient(colors: [_rose, _orchid])
-          .createShader(Rect.fromLTWH(0, 0, size.width, size.height))
-      ..style = PaintingStyle.stroke
+      ..shader = const LinearGradient(colors: [rose, orchid])
+          .createShader(Rect.fromLTWH(0, 0, 1000, 200))
+      ..style       = PaintingStyle.stroke
       ..strokeWidth = 2.5
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+      ..strokeCap   = StrokeCap.round
+      ..strokeJoin  = StrokeJoin.round;
 
     final fillPaint = Paint()
       ..shader = LinearGradient(
-        colors: [_orchid.withOpacity(0.25), _orchid.withOpacity(0.0)],
+        colors: [orchid.withOpacity(0.25), orchid.withOpacity(0.0)],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
       ..style = PaintingStyle.fill;
 
-    final dotPaint = Paint()
-      ..color = _orchid
-      ..style = PaintingStyle.fill;
-
-    final dotBorder = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-
-    // Grid lines
-    final gridPaint = Paint()
-      ..color = Colors.black.withOpacity(0.05)
-      ..strokeWidth = 1;
+    final dotPaint   = Paint()..color = orchid..style = PaintingStyle.fill;
+    final dotBorder  = Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 2;
+    final gridPaint  = Paint()..color = Colors.black.withOpacity(0.05)..strokeWidth = 1;
 
     for (int i = 0; i <= 4; i++) {
       final y = size.height * i / 4;
       canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
     }
 
-    final double stepX = size.width / (scores.length - 1);
+    final stepX = size.width / (scores.length - 1);
+    Offset pt(int i) => Offset(
+        i * stepX, size.height - (scores[i] / 100.0) * size.height);
 
-    Offset _point(int i) {
-      final x = i * stepX;
-      final y = size.height - (scores[i] / 100.0) * size.height;
-      return Offset(x, y);
-    }
+    final fill = Path()..moveTo(0, size.height);
+    for (int i = 0; i < scores.length; i++) fill.lineTo(pt(i).dx, pt(i).dy);
+    fill.lineTo(size.width, size.height);
+    fill.close();
+    canvas.drawPath(fill, fillPaint);
 
-    // Fill path
-    final fillPath = Path();
-    fillPath.moveTo(0, size.height);
-    for (int i = 0; i < scores.length; i++) {
-      fillPath.lineTo(_point(i).dx, _point(i).dy);
-    }
-    fillPath.lineTo(size.width, size.height);
-    fillPath.close();
-    canvas.drawPath(fillPath, fillPaint);
-
-    // Line path
-    final linePath = Path();
-    linePath.moveTo(_point(0).dx, _point(0).dy);
+    final line = Path()..moveTo(pt(0).dx, pt(0).dy);
     for (int i = 1; i < scores.length; i++) {
-      final prev = _point(i - 1);
-      final curr = _point(i);
-      final cp1 = Offset((prev.dx + curr.dx) / 2, prev.dy);
-      final cp2 = Offset((prev.dx + curr.dx) / 2, curr.dy);
-      linePath.cubicTo(cp1.dx, cp1.dy, cp2.dx, cp2.dy, curr.dx, curr.dy);
+      final prev = pt(i - 1);
+      final curr = pt(i);
+      final cp1  = Offset((prev.dx + curr.dx) / 2, prev.dy);
+      final cp2  = Offset((prev.dx + curr.dx) / 2, curr.dy);
+      line.cubicTo(cp1.dx, cp1.dy, cp2.dx, cp2.dy, curr.dx, curr.dy);
     }
-    canvas.drawPath(linePath, linePaint);
+    canvas.drawPath(line, linePaint);
 
-    // Dots
     for (int i = 0; i < scores.length; i++) {
-      canvas.drawCircle(_point(i), 5, dotPaint);
-      canvas.drawCircle(_point(i), 5, dotBorder);
+      canvas.drawCircle(pt(i), 5, dotPaint);
+      canvas.drawCircle(pt(i), 5, dotBorder);
     }
   }
 

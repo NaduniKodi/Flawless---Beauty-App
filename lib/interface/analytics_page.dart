@@ -3,11 +3,24 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flawless_beauty_app/services/scan_history.dart';
+import 'package:flawless_beauty_app/services/makeup_history.dart';
 import 'package:flawless_beauty_app/interface/homepage.dart';
 import 'package:flawless_beauty_app/interface/profilepage.dart';
 import 'package:flawless_beauty_app/interface/settings_page.dart';
 import 'package:flawless_beauty_app/screens/aicamera_page.dart';
+import 'package:flawless_beauty_app/screens/makeup_page.dart';
 import 'package:flawless_beauty_app/interface/skin_report_page.dart';
+import 'package:flawless_beauty_app/interface/makeup_report_page.dart';
+
+// ── Colour tokens (matches HomePage) ─────────────────────────────────────────
+const Color _rose        = Color(0xFFE8708A);
+const Color _roseDark    = Color(0xFFC2516B);
+const Color _orchid      = Color(0xFFF8AFCB);
+const Color _orchidDark  = Color.fromARGB(255, 255, 152, 191);
+const Color _surface     = Color(0xFFFDF7FA);
+const Color _card        = Color(0xFFFFFFFF);
+const Color _textPrimary = Color(0xFF1C1224);
+const Color _textMuted   = Color(0xFF9E8DA8);
 
 class AnalyticsPage extends StatefulWidget {
   const AnalyticsPage({super.key});
@@ -18,24 +31,15 @@ class AnalyticsPage extends StatefulWidget {
 
 class _AnalyticsPageState extends State<AnalyticsPage>
     with SingleTickerProviderStateMixin {
-  // ── Colour tokens ─────────────────────────────────────────────────────────
-  static const Color _rose       = Color(0xFFE8708A);
-  static const Color _roseDark   = Color(0xFFC2516B);
-  static const Color _orchid     = Color(0xFFBF6FD8);
-  static const Color _orchidDark = Color(0xFF9847BE);
-  static const Color _surface    = Color(0xFFFDF7FA);
-  static const Color _textPrimary= Color(0xFF1C1224);
-  static const Color _textMuted  = Color(0xFF9E8DA8);
-
   int _currentIndex = 3;
   late TabController _tabCtrl;
 
   @override
   void initState() {
     super.initState();
-    _tabCtrl = TabController(length: 2, vsync: this);
-    // Trigger load when page opens
+    _tabCtrl = TabController(length: 3, vsync: this); // ← now 3 tabs
     ScanHistory.instance.load();
+    MakeupHistory.instance.load();
   }
 
   @override
@@ -65,15 +69,15 @@ class _AnalyticsPageState extends State<AnalyticsPage>
 
   PageRoute _fadeRoute(Widget page) => PageRouteBuilder(
         pageBuilder: (_, __, ___) => page,
-        transitionsBuilder: (_, anim, __, child) =>
-            FadeTransition(opacity: anim, child: child),
+        transitionsBuilder: (_, a, __, child) =>
+            FadeTransition(opacity: a, child: child),
       );
 
   PageRoute _slideRoute(Widget page) => PageRouteBuilder(
         pageBuilder: (_, __, ___) => page,
-        transitionsBuilder: (_, anim, __, child) => SlideTransition(
+        transitionsBuilder: (_, a, __, child) => SlideTransition(
           position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
-              .animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
+              .animate(CurvedAnimation(parent: a, curve: Curves.easeOutCubic)),
           child: child,
         ),
       );
@@ -93,9 +97,10 @@ class _AnalyticsPageState extends State<AnalyticsPage>
             Expanded(
               child: TabBarView(
                 controller: _tabCtrl,
-                children: [
+                children: const [
                   _HistoryTab(),
                   _TrendsTab(),
+                  _MakeupTab(),   // ← new
                 ],
               ),
             ),
@@ -105,13 +110,13 @@ class _AnalyticsPageState extends State<AnalyticsPage>
     );
   }
 
-  // ── Gradient header ───────────────────────────────────────────────────────
+  // ── Gradient header ─────────────────────────────────────────────────────────
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFFE96A85), _orchid],
+          colors: [_rose, _orchidDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -133,7 +138,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
           ),
           const Expanded(
             child: Text(
-              "Scan Analytics",
+              'Scan Analytics',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
@@ -143,22 +148,25 @@ class _AnalyticsPageState extends State<AnalyticsPage>
               ),
             ),
           ),
+          // Combined scan count badge
           ListenableBuilder(
             listenable: ScanHistory.instance,
             builder: (_, __) {
               final count = ScanHistory.instance.records.length;
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.25),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  "$count scan${count != 1 ? 's' : ''}",
+                  '$count scan${count != 1 ? 's' : ''}',
                   style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12),
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
                 ),
               );
             },
@@ -168,45 +176,50 @@ class _AnalyticsPageState extends State<AnalyticsPage>
     );
   }
 
-  // ── Tab bar ───────────────────────────────────────────────────────────────
+  // ── Pill tab bar ─────────────────────────────────────────────────────────────
   Widget _buildTabBar() {
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 4),
       height: 44,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _card,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 3))
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
         ],
       ),
       child: TabBar(
         controller: _tabCtrl,
         indicator: BoxDecoration(
-          gradient: const LinearGradient(colors: [_rose, _orchid]),
+          gradient: const LinearGradient(colors: [_rose, _orchidDark]),
           borderRadius: BorderRadius.circular(12),
         ),
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,
         labelColor: Colors.white,
         unselectedLabelColor: _textMuted,
-        labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+        labelStyle:
+            const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+        unselectedLabelStyle:
+            const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
         tabs: const [
-          Tab(text: "Scan History"),
-          Tab(text: "Trends"),
+          Tab(text: 'Skin Scans'),
+          Tab(text: 'Trends'),
+          Tab(text: 'Makeup'),
         ],
       ),
     );
   }
 
-  // ── Bottom nav ────────────────────────────────────────────────────────────
+  // ── Bottom nav ──────────────────────────────────────────────────────────────
   Widget _buildBottomNav() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _card,
         boxShadow: [
           BoxShadow(
             color: _roseDark.withOpacity(0.08),
@@ -244,10 +257,12 @@ class _AnalyticsPageState extends State<AnalyticsPage>
         curve: Curves.easeOutCubic,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: active ? _orchid.withOpacity(0.12) : Colors.transparent,
+          color:
+              active ? _orchid.withOpacity(0.18) : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Icon(icon, size: 24, color: active ? _orchidDark : _textMuted),
+        child: Icon(icon,
+            size: 24, color: active ? _orchidDark : _textMuted),
       ),
     );
   }
@@ -275,7 +290,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
         ),
         padding: const EdgeInsets.all(3),
         child: ClipOval(
-          child: Image.asset("assets/images/logo.png", fit: BoxFit.cover),
+          child: Image.asset('assets/images/logo.png', fit: BoxFit.cover),
         ),
       ),
     );
@@ -283,13 +298,10 @@ class _AnalyticsPageState extends State<AnalyticsPage>
 }
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  HISTORY TAB                                                                 ║
+// ║  TAB 1 · SKIN SCAN HISTORY                                                  ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 class _HistoryTab extends StatelessWidget {
-  static const Color _orchid     = Color(0xFFBF6FD8);
-  static const Color _orchidDark = Color(0xFF9847BE);
-  static const Color _rose       = Color(0xFFE8708A);
-  static const Color _textMuted  = Color(0xFF9E8DA8);
+  const _HistoryTab();
 
   @override
   Widget build(BuildContext context) {
@@ -298,162 +310,61 @@ class _HistoryTab extends StatelessWidget {
       builder: (context, _) {
         final history = ScanHistory.instance;
 
-        // ── Loading ─────────────────────────────────────────────────────────
         if (history.isLoading) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 44,
-                  height: 44,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 3,
-                    valueColor: AlwaysStoppedAnimation<Color>(_orchid),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text("Loading your scans…",
-                    style: TextStyle(color: _textMuted, fontSize: 14)),
-              ],
+          return const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(_orchidDark),
             ),
           );
         }
 
-        // ── Error ───────────────────────────────────────────────────────────
         if (history.error != null) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.cloud_off_rounded,
-                      size: 48, color: Color(0xFFE05A5A)),
-                  const SizedBox(height: 16),
-                  const Text("Couldn't load scans",
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1C1224))),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Check your connection and try again",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: _textMuted, fontSize: 13),
-                  ),
-                  const SizedBox(height: 20),
-                  GestureDetector(
-                    onTap: () => ScanHistory.instance.load(force: true),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: _orchid.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: _orchid.withOpacity(0.3)),
-                      ),
-                      child: const Text("Retry",
-                          style: TextStyle(
-                              color: _orchidDark,
-                              fontWeight: FontWeight.w700)),
-                    ),
-                  ),
-                ],
+          return _CenteredMessage(
+            icon: Icons.cloud_off_rounded,
+            iconColor: const Color(0xFFE05A5A),
+            title: "Couldn't load scans",
+            subtitle: "Check your connection and try again",
+            action: _PillButton(
+              label: 'Retry',
+              onTap: () => ScanHistory.instance.load(force: true),
+            ),
+          );
+        }
+
+        if (history.records.isEmpty) {
+          return _CenteredMessage(
+            icon: Icons.face_retouching_natural,
+            iconColor: _orchidDark,
+            title: 'No scans yet',
+            subtitle:
+                'Run your first AI face scan\nto see results here',
+            action: _PillButton(
+              label: '✨ Start a Scan',
+              gradient: true,
+              onTap: () => Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (_, __, ___) => const AICameraPage(),
+                  transitionsBuilder: (_, a, __, child) =>
+                      FadeTransition(opacity: a, child: child),
+                ),
               ),
             ),
           );
         }
 
-        // ── Empty ────────────────────────────────────────────────────────────
-        if (history.records.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    color: _orchid.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.face_retouching_natural,
-                      size: 44, color: _orchid),
-                ),
-                const SizedBox(height: 20),
-                const Text("No scans yet",
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1C1224))),
-                const SizedBox(height: 8),
-                Text(
-                  "Run your first AI face scan\nto see results here",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 14, color: _textMuted, height: 1.5),
-                ),
-                const SizedBox(height: 28),
-                GestureDetector(
-                  onTap: () => Navigator.push(
-                    context,
-                    PageRouteBuilder(
-                      pageBuilder: (_, __, ___) => const AICameraPage(),
-                      transitionsBuilder: (_, anim, __, child) =>
-                          FadeTransition(opacity: anim, child: child),
-                    ),
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 28, vertical: 14),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                          colors: [_rose, _orchid]),
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _orchid.withOpacity(0.35),
-                          blurRadius: 14,
-                          offset: const Offset(0, 5),
-                        )
-                      ],
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.camera_alt_rounded,
-                            color: Colors.white, size: 18),
-                        SizedBox(width: 8),
-                        Text("Start a Scan",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15)),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        // ── List ─────────────────────────────────────────────────────────────
         return RefreshIndicator(
-          color: _orchid,
+          color: _orchidDark,
           onRefresh: () => ScanHistory.instance.load(force: true),
           child: ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics()),
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
             itemCount: history.records.length,
-            itemBuilder: (context, i) {
-              return _ScanCard(
-                record: history.records[i],
-                scanNumber: history.records.length - i,
-              );
-            },
+            itemBuilder: (context, i) => _ScanCard(
+              record: history.records[i],
+              scanNumber: history.records.length - i,
+            ),
           ),
         );
       },
@@ -461,7 +372,7 @@ class _HistoryTab extends StatelessWidget {
   }
 }
 
-// ── Individual scan card ──────────────────────────────────────────────────────
+// ── Skin scan card ────────────────────────────────────────────────────────────
 class _ScanCard extends StatefulWidget {
   const _ScanCard({required this.record, required this.scanNumber});
   final ScanRecord record;
@@ -482,98 +393,54 @@ class _ScanCardState extends State<_ScanCard> {
   }
 
   String _scoreLabel(int score) {
-    if (score >= 75) return "Excellent";
-    if (score >= 50) return "Good";
-    if (score >= 25) return "Fair";
-    return "Needs Care";
+    if (score >= 75) return 'Excellent';
+    if (score >= 50) return 'Good';
+    if (score >= 25) return 'Fair';
+    return 'Needs Care';
   }
 
-  Future<void> _confirmDelete(BuildContext context) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("Delete Scan?",
-            style: TextStyle(fontWeight: FontWeight.w700)),
-        content: const Text(
-            "This scan and its image will be permanently removed. This cannot be undone."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text("Cancel",
-                style: TextStyle(color: Color(0xFF9E8DA8))),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text("Delete",
-                style: TextStyle(
-                    color: Color(0xFFE05A5A), fontWeight: FontWeight.w700)),
-          ),
-        ],
-      ),
-    );
-    if (confirm == true) {
-      await ScanHistory.instance.remove(widget.record.id);
-    }
-  }
-
-  // ── Thumbnail: supports both local file and remote URL ────────────────────
   Widget _thumbnail() {
     final path = widget.record.imagePath;
-    if (path.isEmpty) {
-      return Container(
-        width: 68,
-        height: 68,
-        decoration: BoxDecoration(
-          color: const Color(0xFFBF6FD8).withOpacity(0.1),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: const Icon(Icons.face_outlined,
-            color: Color(0xFFBF6FD8), size: 32),
-      );
-    }
+    if (path.isEmpty) return _thumbFallback();
     final isRemote = widget.record.isRemote;
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: isRemote
-          ? Image.network(
-              path,
-              width: 68,
-              height: 68,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _fallbackThumb(),
-            )
-          : Image.file(
-              File(path),
-              width: 68,
-              height: 68,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _fallbackThumb(),
-            ),
+          ? Image.network(path,
+              width: 66, height: 66, fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _thumbFallback())
+          : Image.file(File(path),
+              width: 66, height: 66, fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _thumbFallback()),
     );
   }
 
-  Widget _fallbackThumb() {
-    return Container(
-      width: 68,
-      height: 68,
-      decoration: BoxDecoration(
-        color: const Color(0xFFBF6FD8).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: const Icon(Icons.broken_image_outlined,
-          color: Color(0xFFBF6FD8), size: 28),
+  Widget _thumbFallback() => Container(
+        width: 66,
+        height: 66,
+        decoration: BoxDecoration(
+          color: _orchid.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: const Icon(Icons.face_outlined, color: _orchidDark, size: 30),
+      );
+
+  Future<void> _confirmDelete(BuildContext ctx) async {
+    final ok = await showDialog<bool>(
+      context: ctx,
+      builder: (_) => _DeleteDialog(),
     );
+    if (ok == true) await ScanHistory.instance.remove(widget.record.id);
   }
 
   @override
   Widget build(BuildContext context) {
-    final r     = widget.record;
+    final r = widget.record;
     final color = _scoreColor(r.result.overallScore);
     final dateStr =
-        "${r.scannedAt.day.toString().padLeft(2, '0')}/${r.scannedAt.month.toString().padLeft(2, '0')}/${r.scannedAt.year}";
+        '${r.scannedAt.day.toString().padLeft(2, '0')}/${r.scannedAt.month.toString().padLeft(2, '0')}/${r.scannedAt.year}';
     final timeStr =
-        "${r.scannedAt.hour.toString().padLeft(2, '0')}:${r.scannedAt.minute.toString().padLeft(2, '0')}";
+        '${r.scannedAt.hour.toString().padLeft(2, '0')}:${r.scannedAt.minute.toString().padLeft(2, '0')}';
 
     return GestureDetector(
       onTapDown: (_) => setState(() => _pressed = true),
@@ -584,8 +451,8 @@ class _ScanCardState extends State<_ScanCard> {
           PageRouteBuilder(
             pageBuilder: (_, __, ___) =>
                 SkinReportPage(result: r.result, imagePath: r.imagePath),
-            transitionsBuilder: (_, anim, __, child) =>
-                FadeTransition(opacity: anim, child: child),
+            transitionsBuilder: (_, a, __, child) =>
+                FadeTransition(opacity: a, child: child),
           ),
         );
       },
@@ -597,68 +464,24 @@ class _ScanCardState extends State<_ScanCard> {
           key: Key(r.id),
           direction: DismissDirection.endToStart,
           confirmDismiss: (_) async {
-            // Show confirm dialog before allowing dismiss
-            final confirm = await showDialog<bool>(
-              context: context,
-              builder: (ctx) => AlertDialog(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20)),
-                title: const Text("Delete Scan?",
-                    style: TextStyle(fontWeight: FontWeight.w700)),
-                content: const Text(
-                    "This scan and its image will be permanently removed."),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx, false),
-                    child: const Text("Cancel",
-                        style: TextStyle(color: Color(0xFF9E8DA8))),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx, true),
-                    child: const Text("Delete",
-                        style: TextStyle(
-                            color: Color(0xFFE05A5A),
-                            fontWeight: FontWeight.w700)),
-                  ),
-                ],
-              ),
-            );
-            return confirm ?? false;
+            return await showDialog<bool>(
+                context: context, builder: (_) => _DeleteDialog());
           },
           onDismissed: (_) => ScanHistory.instance.remove(r.id),
-          background: Container(
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: 20),
-            margin: const EdgeInsets.only(bottom: 14),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE05A5A).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.delete_outline_rounded,
-                    color: Color(0xFFE05A5A), size: 26),
-                SizedBox(height: 4),
-                Text("Delete",
-                    style: TextStyle(
-                        color: Color(0xFFE05A5A),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12)),
-              ],
-            ),
-          ),
+          background: _SwipeDeleteBg(),
           child: Container(
             margin: const EdgeInsets.only(bottom: 14),
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: _card,
               borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: _orchid.withOpacity(0.2)),
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
-                    blurRadius: 14,
-                    offset: const Offset(0, 4))
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
               ],
             ),
             child: Row(
@@ -672,60 +495,50 @@ class _ScanCardState extends State<_ScanCard> {
                       Row(
                         children: [
                           Text(
-                            "Scan #${widget.scanNumber}",
+                            'Scan #${widget.scanNumber}',
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF1C1224),
+                              color: _textPrimary,
                             ),
                           ),
                           const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: color.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              _scoreLabel(r.result.overallScore),
-                              style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: color),
-                            ),
-                          ),
-                          // Delete icon button
+                          _Badge(
+                              label: _scoreLabel(r.result.overallScore),
+                              color: color),
                           GestureDetector(
                             onTap: () => _confirmDelete(context),
                             child: Container(
                               margin: const EdgeInsets.only(left: 8),
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFE05A5A).withOpacity(0.08),
+                                color: const Color(0xFFE05A5A)
+                                    .withOpacity(0.08),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(Icons.delete_outline_rounded,
-                                  size: 16, color: Color(0xFFE05A5A)),
+                              child: const Icon(
+                                  Icons.delete_outline_rounded,
+                                  size: 15,
+                                  color: Color(0xFFE05A5A)),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 5),
-                      Text("$dateStr · $timeStr",
+                      const SizedBox(height: 4),
+                      Text('$dateStr · $timeStr',
                           style: const TextStyle(
-                              fontSize: 12, color: Color(0xFF9E8DA8))),
+                              fontSize: 12, color: _textMuted)),
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          _miniStat("Score",
-                              "${r.result.overallScore}", color),
+                          _MiniStat('Score',
+                              '${r.result.overallScore}', color),
                           const SizedBox(width: 14),
-                          _miniStat("Skin Age",
-                              "${r.result.skinAge}", const Color(0xFFBF6FD8)),
+                          _MiniStat('Skin Age',
+                              '${r.result.skinAge}', _orchidDark),
                           const SizedBox(width: 14),
-                          _miniStat("Shape",
-                              r.result.faceShape, const Color(0xFFE8708A)),
+                          _MiniStat('Shape',
+                              r.result.faceShape, _rose),
                         ],
                       ),
                     ],
@@ -733,7 +546,7 @@ class _ScanCardState extends State<_ScanCard> {
                 ),
                 const SizedBox(width: 6),
                 const Icon(Icons.arrow_forward_ios_rounded,
-                    size: 13, color: Color(0xFF9E8DA8)),
+                    size: 13, color: _textMuted),
               ],
             ),
           ),
@@ -741,33 +554,13 @@ class _ScanCardState extends State<_ScanCard> {
       ),
     );
   }
-
-  Widget _miniStat(String label, String value, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: const TextStyle(
-                fontSize: 10,
-                color: Color(0xFF9E8DA8),
-                fontWeight: FontWeight.w500)),
-        Text(value,
-            style: TextStyle(
-                fontSize: 13, fontWeight: FontWeight.w700, color: color)),
-      ],
-    );
-  }
 }
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  TRENDS TAB                                                                  ║
+// ║  TAB 2 · TRENDS                                                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 class _TrendsTab extends StatelessWidget {
-  static const Color _orchid      = Color(0xFFBF6FD8);
-  static const Color _orchidDark  = Color(0xFF9847BE);
-  static const Color _rose        = Color(0xFFE8708A);
-  static const Color _textPrimary = Color(0xFF1C1224);
-  static const Color _textMuted   = Color(0xFF9E8DA8);
+  const _TrendsTab();
 
   @override
   Widget build(BuildContext context) {
@@ -777,9 +570,9 @@ class _TrendsTab extends StatelessWidget {
         final history = ScanHistory.instance;
 
         if (history.isLoading) {
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(_orchid),
+              valueColor: AlwaysStoppedAnimation<Color>(_orchidDark),
             ),
           );
         }
@@ -787,38 +580,12 @@ class _TrendsTab extends StatelessWidget {
         final records = history.records;
 
         if (records.length < 2) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 90,
-                    height: 90,
-                    decoration: BoxDecoration(
-                      color: _orchid.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.show_chart_rounded,
-                        size: 44, color: _orchid),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text("Not enough data yet",
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: _textPrimary)),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Complete at least 2 scans\nto see your skin trends",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 14, color: _textMuted, height: 1.5),
-                  ),
-                ],
-              ),
-            ),
+          return _CenteredMessage(
+            icon: Icons.show_chart_rounded,
+            iconColor: _orchidDark,
+            title: 'Not enough data yet',
+            subtitle:
+                'Complete at least 2 scans\nto see your skin trends',
           );
         }
 
@@ -826,7 +593,9 @@ class _TrendsTab extends StatelessWidget {
                 .map((r) => r.result.overallScore)
                 .reduce((a, b) => a + b) /
             records.length;
-        final best   = records.map((r) => r.result.overallScore).reduce((a, b) => a > b ? a : b);
+        final best = records
+            .map((r) => r.result.overallScore)
+            .reduce((a, b) => a > b ? a : b);
         final latest = records.first.result.overallScore;
         final prev   = records[1].result.overallScore;
         final trend  = latest - prev;
@@ -837,60 +606,552 @@ class _TrendsTab extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Stat chips row
               Row(
                 children: [
                   Expanded(
-                    child: _statChip("Latest", "$latest", _orchid,
-                        sub: trend >= 0 ? "▲ +$trend vs prev" : "▼ $trend vs prev",
-                        subColor: trend >= 0
-                            ? const Color(0xFF5BB87A)
-                            : const Color(0xFFE05A5A)),
+                    child: _StatChip(
+                      label: 'Latest',
+                      value: '$latest',
+                      color: _orchidDark,
+                      sub: trend >= 0
+                          ? '▲ +$trend vs prev'
+                          : '▼ $trend vs prev',
+                      subColor: trend >= 0
+                          ? const Color(0xFF5BB87A)
+                          : const Color(0xFFE05A5A),
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                      child: _statChip(
-                          "Average", avg.toStringAsFixed(1), _rose)),
+                    child: _StatChip(
+                      label: 'Average',
+                      value: avg.toStringAsFixed(1),
+                      color: _rose,
+                    ),
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
-                      child: _statChip(
-                          "Best", "$best", const Color(0xFF5BB87A))),
+                    child: _StatChip(
+                      label: 'Best',
+                      value: '$best',
+                      color: const Color(0xFF5BB87A),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 24),
-              const Text("Overall Score Over Time",
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: _textPrimary)),
+              const _SectionLabel('Overall Score Over Time'),
               const SizedBox(height: 14),
-              _buildLineChart(records),
+              _LineChartCard(
+                scores: records.reversed
+                    .map((r) => r.result.overallScore.toDouble())
+                    .toList(),
+              ),
               const SizedBox(height: 24),
-              const Text("Latest Concern Breakdown",
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: _textPrimary)),
+              const _SectionLabel('Latest Concern Breakdown'),
               const SizedBox(height: 14),
-              _buildConcernBars(records.first),
+              _ConcernBarsCard(record: records.first),
             ],
           ),
         );
       },
     );
   }
+}
 
-  Widget _statChip(String label, String value, Color color,
-      {String? sub, Color? subColor}) {
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  TAB 3 · MAKEUP HISTORY                                                      ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+class _MakeupTab extends StatelessWidget {
+  const _MakeupTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: MakeupHistory.instance,
+      builder: (context, _) {
+        final history = MakeupHistory.instance;
+
+        if (history.isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(_orchidDark),
+            ),
+          );
+        }
+
+        if (history.records.isEmpty) {
+          return _CenteredMessage(
+            icon: Icons.face_retouching_natural,
+            iconColor: _orchidDark,
+            title: 'No makeup scans yet',
+            subtitle:
+                'Use the Makeup Try-On camera\nto get personalized tutorials',
+            action: _PillButton(
+              label: '💄 Try Makeup AR',
+              gradient: true,
+              onTap: () => Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (_, __, ___) => const MakeupPage(),
+                  transitionsBuilder: (_, a, __, child) =>
+                      FadeTransition(opacity: a, child: child),
+                ),
+              ),
+            ),
+          );
+        }
+
+        return RefreshIndicator(
+          color: _orchidDark,
+          onRefresh: () => MakeupHistory.instance.load(force: true),
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics()),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
+            itemCount: history.records.length,
+            itemBuilder: (context, i) => _MakeupCard(
+              record: history.records[i],
+              sessionNumber: history.records.length - i,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ── Makeup history card ───────────────────────────────────────────────────────
+class _MakeupCard extends StatefulWidget {
+  const _MakeupCard(
+      {required this.record, required this.sessionNumber});
+  final MakeupRecord record;
+  final int sessionNumber;
+
+  @override
+  State<_MakeupCard> createState() => _MakeupCardState();
+}
+
+class _MakeupCardState extends State<_MakeupCard> {
+  bool _pressed = false;
+
+  Widget _thumbnail() {
+    final path = widget.record.imagePath;
+    if (path.isEmpty) return _thumbFallback();
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: Image.file(
+        File(path),
+        width: 66,
+        height: 66,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _thumbFallback(),
+      ),
+    );
+  }
+
+  Widget _thumbFallback() => Container(
+        width: 66,
+        height: 66,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [_rose.withOpacity(0.15), _orchid.withOpacity(0.20)],
+          ),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child:
+            const Icon(Icons.face_retouching_natural, color: _rose, size: 30),
+      );
+
+  Future<void> _confirmDelete(BuildContext ctx) async {
+    final ok = await showDialog<bool>(
+        context: ctx, builder: (_) => _DeleteDialog());
+    if (ok == true) {
+      await MakeupHistory.instance.remove(widget.record.id);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final r = widget.record;
+    final f = r.result.features;
+    final dateStr =
+        '${r.scannedAt.day.toString().padLeft(2, '0')}/${r.scannedAt.month.toString().padLeft(2, '0')}/${r.scannedAt.year}';
+    final timeStr =
+        '${r.scannedAt.hour.toString().padLeft(2, '0')}:${r.scannedAt.minute.toString().padLeft(2, '0')}';
+
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => MakeupReportPage(
+              imagePath: r.imagePath,
+              result: r.result,
+            ),
+            transitionsBuilder: (_, a, __, child) =>
+                FadeTransition(opacity: a, child: child),
+          ),
+        );
+      },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedScale(
+        scale: _pressed ? 0.97 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        child: Dismissible(
+          key: Key(r.id),
+          direction: DismissDirection.endToStart,
+          confirmDismiss: (_) async => await showDialog<bool>(
+              context: context, builder: (_) => _DeleteDialog()),
+          onDismissed: (_) => MakeupHistory.instance.remove(r.id),
+          background: _SwipeDeleteBg(),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 14),
+            decoration: BoxDecoration(
+              color: _card,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: _orchid.withOpacity(0.25)),
+              boxShadow: [
+                BoxShadow(
+                  color: _rose.withOpacity(0.07),
+                  blurRadius: 14,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // ── Top row ─────────────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    children: [
+                      _thumbnail(),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  'Session #${widget.sessionNumber}',
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: _textPrimary,
+                                  ),
+                                ),
+                                const Spacer(),
+                                // Style badge
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                        colors: [_rose, _orchidDark]),
+                                    borderRadius:
+                                        BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    r.result.overallStyle,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                // Delete button
+                                GestureDetector(
+                                  onTap: () => _confirmDelete(context),
+                                  child: Container(
+                                    margin: const EdgeInsets.only(left: 8),
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFE05A5A)
+                                          .withOpacity(0.08),
+                                      borderRadius:
+                                          BorderRadius.circular(8),
+                                    ),
+                                    child: const Icon(
+                                        Icons.delete_outline_rounded,
+                                        size: 15,
+                                        color: Color(0xFFE05A5A)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text('$dateStr · $timeStr',
+                                style: const TextStyle(
+                                    fontSize: 12, color: _textMuted)),
+                            const SizedBox(height: 10),
+                            // Feature chips row
+                            Row(
+                              children: [
+                                _MiniStat('Face', _cap(f.faceShape), _rose),
+                                const SizedBox(width: 14),
+                                _MiniStat(
+                                    'Eyes', _cap(f.eyeShape), _orchidDark),
+                                const SizedBox(width: 14),
+                                _MiniStat(
+                                    'Lips', _cap(f.lipShape), _roseDark),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ── Feature tag strip ───────────────────────────────────────
+                Container(
+                  padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+                  child: Row(
+                    children: [
+                      _FeaturePill('👁️ ${_cap(f.eyeShape)}'),
+                      const SizedBox(width: 6),
+                      _FeaturePill('💋 ${_cap(f.lipShape)}'),
+                      const SizedBox(width: 6),
+                      _FeaturePill('🌟 ${_cap(f.skinUndertone)}'),
+                      const Spacer(),
+                      Row(
+                        children: [
+                          Text('View Report',
+                              style: TextStyle(
+                                color: _orchidDark,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              )),
+                          const SizedBox(width: 3),
+                          const Icon(Icons.arrow_forward_ios_rounded,
+                              size: 11, color: _orchidDark),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  SHARED SMALL WIDGETS                                                        ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+class _CenteredMessage extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final Widget? action;
+
+  const _CenteredMessage({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
+    this.action,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 44, color: iconColor),
+            ),
+            const SizedBox(height: 20),
+            Text(title,
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: _textPrimary)),
+            const SizedBox(height: 8),
+            Text(subtitle,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontSize: 14, color: _textMuted, height: 1.5)),
+            if (action != null) ...[
+              const SizedBox(height: 28),
+              action!,
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PillButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  final bool gradient;
+
+  const _PillButton({
+    required this.label,
+    required this.onTap,
+    this.gradient = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+        decoration: BoxDecoration(
+          gradient: gradient
+              ? const LinearGradient(colors: [_rose, _orchidDark])
+              : null,
+          color: gradient ? null : _orchid.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: gradient
+              ? [
+                  BoxShadow(
+                    color: _orchid.withOpacity(0.35),
+                    blurRadius: 14,
+                    offset: const Offset(0, 5),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: gradient ? Colors.white : _orchidDark,
+            fontWeight: FontWeight.w700,
+            fontSize: 15,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Badge extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _Badge({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(label,
+            style: TextStyle(
+                fontSize: 11, fontWeight: FontWeight.w700, color: color)),
+      );
+}
+
+class _MiniStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+  const _MiniStat(this.label, this.value, this.color);
+
+  @override
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 10,
+                  color: _textMuted,
+                  fontWeight: FontWeight.w500)),
+          Text(value,
+              style: TextStyle(
+                  fontSize: 13, fontWeight: FontWeight.w700, color: color)),
+        ],
+      );
+}
+
+class _FeaturePill extends StatelessWidget {
+  final String label;
+  const _FeaturePill(this.label);
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: _surface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: _orchid.withOpacity(0.3)),
+        ),
+        child: Text(label,
+            style: const TextStyle(
+                fontSize: 10.5,
+                color: _textMuted,
+                fontWeight: FontWeight.w500)),
+      );
+}
+
+class _SectionLabel extends StatelessWidget {
+  final String text;
+  const _SectionLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) => Text(text,
+      style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          color: _textPrimary));
+}
+
+class _StatChip extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+  final String? sub;
+  final Color? subColor;
+
+  const _StatChip({
+    required this.label,
+    required this.value,
+    required this.color,
+    this.sub,
+    this.subColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _card,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4))
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
@@ -910,7 +1171,7 @@ class _TrendsTab extends StatelessWidget {
                   letterSpacing: -0.5)),
           if (sub != null) ...[
             const SizedBox(height: 4),
-            Text(sub,
+            Text(sub!,
                 style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
@@ -920,52 +1181,60 @@ class _TrendsTab extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildLineChart(List<ScanRecord> records) {
-    return Container(
-      height: 180,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
+class _LineChartCard extends StatelessWidget {
+  final List<double> scores;
+  const _LineChartCard({required this.scores});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        height: 180,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: _card,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
               color: Colors.black.withOpacity(0.05),
               blurRadius: 12,
-              offset: const Offset(0, 4))
-        ],
-      ),
-      child: CustomPaint(
-        painter: _LineChartPainter(
-          scores: records.reversed
-              .map((r) => r.result.overallScore.toDouble())
-              .toList(),
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: const SizedBox.expand(),
-      ),
-    );
-  }
+        child: CustomPaint(
+          painter: _LineChartPainter(scores: scores),
+          child: const SizedBox.expand(),
+        ),
+      );
+}
 
-  Widget _buildConcernBars(ScanRecord record) {
+class _ConcernBarsCard extends StatelessWidget {
+  final ScanRecord record;
+  const _ConcernBarsCard({required this.record});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _card,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 12,
-              offset: const Offset(0, 4))
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
         children: record.result.concerns.map((c) {
           Color barColor;
-          if (c.score < 20)      barColor = const Color(0xFF5BB87A);
+          if (c.score < 20) barColor = const Color(0xFF5BB87A);
           else if (c.score < 50) barColor = const Color(0xFFD4B84A);
           else if (c.score < 75) barColor = const Color(0xFFE8956A);
-          else                   barColor = const Color(0xFFE05A5A);
+          else barColor = const Color(0xFFE05A5A);
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 14),
@@ -980,7 +1249,7 @@ class _TrendsTab extends StatelessWidget {
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: _textPrimary)),
-                    Text("${c.score}",
+                    Text('${c.score}',
                         style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
@@ -1006,37 +1275,89 @@ class _TrendsTab extends StatelessWidget {
   }
 }
 
-// ── Line chart painter ────────────────────────────────────────────────────────
+class _SwipeDeleteBg extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        margin: const EdgeInsets.only(bottom: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE05A5A).withOpacity(0.08),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.delete_outline_rounded,
+                color: Color(0xFFE05A5A), size: 26),
+            SizedBox(height: 4),
+            Text('Delete',
+                style: TextStyle(
+                    color: Color(0xFFE05A5A),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12)),
+          ],
+        ),
+      );
+}
+
+class _DeleteDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20)),
+        title: const Text('Delete?',
+            style: TextStyle(fontWeight: FontWeight.w700)),
+        content: const Text(
+            'This record will be permanently removed. This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel',
+                style: TextStyle(color: _textMuted)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete',
+                style: TextStyle(
+                    color: Color(0xFFE05A5A),
+                    fontWeight: FontWeight.w700)),
+          ),
+        ],
+      );
+}
+
+// ── Line chart painter (rose → orchid palette) ────────────────────────────────
 class _LineChartPainter extends CustomPainter {
   final List<double> scores;
-  _LineChartPainter({required this.scores});
+  const _LineChartPainter({required this.scores});
 
   @override
   void paint(Canvas canvas, Size size) {
     if (scores.length < 2) return;
 
-    const Color orchid = Color(0xFFBF6FD8);
-    const Color rose   = Color(0xFFE8708A);
-
     final linePaint = Paint()
-      ..shader = const LinearGradient(colors: [rose, orchid])
-          .createShader(Rect.fromLTWH(0, 0, 1000, 200))
-      ..style       = PaintingStyle.stroke
+      ..shader = const LinearGradient(colors: [_rose, _orchidDark])
+          .createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5
-      ..strokeCap   = StrokeCap.round
-      ..strokeJoin  = StrokeJoin.round;
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
     final fillPaint = Paint()
       ..shader = LinearGradient(
-        colors: [orchid.withOpacity(0.25), orchid.withOpacity(0.0)],
+        colors: [
+          _orchid.withOpacity(0.25),
+          _orchid.withOpacity(0.0),
+        ],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
       ..style = PaintingStyle.fill;
 
-    final dotPaint   = Paint()..color = orchid..style = PaintingStyle.fill;
-    final dotBorder  = Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 2;
-    final gridPaint  = Paint()..color = Colors.black.withOpacity(0.05)..strokeWidth = 1;
+    final gridPaint = Paint()
+      ..color = Colors.black.withOpacity(0.04)
+      ..strokeWidth = 1;
 
     for (int i = 0; i <= 4; i++) {
       final y = size.height * i / 4;
@@ -1047,22 +1368,32 @@ class _LineChartPainter extends CustomPainter {
     Offset pt(int i) => Offset(
         i * stepX, size.height - (scores[i] / 100.0) * size.height);
 
+    // Fill
     final fill = Path()..moveTo(0, size.height);
-    for (int i = 0; i < scores.length; i++) fill.lineTo(pt(i).dx, pt(i).dy);
+    for (int i = 0; i < scores.length; i++) {
+      fill.lineTo(pt(i).dx, pt(i).dy);
+    }
     fill.lineTo(size.width, size.height);
     fill.close();
     canvas.drawPath(fill, fillPaint);
 
+    // Line with cubic bezier
     final line = Path()..moveTo(pt(0).dx, pt(0).dy);
     for (int i = 1; i < scores.length; i++) {
       final prev = pt(i - 1);
       final curr = pt(i);
-      final cp1  = Offset((prev.dx + curr.dx) / 2, prev.dy);
-      final cp2  = Offset((prev.dx + curr.dx) / 2, curr.dy);
+      final cp1 = Offset((prev.dx + curr.dx) / 2, prev.dy);
+      final cp2 = Offset((prev.dx + curr.dx) / 2, curr.dy);
       line.cubicTo(cp1.dx, cp1.dy, cp2.dx, cp2.dy, curr.dx, curr.dy);
     }
     canvas.drawPath(line, linePaint);
 
+    // Dots
+    final dotPaint = Paint()..color = _orchidDark..style = PaintingStyle.fill;
+    final dotBorder = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
     for (int i = 0; i < scores.length; i++) {
       canvas.drawCircle(pt(i), 5, dotPaint);
       canvas.drawCircle(pt(i), 5, dotBorder);
@@ -1073,3 +1404,6 @@ class _LineChartPainter extends CustomPainter {
   bool shouldRepaint(covariant _LineChartPainter old) =>
       old.scores != scores;
 }
+
+// ── Helper ────────────────────────────────────────────────────────────────────
+String _cap(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);

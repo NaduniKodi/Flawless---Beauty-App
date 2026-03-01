@@ -4,6 +4,7 @@ import 'package:flawless_beauty_app/services/user_data.dart';
 import 'package:flawless_beauty_app/interface/profilepage.dart';
 import 'package:flawless_beauty_app/interface/settings_page.dart';
 import 'package:flawless_beauty_app/screens/aicamera_page.dart ';
+import 'package:flawless_beauty_app/screens/makeup_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -466,6 +467,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DROP-IN REPLACEMENT for _buildCategoriesGrid() and _CategoryCard
+// in home_page.dart
+//
+// ADD this import at the top of home_page.dart:
+//   import 'package:flawless_beauty_app/screens/makeup_page.dart';
+// ─────────────────────────────────────────────────────────────────────────────
+
   // ── Categories grid ─────────────────────────────────────────────────────────
   static const _categories = [
     ("Make up",   "AI-guided looks for your skin tone",  "assets/images/makeup.webp"),
@@ -488,7 +497,24 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       itemCount: _categories.length,
       itemBuilder: (context, i) {
         final (title, sub, img) = _categories[i];
-        return _CategoryCard(title: title, subtitle: sub, imgPath: img);
+
+        // ── Route logic per category ───────────────────────────────────────
+        VoidCallback? onTap;
+        if (title == "Make up") {
+          onTap = () => Navigator.push(
+                context,
+                _fadeRoute(const MakeupPage()),
+              );
+        }
+        // Add more routes here as other category pages are built:
+        // if (title == "Skin Care") onTap = () => Navigator.push(context, _fadeRoute(const SkinCarePage()));
+
+        return _CategoryCard(
+          title: title,
+          subtitle: sub,
+          imgPath: img,
+          onTap: onTap,
+        );
       },
     );
   }
@@ -500,11 +526,13 @@ class _CategoryCard extends StatefulWidget {
     required this.title,
     required this.subtitle,
     required this.imgPath,
+    this.onTap,                          // ← optional navigation callback
   });
 
   final String title;
   final String subtitle;
   final String imgPath;
+  final VoidCallback? onTap;             // ← NEW
 
   @override
   State<_CategoryCard> createState() => _CategoryCardState();
@@ -516,6 +544,7 @@ class _CategoryCardState extends State<_CategoryCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: widget.onTap,               // ← uses the callback (null = no-op)
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) => setState(() => _pressed = false),
       onTapCancel: () => setState(() => _pressed = false),
@@ -526,6 +555,13 @@ class _CategoryCardState extends State<_CategoryCard> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(18),
+            // Highlight active (tappable) cards with a subtle orchid border
+            border: widget.onTap != null
+                ? Border.all(
+                    color: const Color(0xFFF8AFCB).withOpacity(0.35),
+                    width: 1.2,
+                  )
+                : null,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.07),
@@ -537,15 +573,48 @@ class _CategoryCardState extends State<_CategoryCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-                child: Image.asset(
-                  widget.imgPath,
-                  height: 112,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
+              // ── Image ──────────────────────────────────────────────────────
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(18)),
+                    child: Image.asset(
+                      widget.imgPath,
+                      height: 112,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  // "Tap to explore" badge only on linked cards
+                  if (widget.onTap != null)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFE8708A), Color(0xFFF8AFCB)],
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          "Try Now",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
+
+              // ── Text ───────────────────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
                 child: Column(

@@ -7,8 +7,7 @@ class CosmeticsPage extends StatefulWidget {
   State<CosmeticsPage> createState() => _CosmeticsPageState();
 }
 
-class _CosmeticsPageState extends State<CosmeticsPage>
-    with SingleTickerProviderStateMixin {
+class _CosmeticsPageState extends State<CosmeticsPage> {
   // ── Colour tokens ─────────────────────────────────────────────────────────
   static const Color _rose        = Color(0xFFE8708A);
   static const Color _roseDark    = Color(0xFFC2516B);
@@ -20,50 +19,131 @@ class _CosmeticsPageState extends State<CosmeticsPage>
   static const Color _textMuted   = Color(0xFF9E8DA8);
 
   int _selectedFilter = 0;
-  late TabController _tabController;
 
-  final List<String> _filters = [
-    'All', 'Lips', 'Eyes', 'Face', 'Nails', 'Fragrance',
+  final List<String> _filters = ['All', 'Lips', 'Eyes', 'Face', 'Nails'];
+
+  // ── Sri Lankan brands ───────────────────────────────────────────────────────
+  final List<Map<String, dynamic>> _lkProducts = [
+    {
+      'name': 'Matte Lip Colour',
+      'brand': 'Viana',
+      'price': 'Rs. 580',
+      'rating': 4.7,
+      'category': 'Lips',
+      'shade': Color(0xFFCC3D5A),
+      'tag': 'Best Seller',
+    },
+    {
+      'name': 'Glossy Lip Tint',
+      'brand': 'Viana',
+      'price': 'Rs. 490',
+      'rating': 4.5,
+      'category': 'Lips',
+      'shade': Color(0xFFE8708A),
+      'tag': 'Trending',
+    },
+    {
+      'name': 'Long-Wear Eyeliner',
+      'brand': 'Viana',
+      'price': 'Rs. 420',
+      'rating': 4.6,
+      'category': 'Eyes',
+      'shade': Color(0xFF1C1224),
+      'tag': 'Fan Fave',
+    },
+    {
+      'name': 'BB Cream SPF 30',
+      'brand': 'Viana',
+      'price': 'Rs. 890',
+      'rating': 4.7,
+      'category': 'Face',
+      'shade': Color(0xFFE8C8A0),
+      'tag': 'New',
+    },
+    {
+      'name': 'Toxin-Free Nail Paint',
+      'brand': 'Viana',
+      'price': 'Rs. 350',
+      'rating': 4.8,
+      'category': 'Nails',
+      'shade': Color(0xFFF8AFCB),
+      'tag': 'Clean Beauty',
+    },
+    {
+      'name': 'Papaya Glow Foundation',
+      'brand': 'Janet',
+      'price': 'Rs. 680',
+      'rating': 4.4,
+      'category': 'Face',
+      'shade': Color(0xFFDEC8A8),
+      'tag': 'Herbal',
+    },
+    {
+      'name': 'Herbal Kajal',
+      'brand': 'Janet',
+      'price': 'Rs. 220',
+      'rating': 4.5,
+      'category': 'Eyes',
+      'shade': Color(0xFF2C2040),
+      'tag': 'Natural',
+    },
+    {
+      'name': 'Ayurvedic Lip Balm',
+      'brand': 'Spa Ceylon',
+      'price': 'Rs. 1,600',
+      'rating': 4.9,
+      'category': 'Lips',
+      'shade': Color(0xFFD4A1C0),
+      'tag': 'Luxury',
+    },
+    {
+      'name': 'Compact Powder',
+      'brand': 'Dreamron',
+      'price': 'Rs. 380',
+      'rating': 4.3,
+      'category': 'Face',
+      'shade': Color(0xFFE8D0B0),
+      'tag': 'Value',
+    },
+    {
+      'name': 'Colour Nail Polish',
+      'brand': 'Dreamron',
+      'price': 'Rs. 260',
+      'rating': 4.2,
+      'category': 'Nails',
+      'shade': Color(0xFFC2516B),
+      'tag': 'Affordable',
+    },
   ];
 
-  final List<Map<String, dynamic>> _featured = [
+  // ── International brands ────────────────────────────────────────────────────
+  final List<Map<String, dynamic>> _intlProducts = [
     {
       'name': 'Velvet Matte Lip',
       'brand': 'Fenty Beauty',
       'price': '\$22',
       'rating': 4.8,
+      'category': 'Lips',
+      'shade': Color(0xFFE96A85),
       'tag': 'Best Seller',
-      'color': const Color(0xFFE96A85),
-      'icon': Icons.favorite,
     },
     {
       'name': 'Glossy Lip Oil',
       'brand': 'Charlotte Tilbury',
       'price': '\$28',
       'rating': 4.6,
+      'category': 'Lips',
+      'shade': Color(0xFFD4A1C0),
       'tag': 'New',
-      'color': const Color(0xFFD4A1C0),
-      'icon': Icons.water_drop,
     },
     {
-      'name': 'Liquid Liner',
+      'name': 'Precision Liquid Liner',
       'brand': 'NYX Professional',
       'price': '\$12',
       'rating': 4.7,
+      'category': 'Eyes',
+      'shade': Color(0xFF1C1224),
       'tag': 'Fan Fave',
-      'color': const Color(0xFF1C1224),
-      'icon': Icons.edit,
-    },
-  ];
-
-  final List<Map<String, dynamic>> _products = [
-    {
-      'name': 'Satin Lip Liner',
-      'brand': 'MAC',
-      'price': '\$18',
-      'rating': 4.5,
-      'category': 'Lips',
-      'shade': const Color(0xFFC2516B),
     },
     {
       'name': 'Lash Serum Mascara',
@@ -71,7 +151,8 @@ class _CosmeticsPageState extends State<CosmeticsPage>
       'price': '\$32',
       'rating': 4.9,
       'category': 'Eyes',
-      'shade': const Color(0xFF1C1224),
+      'shade': Color(0xFF1C1224),
+      'tag': 'Premium',
     },
     {
       'name': 'HD Powder Foundation',
@@ -79,7 +160,8 @@ class _CosmeticsPageState extends State<CosmeticsPage>
       'price': '\$44',
       'rating': 4.7,
       'category': 'Face',
-      'shade': const Color(0xFFE8C8A0),
+      'shade': Color(0xFFE8C8A0),
+      'tag': 'Pro',
     },
     {
       'name': 'Gel Nail Polish',
@@ -87,15 +169,8 @@ class _CosmeticsPageState extends State<CosmeticsPage>
       'price': '\$14',
       'rating': 4.6,
       'category': 'Nails',
-      'shade': const Color(0xFFE8708A),
-    },
-    {
-      'name': 'Perfume Mist',
-      'brand': 'Sol de Janeiro',
-      'price': '\$38',
-      'rating': 4.8,
-      'category': 'Fragrance',
-      'shade': const Color(0xFFF5C97A),
+      'shade': Color(0xFFE8708A),
+      'tag': 'Classic',
     },
     {
       'name': 'Cream Eyeshadow',
@@ -103,7 +178,8 @@ class _CosmeticsPageState extends State<CosmeticsPage>
       'price': '\$22',
       'rating': 4.7,
       'category': 'Eyes',
-      'shade': const Color(0xFFB8A0C8),
+      'shade': Color(0xFFB8A0C8),
+      'tag': 'Trending',
     },
     {
       'name': 'Bronzer Stick',
@@ -111,38 +187,22 @@ class _CosmeticsPageState extends State<CosmeticsPage>
       'price': '\$34',
       'rating': 4.5,
       'category': 'Face',
-      'shade': const Color(0xFFC8986C),
-    },
-    {
-      'name': 'Plumping Lip Gloss',
-      'brand': 'Too Faced',
-      'price': '\$26',
-      'rating': 4.6,
-      'category': 'Lips',
-      'shade': const Color(0xFFF8AFCB),
+      'shade': Color(0xFFC8986C),
+      'tag': 'Popular',
     },
   ];
 
-  List<Map<String, dynamic>> get _filteredProducts {
-    if (_selectedFilter == 0) return _products;
+  List<Map<String, dynamic>> _applyFilter(List<Map<String, dynamic>> list) {
+    if (_selectedFilter == 0) return list;
     final label = _filters[_selectedFilter];
-    return _products.where((p) => p['category'] == label).toList();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: _filters.length, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+    return list.where((p) => p['category'] == label).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final lkFiltered   = _applyFilter(_lkProducts);
+    final intlFiltered = _applyFilter(_intlProducts);
+
     return Scaffold(
       backgroundColor: _surface,
       body: CustomScrollView(
@@ -150,12 +210,42 @@ class _CosmeticsPageState extends State<CosmeticsPage>
         slivers: [
           _buildSliverAppBar(context),
           SliverToBoxAdapter(child: _buildFilterChips()),
-          SliverToBoxAdapter(child: _buildFeaturedSection()),
-          SliverToBoxAdapter(child: _buildSectionHeader('All Products')),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-            sliver: _buildProductsGrid(),
+
+          // ── 🇱🇰 Sri Lankan Section ─────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: _BrandSectionHeader(
+              emoji: '🇱🇰',
+              title: 'Sri Lankan Brands',
+              subtitle: 'Proudly local · support homegrown beauty',
+              bgColor: const Color(0xFFFFF8E1),
+              accentColor: const Color(0xFFD4A820),
+            ),
           ),
+          if (lkFiltered.isEmpty)
+            const SliverToBoxAdapter(child: _EmptyFilter())
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              sliver: _buildGrid(lkFiltered, isLocal: true),
+            ),
+
+          // ── 🌍 International Section ───────────────────────────────────────
+          SliverToBoxAdapter(
+            child: _BrandSectionHeader(
+              emoji: '🌍',
+              title: 'International Brands',
+              subtitle: 'Global bestsellers · premium picks',
+              bgColor: const Color(0xFFEEF4FF),
+              accentColor: const Color(0xFF5A7AB8),
+            ),
+          ),
+          if (intlFiltered.isEmpty)
+            const SliverToBoxAdapter(child: _EmptyFilter())
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+              sliver: _buildGrid(intlFiltered, isLocal: false),
+            ),
         ],
       ),
     );
@@ -164,7 +254,7 @@ class _CosmeticsPageState extends State<CosmeticsPage>
   // ── Sliver App Bar ──────────────────────────────────────────────────────────
   Widget _buildSliverAppBar(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 200,
+      expandedHeight: 185,
       pinned: true,
       backgroundColor: _surface,
       leading: GestureDetector(
@@ -172,31 +262,18 @@ class _CosmeticsPageState extends State<CosmeticsPage>
         child: Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 8,
-              ),
-            ],
+            color: Colors.white, borderRadius: BorderRadius.circular(12),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8)],
           ),
-          child: const Icon(Icons.arrow_back_ios_new_rounded,
-              size: 16, color: _textPrimary),
+          child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: _textPrimary),
         ),
       ),
       actions: [
         Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 8,
-              ),
-            ],
+            color: Colors.white, borderRadius: BorderRadius.circular(12),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8)],
           ),
           child: IconButton(
             icon: const Icon(Icons.search_rounded, size: 20, color: _textPrimary),
@@ -209,8 +286,7 @@ class _CosmeticsPageState extends State<CosmeticsPage>
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [Color(0xFFFFE8F0), Color(0xFFFDF7FA)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+              begin: Alignment.topCenter, end: Alignment.bottomCenter,
             ),
           ),
           child: SafeArea(
@@ -223,30 +299,19 @@ class _CosmeticsPageState extends State<CosmeticsPage>
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _rose.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(8),
+                      color: _rose.withOpacity(0.12), borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Text(
-                      '💄 COSMETICS',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: _roseDark,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
+                    child: Text('💄 COSMETICS',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700,
+                          color: _roseDark, letterSpacing: 1.2)),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Explore Top-Rated\nCosmetics',
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
-                      color: _textPrimary,
-                      height: 1.2,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
+                  const Text('Explore Top-Rated\nCosmetics',
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800,
+                        color: _textPrimary, height: 1.2, letterSpacing: -0.5)),
+                  const SizedBox(height: 6),
+                  Text('Local pride · global glamour',
+                    style: TextStyle(fontSize: 13, color: _textMuted)),
                 ],
               ),
             ),
@@ -259,7 +324,7 @@ class _CosmeticsPageState extends State<CosmeticsPage>
   // ── Filter Chips ────────────────────────────────────────────────────────────
   Widget _buildFilterChips() {
     return SizedBox(
-      height: 50,
+      height: 52,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -274,28 +339,17 @@ class _CosmeticsPageState extends State<CosmeticsPage>
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
                 gradient: active
-                    ? const LinearGradient(colors: [_rose, _orchid])
-                    : null,
+                    ? const LinearGradient(colors: [_rose, _orchid]) : null,
                 color: active ? null : _card,
                 borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: active
-                        ? _rose.withOpacity(0.25)
-                        : Colors.black.withOpacity(0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
+                boxShadow: [BoxShadow(
+                  color: active ? _rose.withOpacity(0.25) : Colors.black.withOpacity(0.05),
+                  blurRadius: 8, offset: const Offset(0, 3),
+                )],
               ),
-              child: Text(
-                _filters[i],
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: active ? Colors.white : _textMuted,
-                ),
-              ),
+              child: Text(_filters[i],
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
+                    color: active ? Colors.white : _textMuted)),
             ),
           );
         },
@@ -303,200 +357,115 @@ class _CosmeticsPageState extends State<CosmeticsPage>
     );
   }
 
-  // ── Featured Section ────────────────────────────────────────────────────────
-  Widget _buildFeaturedSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('✨ Featured'),
-        SizedBox(
-          height: 160,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: _featured.length,
-            itemBuilder: (context, i) {
-              final item = _featured[i];
-              return Container(
-                width: 150,
-                margin: const EdgeInsets.only(right: 12),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: _card,
-                  borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.07),
-                      blurRadius: 12,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            color: (item['color'] as Color).withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(item['icon'] as IconData,
-                              color: item['color'] as Color, size: 22),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: _orchid.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            item['tag'] as String,
-                            style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w700,
-                                color: _orchidDark),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    Text(
-                      item['name'] as String,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: _textPrimary,
-                      ),
-                      maxLines: 2,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      item['brand'] as String,
-                      style:
-                          const TextStyle(fontSize: 11, color: _textMuted),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          item['price'] as String,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: _roseDark,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            const Icon(Icons.star_rounded,
-                                size: 12, color: Color(0xFFFFC107)),
-                            const SizedBox(width: 2),
-                            Text(
-                              '${item['rating']}',
-                              style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: _textMuted),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 24),
-      ],
-    );
-  }
-
-  // ── Section Header ──────────────────────────────────────────────────────────
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: _textPrimary,
-              letterSpacing: -0.2,
-            ),
-          ),
-          Text(
-            'See all',
-            style: TextStyle(
-              fontSize: 13,
-              color: _orchidDark,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   // ── Products Grid ───────────────────────────────────────────────────────────
-  Widget _buildProductsGrid() {
-    final items = _filteredProducts;
+  Widget _buildGrid(List<Map<String, dynamic>> items, {required bool isLocal}) {
     return SliverGrid(
       delegate: SliverChildBuilderDelegate(
-        (context, i) => _ProductCard(
+        (context, i) => _CosmeticCard(
           name: items[i]['name'] as String,
           brand: items[i]['brand'] as String,
           price: items[i]['price'] as String,
           rating: items[i]['rating'] as double,
           shadeColor: items[i]['shade'] as Color,
-          category: items[i]['category'] as String,
+          tag: items[i]['tag'] as String,
+          isLocal: isLocal,
         ),
         childCount: items.length,
       ),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.82,
+        crossAxisCount: 2, crossAxisSpacing: 12,
+        mainAxisSpacing: 12, childAspectRatio: 0.82,
       ),
     );
   }
 }
 
-// ── Product Card ─────────────────────────────────────────────────────────────
-class _ProductCard extends StatefulWidget {
-  const _ProductCard({
+// ── Shared Brand Section Header ───────────────────────────────────────────────
+class _BrandSectionHeader extends StatelessWidget {
+  const _BrandSectionHeader({
+    required this.emoji,
+    required this.title,
+    required this.subtitle,
+    required this.bgColor,
+    required this.accentColor,
+  });
+
+  final String emoji, title, subtitle;
+  final Color bgColor, accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: accentColor.withOpacity(0.2), width: 1.2),
+      ),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 24)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700,
+                      color: accentColor)),
+                const SizedBox(height: 2),
+                Text(subtitle,
+                  style: TextStyle(fontSize: 11, color: accentColor.withOpacity(0.75))),
+              ],
+            ),
+          ),
+          Text('See all',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: accentColor)),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Empty Filter State ────────────────────────────────────────────────────────
+class _EmptyFilter extends StatelessWidget {
+  const _EmptyFilter();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+      child: Center(
+        child: Text('No products in this category',
+          style: TextStyle(fontSize: 13, color: Color(0xFF9E8DA8))),
+      ),
+    );
+  }
+}
+
+// ── Cosmetic Card ─────────────────────────────────────────────────────────────
+class _CosmeticCard extends StatefulWidget {
+  const _CosmeticCard({
     required this.name,
     required this.brand,
     required this.price,
     required this.rating,
     required this.shadeColor,
-    required this.category,
+    required this.tag,
+    required this.isLocal,
   });
 
-  final String name;
-  final String brand;
-  final String price;
+  final String name, brand, price, tag;
   final double rating;
   final Color shadeColor;
-  final String category;
+  final bool isLocal;
 
   @override
-  State<_ProductCard> createState() => _ProductCardState();
+  State<_CosmeticCard> createState() => _CosmeticCardState();
 }
 
-class _ProductCardState extends State<_ProductCard> {
+class _CosmeticCardState extends State<_CosmeticCard> {
   bool _wishlisted = false;
 
   @override
@@ -505,78 +474,68 @@ class _ProductCardState extends State<_ProductCard> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06),
+            blurRadius: 12, offset: const Offset(0, 5))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Shade preview ────────────────────────────────────────────────
+          // ── Shade swatch ──────────────────────────────────────────────────
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
             child: Stack(
               children: [
                 Container(
-                  height: 110,
-                  width: double.infinity,
+                  height: 110, width: double.infinity,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [
-                        widget.shadeColor.withOpacity(0.3),
-                        widget.shadeColor.withOpacity(0.08),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      colors: [widget.shadeColor.withOpacity(0.3),
+                        widget.shadeColor.withOpacity(0.08)],
+                      begin: Alignment.topLeft, end: Alignment.bottomRight,
                     ),
                   ),
                   child: Center(
                     child: Container(
-                      width: 54,
-                      height: 54,
+                      width: 54, height: 54,
                       decoration: BoxDecoration(
-                        color: widget.shadeColor,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: widget.shadeColor.withOpacity(0.4),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        color: widget.shadeColor, shape: BoxShape.circle,
+                        boxShadow: [BoxShadow(color: widget.shadeColor.withOpacity(0.4),
+                            blurRadius: 12, offset: const Offset(0, 4))],
                       ),
                     ),
                   ),
                 ),
+                // Local badge
+                if (widget.isLocal)
+                  Positioned(
+                    top: 8, left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD4A820),
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                      child: const Text('🇱🇰 Local',
+                        style: TextStyle(color: Colors.white, fontSize: 9,
+                            fontWeight: FontWeight.w700)),
+                    ),
+                  ),
+                // Wishlist
                 Positioned(
-                  top: 8,
-                  right: 8,
+                  top: 8, right: 8,
                   child: GestureDetector(
                     onTap: () => setState(() => _wishlisted = !_wishlisted),
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 6,
-                          ),
-                        ],
+                        color: Colors.white, shape: BoxShape.circle,
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08),
+                            blurRadius: 6)],
                       ),
                       child: Icon(
-                        _wishlisted
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
+                        _wishlisted ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                         size: 14,
-                        color: _wishlisted
-                            ? const Color(0xFFE8708A)
-                            : const Color(0xFF9E8DA8),
+                        color: _wishlisted ? const Color(0xFFE8708A) : const Color(0xFF9E8DA8),
                       ),
                     ),
                   ),
@@ -590,47 +549,30 @@ class _ProductCardState extends State<_ProductCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.name,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1C1224),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                Text(widget.name,
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
+                      color: Color(0xFF1C1224)),
+                  maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 2),
-                Text(
-                  widget.brand,
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF9E8DA8)),
-                ),
+                Text(widget.brand,
+                  style: const TextStyle(fontSize: 11, color: Color(0xFF9E8DA8))),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      widget.price,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFFC2516B),
-                      ),
+                    Flexible(
+                      child: Text(widget.price,
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800,
+                            color: Color(0xFFC2516B)),
+                        overflow: TextOverflow.ellipsis),
                     ),
-                    Row(
-                      children: [
-                        const Icon(Icons.star_rounded,
-                            size: 12, color: Color(0xFFFFC107)),
-                        const SizedBox(width: 3),
-                        Text(
-                          '${widget.rating}',
-                          style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF9E8DA8)),
-                        ),
-                      ],
-                    ),
+                    Row(children: [
+                      const Icon(Icons.star_rounded, size: 12, color: Color(0xFFFFC107)),
+                      const SizedBox(width: 3),
+                      Text('${widget.rating}',
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+                            color: Color(0xFF9E8DA8))),
+                    ]),
                   ],
                 ),
               ],

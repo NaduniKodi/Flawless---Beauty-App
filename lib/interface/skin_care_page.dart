@@ -20,54 +20,123 @@ class _SkinCarePageState extends State<SkinCarePage> {
 
   int _selectedSkinType = 0;
 
-  final List<String> _skinTypes = [
-    'All', 'Oily', 'Dry', 'Combination', 'Sensitive', 'Normal',
-  ];
+  final List<String> _skinTypes = ['All', 'Oily', 'Dry', 'Combination', 'Sensitive', 'Normal'];
 
+  // ── Daily routine steps (shared / universal) ──────────────────────────────
   final List<Map<String, dynamic>> _routineSteps = [
+    {'step': '01', 'name': 'Cleanse',    'time': 'AM & PM', 'icon': Icons.water_drop_outlined, 'color': Color(0xFF7EB8D4)},
+    {'step': '02', 'name': 'Tone',       'time': 'AM & PM', 'icon': Icons.spa_outlined,         'color': Color(0xFFB4D4A8)},
+    {'step': '03', 'name': 'Serum',      'time': 'AM & PM', 'icon': Icons.science_outlined,     'color': Color(0xFFF8AFCB)},
+    {'step': '04', 'name': 'Moisturise', 'time': 'AM & PM', 'icon': Icons.opacity_outlined,     'color': Color(0xFFE8C4A0)},
+    {'step': '05', 'name': 'SPF',        'time': 'AM only',  'icon': Icons.wb_sunny_outlined,   'color': Color(0xFFF5E07A)},
+  ];
+
+  // ── Sri Lankan skincare products ──────────────────────────────────────────
+  final List<Map<String, dynamic>> _lkProducts = [
     {
-      'step': '01',
-      'name': 'Cleanse',
-      'desc': 'Remove impurities & excess oil',
-      'time': 'AM & PM',
-      'icon': Icons.water_drop_outlined,
-      'color': const Color(0xFF7EB8D4),
+      'name': 'Coconut Milk Cleanser',
+      'brand': 'Spa Ceylon',
+      'price': 'Rs. 1,950',
+      'rating': 4.9,
+      'skinType': ['All', 'Dry', 'Sensitive', 'Normal'],
+      'tag': 'Step 1',
+      'tagColor': Color(0xFF7EB8D4),
+      'desc': 'Gentle Ayurvedic cleanser with raw coconut milk',
     },
     {
-      'step': '02',
-      'name': 'Tone',
-      'desc': 'Balance & prep the skin',
-      'time': 'AM & PM',
-      'icon': Icons.spa_outlined,
-      'color': const Color(0xFFB4D4A8),
+      'name': 'Neem & Turmeric Face Wash',
+      'brand': 'Siddhalepa',
+      'price': 'Rs. 480',
+      'rating': 4.6,
+      'skinType': ['All', 'Oily', 'Combination'],
+      'tag': 'Step 1',
+      'tagColor': Color(0xFF7EB8D4),
+      'desc': 'Traditional Ayurvedic formula for clear skin',
     },
     {
-      'step': '03',
-      'name': 'Serum',
-      'desc': 'Targeted treatment',
-      'time': 'AM & PM',
-      'icon': Icons.science_outlined,
-      'color': const Color(0xFFF8AFCB),
+      'name': 'Papaya Face Wash',
+      'brand': 'Janet',
+      'price': 'Rs. 320',
+      'rating': 4.5,
+      'skinType': ['All', 'Normal', 'Combination'],
+      'tag': 'Step 1',
+      'tagColor': Color(0xFF7EB8D4),
+      'desc': 'Brightening papaya extract for a natural glow',
     },
     {
-      'step': '04',
-      'name': 'Moisturise',
-      'desc': 'Lock in hydration',
-      'time': 'AM & PM',
-      'icon': Icons.opacity_outlined,
-      'color': const Color(0xFFE8C4A0),
+      'name': 'Aloe Vera Toner',
+      'brand': 'Janet',
+      'price': 'Rs. 280',
+      'rating': 4.4,
+      'skinType': ['All', 'Sensitive', 'Dry'],
+      'tag': 'Step 2',
+      'tagColor': Color(0xFFB4D4A8),
+      'desc': 'Soothing aloe vera for balanced, calm skin',
     },
     {
-      'step': '05',
-      'name': 'SPF',
-      'desc': 'Protect from UV damage',
-      'time': 'AM only',
-      'icon': Icons.wb_sunny_outlined,
-      'color': const Color(0xFFF5E07A),
+      'name': 'Herbal Brightening Serum',
+      'brand': 'Swabha Ceylon',
+      'price': 'Rs. 2,200',
+      'rating': 4.7,
+      'skinType': ['All', 'Normal', 'Dry'],
+      'tag': 'Step 3',
+      'tagColor': Color(0xFFF8AFCB),
+      'desc': 'Modern Ayurveda meets science for radiant skin',
+    },
+    {
+      'name': 'D\'las Vitamin C Serum',
+      'brand': 'D\'las',
+      'price': 'Rs. 1,800',
+      'rating': 4.6,
+      'skinType': ['All', 'Oily', 'Combination'],
+      'tag': 'Step 3',
+      'tagColor': Color(0xFFF8AFCB),
+      'desc': '100% natural organic ingredients from Sri Lankan fields',
+    },
+    {
+      'name': 'Sandalwood Moisturiser',
+      'brand': 'Spa Ceylon',
+      'price': 'Rs. 2,400',
+      'rating': 4.8,
+      'skinType': ['All', 'Dry', 'Normal', 'Sensitive'],
+      'tag': 'Step 4',
+      'tagColor': Color(0xFFE8C4A0),
+      'desc': 'Rich sandalwood & coconut oil hydration ritual',
+    },
+    {
+      'name': 'Oil-Control Moisturiser',
+      'brand': 'British Cosmetics',
+      'price': 'Rs. 1,100',
+      'rating': 4.5,
+      'skinType': ['Oily', 'Combination'],
+      'tag': 'Step 4',
+      'tagColor': Color(0xFFE8C4A0),
+      'desc': 'Designed for Sri Lankan humidity & oily skin',
+    },
+    {
+      'name': 'Daily SPF 50 Sunscreen',
+      'brand': 'Prevense',
+      'price': 'Rs. 1,450',
+      'rating': 4.6,
+      'skinType': ['All', 'Sensitive'],
+      'tag': 'Step 5',
+      'tagColor': Color(0xFFF5E07A),
+      'desc': 'Lightweight SPF suited to tropical climate',
+    },
+    {
+      'name': 'Velvet Body Lotion',
+      'brand': 'Velvet',
+      'price': 'Rs. 560',
+      'rating': 4.4,
+      'skinType': ['All', 'Dry', 'Normal'],
+      'tag': 'Body',
+      'tagColor': Color(0xFFD4C0E8),
+      'desc': 'Designed specifically for Sri Lankan skin & climate',
     },
   ];
 
-  final List<Map<String, dynamic>> _products = [
+  // ── International skincare products ──────────────────────────────────────
+  final List<Map<String, dynamic>> _intlProducts = [
     {
       'name': 'Gentle Foaming Cleanser',
       'brand': 'CeraVe',
@@ -76,6 +145,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['All', 'Oily', 'Combination'],
       'tag': 'Step 1',
       'tagColor': Color(0xFF7EB8D4),
+      'desc': 'Dermatologist recommended with ceramides',
     },
     {
       'name': 'Hydrating Toner',
@@ -85,6 +155,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['All', 'Dry', 'Sensitive', 'Normal'],
       'tag': 'Step 2',
       'tagColor': Color(0xFFB4D4A8),
+      'desc': 'K-beauty essential for glass skin',
     },
     {
       'name': 'Niacinamide 10% + Zinc',
@@ -94,6 +165,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['Oily', 'Combination'],
       'tag': 'Step 3',
       'tagColor': Color(0xFFF8AFCB),
+      'desc': 'Pore-minimising & sebum-control serum',
     },
     {
       'name': 'Hyaluronic Acid Serum',
@@ -103,6 +175,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['Dry', 'Normal', 'Sensitive'],
       'tag': 'Step 3',
       'tagColor': Color(0xFFF8AFCB),
+      'desc': 'Deep hydration with multi-weight HA',
     },
     {
       'name': 'Barrier Repair Cream',
@@ -112,6 +185,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['Sensitive', 'Dry'],
       'tag': 'Step 4',
       'tagColor': Color(0xFFE8C4A0),
+      'desc': 'Clinically tested for reactive skin',
     },
     {
       'name': 'Oil-Free Moisturiser',
@@ -121,6 +195,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['Oily', 'Combination', 'Normal'],
       'tag': 'Step 4',
       'tagColor': Color(0xFFE8C4A0),
+      'desc': 'Lightweight formula from comfrey herb',
     },
     {
       'name': 'Mineral SPF 50',
@@ -130,6 +205,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['All', 'Sensitive'],
       'tag': 'Step 5',
       'tagColor': Color(0xFFF5E07A),
+      'desc': 'Zinc oxide broad-spectrum protection',
     },
     {
       'name': 'Retinol Night Serum',
@@ -139,19 +215,21 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['Oily', 'Combination', 'Normal'],
       'tag': 'PM Boost',
       'tagColor': Color(0xFFB8A0C8),
+      'desc': 'Encapsulated retinol for smoother skin',
     },
   ];
 
-  List<Map<String, dynamic>> get _filteredProducts {
-    if (_selectedSkinType == 0) return _products;
+  List<Map<String, dynamic>> _applyFilter(List<Map<String, dynamic>> list) {
+    if (_selectedSkinType == 0) return list;
     final label = _skinTypes[_selectedSkinType];
-    return _products
-        .where((p) => (p['skinType'] as List<String>).contains(label))
-        .toList();
+    return list.where((p) => (p['skinType'] as List<String>).contains(label)).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final lkFiltered   = _applyFilter(_lkProducts);
+    final intlFiltered = _applyFilter(_intlProducts);
+
     return Scaffold(
       backgroundColor: _surface,
       body: CustomScrollView(
@@ -160,11 +238,42 @@ class _SkinCarePageState extends State<SkinCarePage> {
           _buildSliverAppBar(context),
           SliverToBoxAdapter(child: _buildSkinTypeSelector()),
           SliverToBoxAdapter(child: _buildRoutineSection()),
-          SliverToBoxAdapter(child: _buildSectionHeader('Recommended Products')),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-            sliver: _buildProductsSliver(),
+
+          // ── 🇱🇰 Sri Lankan Section ─────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: _BrandSectionHeader(
+              emoji: '🇱🇰',
+              title: 'Sri Lankan Brands',
+              subtitle: 'Proudly local · Ayurvedic & natural heritage',
+              bgColor: const Color(0xFFFFF8E1),
+              accentColor: const Color(0xFFD4A820),
+            ),
           ),
+          if (lkFiltered.isEmpty)
+            const SliverToBoxAdapter(child: _EmptyFilter())
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              sliver: _buildProductSliver(lkFiltered, isLocal: true),
+            ),
+
+          // ── 🌍 International Section ───────────────────────────────────────
+          SliverToBoxAdapter(
+            child: _BrandSectionHeader(
+              emoji: '🌍',
+              title: 'International Brands',
+              subtitle: 'Science-backed · globally trusted',
+              bgColor: const Color(0xFFEEF4FF),
+              accentColor: const Color(0xFF5A7AB8),
+            ),
+          ),
+          if (intlFiltered.isEmpty)
+            const SliverToBoxAdapter(child: _EmptyFilter())
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+              sliver: _buildProductSliver(intlFiltered, isLocal: false),
+            ),
         ],
       ),
     );
@@ -173,7 +282,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
   // ── Sliver App Bar ──────────────────────────────────────────────────────────
   Widget _buildSliverAppBar(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 220,
+      expandedHeight: 205,
       pinned: true,
       backgroundColor: _surface,
       leading: GestureDetector(
@@ -181,35 +290,21 @@ class _SkinCarePageState extends State<SkinCarePage> {
         child: Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 8,
-              ),
-            ],
+            color: Colors.white, borderRadius: BorderRadius.circular(12),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8)],
           ),
-          child: const Icon(Icons.arrow_back_ios_new_rounded,
-              size: 16, color: _textPrimary),
+          child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: _textPrimary),
         ),
       ),
       actions: [
         Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 8,
-              ),
-            ],
+            color: Colors.white, borderRadius: BorderRadius.circular(12),
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8)],
           ),
           child: IconButton(
-            icon: const Icon(Icons.face_retouching_natural_rounded,
-                size: 20, color: _textPrimary),
+            icon: const Icon(Icons.face_retouching_natural_rounded, size: 20, color: _textPrimary),
             onPressed: () {},
           ),
         ),
@@ -219,8 +314,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [Color(0xFFE8F4F8), Color(0xFFFDF7FA)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+              begin: Alignment.topCenter, end: Alignment.bottomCenter,
             ),
           ),
           child: SafeArea(
@@ -236,35 +330,17 @@ class _SkinCarePageState extends State<SkinCarePage> {
                       color: const Color(0xFF7EB8D4).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text(
-                      '🌿 SKIN CARE',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF5A9AB8),
-                        letterSpacing: 1.2,
-                      ),
-                    ),
+                    child: const Text('🌿 SKIN CARE',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700,
+                          color: Color(0xFF5A9AB8), letterSpacing: 1.2)),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Routines Tailored\nTo You',
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
-                      color: _textPrimary,
-                      height: 1.2,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Science-backed products for every skin type',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: _textMuted,
-                    ),
-                  ),
+                  const Text('Routines Tailored\nTo You',
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800,
+                        color: _textPrimary, height: 1.2, letterSpacing: -0.5)),
+                  const SizedBox(height: 6),
+                  Text('Local remedies · global science',
+                    style: TextStyle(fontSize: 13, color: _textMuted)),
                 ],
               ),
             ),
@@ -279,12 +355,17 @@ class _SkinCarePageState extends State<SkinCarePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Your Skin Type'),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+          child: const Text('Filter by Skin Type',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700,
+                color: _textPrimary, letterSpacing: -0.2)),
+        ),
         SizedBox(
-          height: 50,
+          height: 44,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: _skinTypes.length,
             itemBuilder: (context, i) {
               final active = _selectedSkinType == i;
@@ -296,28 +377,83 @@ class _SkinCarePageState extends State<SkinCarePage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   decoration: BoxDecoration(
                     gradient: active
-                        ? const LinearGradient(colors: [_rose, _orchid])
-                        : null,
+                        ? const LinearGradient(colors: [_rose, _orchid]) : null,
                     color: active ? null : _card,
                     borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: active
-                            ? _rose.withOpacity(0.25)
-                            : Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
+                    boxShadow: [BoxShadow(
+                      color: active ? _rose.withOpacity(0.25) : Colors.black.withOpacity(0.05),
+                      blurRadius: 8, offset: const Offset(0, 3),
+                    )],
                   ),
-                  child: Text(
-                    _skinTypes[i],
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: active ? Colors.white : _textMuted,
+                  child: Text(_skinTypes[i],
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
+                        color: active ? Colors.white : _textMuted)),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 4),
+      ],
+    );
+  }
+
+  // ── Routine Carousel ────────────────────────────────────────────────────────
+  Widget _buildRoutineSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 10),
+          child: Text('Daily Routine Steps',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700,
+                color: _textPrimary, letterSpacing: -0.2)),
+        ),
+        SizedBox(
+          height: 125,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: _routineSteps.length,
+            itemBuilder: (context, i) {
+              final step = _routineSteps[i];
+              return Container(
+                width: 115,
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.all(13),
+                decoration: BoxDecoration(
+                  color: _card, borderRadius: BorderRadius.circular(18),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06),
+                      blurRadius: 10, offset: const Offset(0, 4))],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          width: 34, height: 34,
+                          decoration: BoxDecoration(
+                            color: (step['color'] as Color).withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(step['icon'] as IconData, size: 17,
+                              color: step['color'] as Color),
+                        ),
+                        Text(step['step'] as String,
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800,
+                              color: (step['color'] as Color).withOpacity(0.5))),
+                      ],
                     ),
-                  ),
+                    const Spacer(),
+                    Text(step['name'] as String,
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
+                          color: _textPrimary)),
+                    const SizedBox(height: 2),
+                    Text(step['time'] as String,
+                      style: const TextStyle(fontSize: 10, color: _textMuted)),
+                  ],
                 ),
               );
             },
@@ -328,122 +464,8 @@ class _SkinCarePageState extends State<SkinCarePage> {
     );
   }
 
-  // ── Routine Section ─────────────────────────────────────────────────────────
-  Widget _buildRoutineSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('Daily Routine'),
-        SizedBox(
-          height: 130,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: _routineSteps.length,
-            itemBuilder: (context, i) {
-              final step = _routineSteps[i];
-              return Container(
-                width: 120,
-                margin: const EdgeInsets.only(right: 12),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: _card,
-                  borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: (step['color'] as Color).withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(
-                            step['icon'] as IconData,
-                            size: 18,
-                            color: step['color'] as Color,
-                          ),
-                        ),
-                        Text(
-                          step['step'] as String,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: (step['color'] as Color).withOpacity(0.5),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    Text(
-                      step['name'] as String,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: _textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      step['time'] as String,
-                      style: const TextStyle(
-                          fontSize: 10, color: _textMuted),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 24),
-      ],
-    );
-  }
-
-  // ── Section Header ──────────────────────────────────────────────────────────
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: _textPrimary,
-              letterSpacing: -0.2,
-            ),
-          ),
-          Text(
-            'See all',
-            style: TextStyle(
-              fontSize: 13,
-              color: _orchidDark,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── Products Sliver ─────────────────────────────────────────────────────────
-  Widget _buildProductsSliver() {
-    final items = _filteredProducts;
+  // ── Product Sliver (list tiles) ─────────────────────────────────────────────
+  Widget _buildProductSliver(List<Map<String, dynamic>> items, {required bool isLocal}) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, i) => _SkinProductTile(
@@ -453,6 +475,8 @@ class _SkinCarePageState extends State<SkinCarePage> {
           rating: items[i]['rating'] as double,
           tag: items[i]['tag'] as String,
           tagColor: items[i]['tagColor'] as Color,
+          desc: items[i]['desc'] as String,
+          isLocal: isLocal,
         ),
         childCount: items.length,
       ),
@@ -460,23 +484,76 @@ class _SkinCarePageState extends State<SkinCarePage> {
   }
 }
 
+// ── Shared Brand Section Header ───────────────────────────────────────────────
+class _BrandSectionHeader extends StatelessWidget {
+  const _BrandSectionHeader({
+    required this.emoji, required this.title,
+    required this.subtitle, required this.bgColor, required this.accentColor,
+  });
+
+  final String emoji, title, subtitle;
+  final Color bgColor, accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: bgColor, borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: accentColor.withOpacity(0.2), width: 1.2),
+      ),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 24)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700,
+                    color: accentColor)),
+                const SizedBox(height: 2),
+                Text(subtitle, style: TextStyle(fontSize: 11,
+                    color: accentColor.withOpacity(0.75))),
+              ],
+            ),
+          ),
+          Text('See all', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
+              color: accentColor)),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Empty Filter ──────────────────────────────────────────────────────────────
+class _EmptyFilter extends StatelessWidget {
+  const _EmptyFilter();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+      child: Center(child: Text('No products match this skin type',
+          style: TextStyle(fontSize: 13, color: Color(0xFF9E8DA8)))),
+    );
+  }
+}
+
 // ── Skin Product Tile ─────────────────────────────────────────────────────────
 class _SkinProductTile extends StatefulWidget {
   const _SkinProductTile({
-    required this.name,
-    required this.brand,
-    required this.price,
-    required this.rating,
-    required this.tag,
-    required this.tagColor,
+    required this.name,    required this.brand,
+    required this.price,   required this.rating,
+    required this.tag,     required this.tagColor,
+    required this.desc,    required this.isLocal,
   });
 
-  final String name;
-  final String brand;
-  final String price;
+  final String name, brand, price, tag, desc;
   final double rating;
-  final String tag;
   final Color tagColor;
+  final bool isLocal;
 
   @override
   State<_SkinProductTile> createState() => _SkinProductTileState();
@@ -488,41 +565,30 @@ class _SkinProductTileState extends State<_SkinProductTile> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: Colors.white, borderRadius: BorderRadius.circular(18),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05),
+            blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Row(
         children: [
-          // Colour dot
+          // Swatch dot
           Container(
-            width: 52,
-            height: 52,
+            width: 52, height: 52,
             decoration: BoxDecoration(
               color: widget.tagColor.withOpacity(0.15),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Center(
               child: Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: widget.tagColor,
-                  shape: BoxShape.circle,
-                ),
+                width: 26, height: 26,
+                decoration: BoxDecoration(color: widget.tagColor, shape: BoxShape.circle),
               ),
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -530,69 +596,60 @@ class _SkinProductTileState extends State<_SkinProductTile> {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 3),
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                       decoration: BoxDecoration(
                         color: widget.tagColor.withOpacity(0.18),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: Text(
-                        widget.tag,
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          color: widget.tagColor == const Color(0xFFF5E07A)
-                              ? const Color(0xFF9E8A2A)
-                              : widget.tagColor,
+                      child: Text(widget.tag,
+                        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700,
+                            color: widget.tagColor == const Color(0xFFF5E07A)
+                                ? const Color(0xFF9E8A2A) : widget.tagColor)),
+                    ),
+                    if (widget.isLocal) ...[
+                      const SizedBox(width: 5),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD4A820),
+                          borderRadius: BorderRadius.circular(6),
                         ),
+                        child: const Text('🇱🇰 Local',
+                          style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700,
+                              color: Colors.white)),
                       ),
-                    ),
+                    ],
                   ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  widget.name,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1C1224),
-                  ),
-                ),
+                const SizedBox(height: 5),
+                Text(widget.name,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700,
+                      color: Color(0xFF1C1224))),
                 const SizedBox(height: 2),
-                Text(
-                  widget.brand,
-                  style: const TextStyle(
-                      fontSize: 12, color: Color(0xFF9E8DA8)),
-                ),
+                Text(widget.brand,
+                  style: const TextStyle(fontSize: 11, color: Color(0xFF9E8DA8))),
+                const SizedBox(height: 3),
+                Text(widget.desc,
+                  style: const TextStyle(fontSize: 11, color: Color(0xFF9E8DA8), height: 1.3),
+                  maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(Icons.star_rounded,
-                        size: 12, color: Color(0xFFFFC107)),
-                    const SizedBox(width: 3),
-                    Text(
-                      '${widget.rating}',
-                      style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF9E8DA8)),
-                    ),
-                  ],
-                ),
+                Row(children: [
+                  const Icon(Icons.star_rounded, size: 12, color: Color(0xFFFFC107)),
+                  const SizedBox(width: 3),
+                  Text('${widget.rating}',
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+                        color: Color(0xFF9E8DA8))),
+                ]),
               ],
             ),
           ),
+          const SizedBox(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                widget.price,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFFC2516B),
-                ),
-              ),
+              Text(widget.price,
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800,
+                    color: Color(0xFFC2516B))),
               const SizedBox(height: 8),
               GestureDetector(
                 onTap: () => setState(() => _added = !_added),
@@ -600,8 +657,7 @@ class _SkinProductTileState extends State<_SkinProductTile> {
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
-                    color: _added
-                        ? const Color(0xFFE8708A)
+                    color: _added ? const Color(0xFFE8708A)
                         : const Color(0xFFF8AFCB).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),

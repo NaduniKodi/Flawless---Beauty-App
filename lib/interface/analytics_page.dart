@@ -58,10 +58,10 @@ class _AnalyticsPageState extends State<AnalyticsPage>
       case 1:
         Navigator.push(context, _fadeRoute(const AICameraPage()));
         break;
-      case 2:
+      case 4:
         Navigator.push(context, _fadeRoute(const SettingsPage()));
         break;
-      case 4:
+      case 2:
         Navigator.push(context, _slideRoute(const ProfilePage()));
         break;
     }
@@ -239,7 +239,7 @@ class _AnalyticsPageState extends State<AnalyticsPage>
               _navItem(icon: Icons.auto_awesome_rounded,  index: 1),
               _navLogo(),
               _navItem(icon: Icons.bar_chart_rounded,     index: 3),
-              _navItem(icon: Icons.person_rounded,        index: 4),
+              _navItem(icon: Icons.settings_rounded,      index: 4),
             ],
           ),
         ),

@@ -5,6 +5,11 @@ import 'package:flawless_beauty_app/interface/profilepage.dart';
 import 'package:flawless_beauty_app/interface/settings_page.dart';
 import 'package:flawless_beauty_app/screens/aicamera_page.dart ';
 import 'package:flawless_beauty_app/screens/makeup_page.dart';
+import 'package:flawless_beauty_app/screens/makeup_page.dart';
+import 'package:flawless_beauty_app/interface/cosmetics_page.dart';
+import 'package:flawless_beauty_app/interface/skin_care_page.dart';
+import 'package:flawless_beauty_app/interface/face_yoga.dart';
+import 'package:flawless_beauty_app/interface/products_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -499,16 +504,25 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         final (title, sub, img) = _categories[i];
 
         // ── Route logic per category ───────────────────────────────────────
-        VoidCallback? onTap;
-        if (title == "Make up") {
-          onTap = () => Navigator.push(
-                context,
-                _fadeRoute(const MakeupPage()),
-              );
+                VoidCallback? onTap;
+        switch (title) {
+          case "Make up":
+            onTap = () => Navigator.push(context, _fadeRoute(const MakeupPage()));
+            break;
+          case "Cosmetics":
+            onTap = () => Navigator.push(context, _fadeRoute(const CosmeticsPage()));
+            break;
+          case "Face Yoga":
+            onTap = () => Navigator.push(context, _fadeRoute(const FaceYogaPage()));
+            break;
+          case "Skin Care":
+            onTap = () => Navigator.push(context, _fadeRoute(const SkinCarePage()));
+            break;
+          case "Products":
+            onTap = () => Navigator.push(context, _fadeRoute(const ProductsPage()));
+            break;
         }
-        // Add more routes here as other category pages are built:
-        // if (title == "Skin Care") onTap = () => Navigator.push(context, _fadeRoute(const SkinCarePage()));
-
+        
         return _CategoryCard(
           title: title,
           subtitle: sub,

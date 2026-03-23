@@ -78,6 +78,8 @@ flutter:
   
   assets:
     - assets/images/
+    - assets/images/cosmetics/lk/
+    - assets/images/cosmetics/intl/
     
 
   # To add assets to your application, add an assets section, like this:

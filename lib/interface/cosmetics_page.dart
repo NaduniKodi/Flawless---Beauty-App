@@ -64,7 +64,7 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
       'category': 'Lips',
       'shade': Color(0xFFCC3D5A),
       'tag': 'Best Seller',
-      'image': 'assets/images/cosmetics/lk/viana_matte_lip.webp',
+      'image': 'assets/images/cosmetics/lk/viana_matte_lip.jpg',
     },
     {
       'name': 'Glossy Lip Tint',
@@ -74,7 +74,7 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
       'category': 'Lips',
       'shade': Color(0xFFE8708A),
       'tag': 'Trending',
-      'image': 'assets/images/cosmetics/lk/viana_glossy_tint.webp',
+      'image': 'assets/images/cosmetics/lk/viana_glossy_tint.jpg',
     },
     {
       'name': 'Long-Wear Eyeliner',
@@ -84,7 +84,7 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
       'category': 'Eyes',
       'shade': Color(0xFF1C1224),
       'tag': 'Fan Fave',
-      'image': 'assets/images/cosmetics/lk/viana_eyeliner.webp',
+      'image': 'assets/images/cosmetics/lk/viana_eyeliner.jpg',
     },
     {
       'name': 'BB Cream SPF 30',
@@ -94,7 +94,7 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
       'category': 'Face',
       'shade': Color(0xFFE8C8A0),
       'tag': 'New',
-      'image': 'assets/images/cosmetics/lk/viana_bb_cream.webp',
+      'image': 'assets/images/cosmetics/lk/viana_bb_cream.jpg',
     },
     {
       'name': 'Toxin-Free Nail Paint',
@@ -104,7 +104,7 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
       'category': 'Nails',
       'shade': Color(0xFFF8AFCB),
       'tag': 'Clean Beauty',
-      'image': 'assets/images/cosmetics/lk/viana_nail_paint.webp',
+      'image': 'assets/images/cosmetics/lk/viana_nail_paint.jpg',
     },
     {
       'name': 'Papaya Glow Foundation',
@@ -124,7 +124,7 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
       'category': 'Eyes',
       'shade': Color(0xFF2C2040),
       'tag': 'Natural',
-      'image': 'assets/images/cosmetics/lk/janet_kajal.webp',
+      'image': 'assets/images/cosmetics/lk/janet_kajal.jpg',
     },
     {
       'name': 'Ayurvedic Lip Balm',
@@ -134,7 +134,7 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
       'category': 'Lips',
       'shade': Color(0xFFD4A1C0),
       'tag': 'Luxury',
-      'image': 'assets/images/cosmetics/lk/spaceylon_lip_balm.webp',
+      'image': 'assets/images/cosmetics/lk/spaceylon_lip_balm.jpg',
     },
     {
       'name': 'Compact Powder',
@@ -144,7 +144,7 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
       'category': 'Face',
       'shade': Color(0xFFE8D0B0),
       'tag': 'Value',
-      'image': 'assets/images/cosmetics/lk/dreamron_compact.webp',
+      'image': 'assets/images/cosmetics/lk/dreamron_compact.jpg',
     },
     {
       'name': 'Colour Nail Polish',
@@ -154,7 +154,7 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
       'category': 'Nails',
       'shade': Color(0xFFC2516B),
       'tag': 'Affordable',
-      'image': 'assets/images/cosmetics/lk/dreamron_nail_polish.webp',
+      'image': 'assets/images/cosmetics/lk/dreamron_nail_polish.jpg',
     },
   ];
 
@@ -362,7 +362,7 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
                             color: _roseDark,
                             letterSpacing: 1.2)),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   const Text('Explore Top-Rated\nCosmetics',
                       style: TextStyle(
                           fontSize: 26,
@@ -446,7 +446,7 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 0.78,   // slightly taller to give images room
+        childAspectRatio: 0.68,
       ),
     );
   }
@@ -547,193 +547,198 @@ class _CosmeticCardState extends State<_CosmeticCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 5))
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Image / Shade swatch ──────────────────────────────────────────
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-            child: Stack(
-              children: [
-                // ── Gradient background (always visible behind the image) ──
-                Container(
-                  height: 130,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        widget.shadeColor.withOpacity(0.25),
-                        widget.shadeColor.withOpacity(0.07),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+    // SizedBox.expand fills the grid cell exactly.
+    // Expanded on the image section means it takes whatever height
+    // remains after the fixed-height info section — overflow is impossible.
+    return SizedBox.expand(
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 12,
+                offset: const Offset(0, 5))
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Image section (Expanded = fills remaining cell height) ──────
+            Expanded(
+              child: ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(18)),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Gradient background
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            widget.shadeColor.withOpacity(0.25),
+                            widget.shadeColor.withOpacity(0.07),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
 
-                // ── Product image (loads on top; falls back gracefully) ────
-                SizedBox(
-                  height: 130,
-                  width: double.infinity,
-                  child: Image.asset(
-                    widget.imagePath,
-                    fit: BoxFit.contain,         // keeps full product visible
-                    alignment: Alignment.center,
-                    errorBuilder: (_, __, ___) =>
-                        // ── Fallback: shade swatch circle ─────────────────
-                        Center(
-                          child: Container(
-                            width: 58,
-                            height: 58,
-                            decoration: BoxDecoration(
-                              color: widget.shadeColor,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: widget.shadeColor.withOpacity(0.4),
-                                  blurRadius: 14,
-                                  offset: const Offset(0, 5),
-                                )
-                              ],
-                            ),
+                    // Product image — fills the Expanded area, contains aspect
+                    Image.asset(
+                      widget.imagePath,
+                      fit: BoxFit.contain,
+                      alignment: Alignment.center,
+                      errorBuilder: (_, __, ___) => Center(
+                        child: Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: widget.shadeColor,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: widget.shadeColor.withOpacity(0.4),
+                                blurRadius: 14,
+                                offset: const Offset(0, 5),
+                              )
+                            ],
                           ),
                         ),
-                  ),
-                ),
-
-                // ── 🇱🇰 Local badge ────────────────────────────────────────
-                if (widget.isLocal)
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFD4A820),
-                        borderRadius: BorderRadius.circular(7),
-                      ),
-                      child: const Text('🇱🇰 Local',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700)),
-                    ),
-                  ),
-
-                // ── Wishlist button ────────────────────────────────────────
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: GestureDetector(
-                    onTap: () => setState(() => _wishlisted = !_wishlisted),
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 6)
-                        ],
-                      ),
-                      child: Icon(
-                        _wishlisted
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
-                        size: 14,
-                        color: _wishlisted
-                            ? const Color(0xFFE8708A)
-                            : const Color(0xFF9E8DA8),
                       ),
                     ),
-                  ),
-                ),
-              ],
-            ),
-          ),
 
-          // ── Info ──────────────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Tag pill
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: widget.shadeColor.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(widget.tag,
-                      style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          color: widget.shadeColor == const Color(0xFF1C1224) ||
-                                  widget.shadeColor == const Color(0xFF2C2040)
-                              ? const Color(0xFF9E8DA8)
-                              : widget.shadeColor)),
-                ),
-                const SizedBox(height: 6),
+                    // 🇱🇰 Local badge
+                    if (widget.isLocal)
+                      Positioned(
+                        top: 8,
+                        left: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFD4A820),
+                            borderRadius: BorderRadius.circular(7),
+                          ),
+                          child: const Text('🇱🇰 Local',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700)),
+                        ),
+                      ),
 
-                // Product name
-                Text(widget.name,
-                    style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1C1224)),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis),
-                const SizedBox(height: 2),
-
-                // Brand
-                Text(widget.brand,
-                    style:
-                        const TextStyle(fontSize: 11, color: Color(0xFF9E8DA8))),
-                const SizedBox(height: 8),
-
-                // Price + rating
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: Text(widget.price,
-                          style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFFC2516B)),
-                          overflow: TextOverflow.ellipsis),
+                    // Wishlist button
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: GestureDetector(
+                        onTap: () =>
+                            setState(() => _wishlisted = !_wishlisted),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 6)
+                            ],
+                          ),
+                          child: Icon(
+                            _wishlisted
+                                ? Icons.favorite_rounded
+                                : Icons.favorite_border_rounded,
+                            size: 14,
+                            color: _wishlisted
+                                ? const Color(0xFFE8708A)
+                                : const Color(0xFF9E8DA8),
+                          ),
+                        ),
+                      ),
                     ),
-                    Row(children: [
-                      const Icon(Icons.star_rounded,
-                          size: 12, color: Color(0xFFFFC107)),
-                      const SizedBox(width: 3),
-                      Text('${widget.rating}',
-                          style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF9E8DA8))),
-                    ]),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ],
+
+            // ── Info section (fixed height — never overflows) ───────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 7, 10, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Tag pill
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: widget.shadeColor.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(widget.tag,
+                        style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            color: widget.shadeColor ==
+                                        const Color(0xFF1C1224) ||
+                                    widget.shadeColor ==
+                                        const Color(0xFF2C2040)
+                                ? const Color(0xFF9E8DA8)
+                                : widget.shadeColor)),
+                  ),
+                  const SizedBox(height: 4),
+
+                  // Product name
+                  Text(widget.name,
+                      style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1C1224)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 2),
+
+                  // Brand
+                  Text(widget.brand,
+                      style: const TextStyle(
+                          fontSize: 11, color: Color(0xFF9E8DA8))),
+                  const SizedBox(height: 5),
+
+                  // Price + rating
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(widget.price,
+                            style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFFC2516B)),
+                            overflow: TextOverflow.ellipsis),
+                      ),
+                      Row(children: [
+                        const Icon(Icons.star_rounded,
+                            size: 12, color: Color(0xFFFFC107)),
+                        const SizedBox(width: 3),
+                        Text('${widget.rating}',
+                            style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF9E8DA8))),
+                      ]),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

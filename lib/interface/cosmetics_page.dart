@@ -188,7 +188,7 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
       'category': 'Eyes',
       'shade': Color(0xFF1C1224),
       'tag': 'Fan Fave',
-      'image': 'assets/images/cosmetics/intl/nyx_liner.webp',
+      'image': 'assets/images/cosmetics/intl/nyx_liner.jpg',
     },
     {
       'name': 'Lash Serum Mascara',
@@ -208,7 +208,7 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
       'category': 'Face',
       'shade': Color(0xFFE8C8A0),
       'tag': 'Pro',
-      'image': 'assets/images/cosmetics/intl/mufe_foundation.webp',
+      'image': 'assets/images/cosmetics/intl/mufe_foundation.png',
     },
     {
       'name': 'Gel Nail Polish',
@@ -590,7 +590,7 @@ class _CosmeticCardState extends State<_CosmeticCard> {
                     // Product image — fills the Expanded area, contains aspect
                     Image.asset(
                       widget.imagePath,
-                      fit: BoxFit.contain,
+                      fit:BoxFit.fill,
                       alignment: Alignment.center,
                       errorBuilder: (_, __, ___) => Center(
                         child: Container(

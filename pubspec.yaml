@@ -80,7 +80,10 @@ flutter:
     - assets/images/
     - assets/images/cosmetics/lk/
     - assets/images/cosmetics/intl/
-    
+    - assets/images/skincare/lk/
+    - assets/images/skincare/intl/
+    - assets/images/products/lk/
+    - assets/images/products/intl/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

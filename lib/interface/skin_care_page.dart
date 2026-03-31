@@ -1,5 +1,35 @@
 import 'package:flutter/material.dart';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ASSET FOLDER STRUCTURE — add your images here:
+//
+//   assets/images/skincare/
+//   ├── lk/
+//   │   ├── spaceylon_coconut_cleanser.jpg
+//   │   ├── siddhalepa_neem_wash.jpg
+//   │   ├── janet_papaya_wash.jpg
+//   │   ├── janet_aloe_toner.jpg
+//   │   ├── swabha_brightening_serum.jpg
+//   │   ├── dlas_vitc_serum.jpg
+//   │   ├── spaceylon_sandalwood_moist.jpg
+//   │   ├── british_oil_control.jpg
+//   │   ├── prevense_spf50.jpg
+//   │   └── velvet_body_lotion.jpg
+//   └── intl/
+//       ├── cerave_cleanser.jpg
+//       ├── klairs_toner.jpg
+//       ├── ordinary_niacinamide.jpg
+//       ├── neutrogena_ha.jpg
+//       ├── laroche_barrier.jpg
+//       ├── belif_moisturiser.jpg
+//       ├── eltamd_spf.jpg
+//       └── paulas_retinol.jpg
+//
+// pubspec.yaml:
+//   - assets/images/skincare/lk/
+//   - assets/images/skincare/intl/
+// ─────────────────────────────────────────────────────────────────────────────
+
 class SkinCarePage extends StatefulWidget {
   const SkinCarePage({super.key});
 
@@ -8,9 +38,7 @@ class SkinCarePage extends StatefulWidget {
 }
 
 class _SkinCarePageState extends State<SkinCarePage> {
-  // ── Colour tokens ─────────────────────────────────────────────────────────
   static const Color _rose        = Color(0xFFE8708A);
-  static const Color _roseDark    = Color(0xFFC2516B);
   static const Color _orchid      = Color(0xFFF8AFCB);
   static const Color _orchidDark  = Color.fromARGB(255, 255, 152, 191);
   static const Color _surface     = Color(0xFFFDF7FA);
@@ -20,9 +48,10 @@ class _SkinCarePageState extends State<SkinCarePage> {
 
   int _selectedSkinType = 0;
 
-  final List<String> _skinTypes = ['All', 'Oily', 'Dry', 'Combination', 'Sensitive', 'Normal'];
+  final List<String> _skinTypes = [
+    'All', 'Oily', 'Dry', 'Combination', 'Sensitive', 'Normal',
+  ];
 
-  // ── Daily routine steps (shared / universal) ──────────────────────────────
   final List<Map<String, dynamic>> _routineSteps = [
     {'step': '01', 'name': 'Cleanse',    'time': 'AM & PM', 'icon': Icons.water_drop_outlined, 'color': Color(0xFF7EB8D4)},
     {'step': '02', 'name': 'Tone',       'time': 'AM & PM', 'icon': Icons.spa_outlined,         'color': Color(0xFFB4D4A8)},
@@ -36,102 +65,92 @@ class _SkinCarePageState extends State<SkinCarePage> {
     {
       'name': 'Coconut Milk Cleanser',
       'brand': 'Spa Ceylon',
-      'price': 'Rs. 1,950',
-      'rating': 4.9,
+      'price': 'Rs. 1,950', 'rating': 4.9,
       'skinType': ['All', 'Dry', 'Sensitive', 'Normal'],
-      'tag': 'Step 1',
-      'tagColor': Color(0xFF7EB8D4),
+      'tag': 'Step 1', 'tagColor': Color(0xFF7EB8D4),
       'desc': 'Gentle Ayurvedic cleanser with raw coconut milk',
+      'image': 'assets/images/skincare/lk/spaceylon_coconut_cleanser.jpg',
     },
     {
       'name': 'Neem & Turmeric Face Wash',
       'brand': 'Siddhalepa',
-      'price': 'Rs. 480',
-      'rating': 4.6,
+      'price': 'Rs. 480', 'rating': 4.6,
       'skinType': ['All', 'Oily', 'Combination'],
-      'tag': 'Step 1',
-      'tagColor': Color(0xFF7EB8D4),
+      'tag': 'Step 1', 'tagColor': Color(0xFF7EB8D4),
       'desc': 'Traditional Ayurvedic formula for clear skin',
+      'image': 'assets/images/skincare/lk/siddhalepa_neem_wash.jpg',
     },
     {
       'name': 'Papaya Face Wash',
       'brand': 'Janet',
-      'price': 'Rs. 320',
-      'rating': 4.5,
+      'price': 'Rs. 320', 'rating': 4.5,
       'skinType': ['All', 'Normal', 'Combination'],
-      'tag': 'Step 1',
-      'tagColor': Color(0xFF7EB8D4),
+      'tag': 'Step 1', 'tagColor': Color(0xFF7EB8D4),
       'desc': 'Brightening papaya extract for a natural glow',
+      'image': 'assets/images/skincare/lk/janet_papaya_wash.jpg',
     },
     {
       'name': 'Aloe Vera Toner',
       'brand': 'Janet',
-      'price': 'Rs. 280',
-      'rating': 4.4,
+      'price': 'Rs. 280', 'rating': 4.4,
       'skinType': ['All', 'Sensitive', 'Dry'],
-      'tag': 'Step 2',
-      'tagColor': Color(0xFFB4D4A8),
+      'tag': 'Step 2', 'tagColor': Color(0xFFB4D4A8),
       'desc': 'Soothing aloe vera for balanced, calm skin',
+      'image': 'assets/images/skincare/lk/janet_aloe_toner.jpg',
     },
     {
       'name': 'Herbal Brightening Serum',
       'brand': 'Swabha Ceylon',
-      'price': 'Rs. 2,200',
-      'rating': 4.7,
+      'price': 'Rs. 2,200', 'rating': 4.7,
       'skinType': ['All', 'Normal', 'Dry'],
-      'tag': 'Step 3',
-      'tagColor': Color(0xFFF8AFCB),
+      'tag': 'Step 3', 'tagColor': Color(0xFFF8AFCB),
       'desc': 'Modern Ayurveda meets science for radiant skin',
+      'image': 'assets/images/skincare/lk/swabha_brightening_serum.jpg',
     },
     {
-      'name': 'D\'las Vitamin C Serum',
-      'brand': 'D\'las',
-      'price': 'Rs. 1,800',
-      'rating': 4.6,
+      'name': 'Nature\'s secret Vitamin C Serum',
+      'brand': 'Nature\'s Secret',
+      'price': 'Rs. 1,800', 'rating': 4.6,
       'skinType': ['All', 'Oily', 'Combination'],
-      'tag': 'Step 3',
-      'tagColor': Color(0xFFF8AFCB),
+      'tag': 'Step 3', 'tagColor': Color(0xFFF8AFCB),
       'desc': '100% natural organic ingredients from Sri Lankan fields',
+      'image': 'assets/images/skincare/lk/nature_secret_vitc_serum.jpg',
     },
     {
       'name': 'Sandalwood Moisturiser',
       'brand': 'Spa Ceylon',
-      'price': 'Rs. 2,400',
-      'rating': 4.8,
+      'price': 'Rs. 2,400', 'rating': 4.8,
       'skinType': ['All', 'Dry', 'Normal', 'Sensitive'],
-      'tag': 'Step 4',
-      'tagColor': Color(0xFFE8C4A0),
+      'tag': 'Step 4', 'tagColor': Color(0xFFE8C4A0),
       'desc': 'Rich sandalwood & coconut oil hydration ritual',
+      'image': 'assets/images/skincare/lk/spaceylon_sandalwood_moist.jpg',
     },
     {
       'name': 'Oil-Control Moisturiser',
       'brand': 'British Cosmetics',
-      'price': 'Rs. 1,100',
-      'rating': 4.5,
+      'price': 'Rs. 1,100', 'rating': 4.5,
       'skinType': ['Oily', 'Combination'],
-      'tag': 'Step 4',
-      'tagColor': Color(0xFFE8C4A0),
+      'tag': 'Step 4', 'tagColor': Color(0xFFE8C4A0),
       'desc': 'Designed for Sri Lankan humidity & oily skin',
+      'image': 'assets/images/skincare/lk/british_oil_control.jpg',
     },
     {
       'name': 'Daily SPF 50 Sunscreen',
       'brand': 'Prevense',
-      'price': 'Rs. 1,450',
-      'rating': 4.6,
+      'price': 'Rs. 1,450', 'rating': 4.6,
       'skinType': ['All', 'Sensitive'],
-      'tag': 'Step 5',
-      'tagColor': Color(0xFFF5E07A),
+      'tag': 'Step 5', 'tagColor': Color(0xFFF5E07A),
       'desc': 'Lightweight SPF suited to tropical climate',
+      'image': 'assets/images/skincare/lk/prevense_spf50.jpg',
     },
     {
       'name': 'Velvet Body Lotion',
       'brand': 'Velvet',
-      'price': 'Rs. 560',
-      'rating': 4.4,
+      'price': 'Rs. 560', 'rating': 4.4,
       'skinType': ['All', 'Dry', 'Normal'],
-      'tag': 'Body',
-      'tagColor': Color(0xFFD4C0E8),
+      'tag': 'Body', 'tagColor': Color(0xFFD4C0E8),
       'desc': 'Designed specifically for Sri Lankan skin & climate',
+      'image': 'assets/images/skincare/lk/velvet_body_lotion.jpg',
     },
   ];
 
@@ -140,82 +159,74 @@ class _SkinCarePageState extends State<SkinCarePage> {
     {
       'name': 'Gentle Foaming Cleanser',
       'brand': 'CeraVe',
-      'price': '\$16',
-      'rating': 4.9,
+      'price': '\$16', 'rating': 4.9,
       'skinType': ['All', 'Oily', 'Combination'],
-      'tag': 'Step 1',
-      'tagColor': Color(0xFF7EB8D4),
+      'tag': 'Step 1', 'tagColor': Color(0xFF7EB8D4),
       'desc': 'Dermatologist recommended with ceramides',
+      'image': 'assets/images/skincare/intl/cerave_cleanser.jpg',
     },
     {
       'name': 'Hydrating Toner',
       'brand': 'Klairs',
-      'price': '\$24',
-      'rating': 4.7,
+      'price': '\$24', 'rating': 4.7,
       'skinType': ['All', 'Dry', 'Sensitive', 'Normal'],
-      'tag': 'Step 2',
-      'tagColor': Color(0xFFB4D4A8),
+      'tag': 'Step 2', 'tagColor': Color(0xFFB4D4A8),
       'desc': 'K-beauty essential for glass skin',
+      'image': 'assets/images/skincare/intl/klairs_toner.jpg',
     },
     {
       'name': 'Niacinamide 10% + Zinc',
       'brand': 'The Ordinary',
-      'price': '\$8',
-      'rating': 4.8,
+      'price': '\$8', 'rating': 4.8,
       'skinType': ['Oily', 'Combination'],
-      'tag': 'Step 3',
-      'tagColor': Color(0xFFF8AFCB),
+      'tag': 'Step 3', 'tagColor': Color(0xFFF8AFCB),
       'desc': 'Pore-minimising & sebum-control serum',
+      'image': 'assets/images/skincare/intl/ordinary_niacinamide.jpg',
     },
     {
       'name': 'Hyaluronic Acid Serum',
       'brand': 'Neutrogena',
-      'price': '\$19',
-      'rating': 4.6,
+      'price': '\$19', 'rating': 4.6,
       'skinType': ['Dry', 'Normal', 'Sensitive'],
-      'tag': 'Step 3',
-      'tagColor': Color(0xFFF8AFCB),
+      'tag': 'Step 3', 'tagColor': Color(0xFFF8AFCB),
       'desc': 'Deep hydration with multi-weight HA',
+      'image': 'assets/images/skincare/intl/neutrogena_ha.jpg',
     },
     {
       'name': 'Barrier Repair Cream',
       'brand': 'La Roche-Posay',
-      'price': '\$30',
-      'rating': 4.9,
+      'price': '\$30', 'rating': 4.9,
       'skinType': ['Sensitive', 'Dry'],
-      'tag': 'Step 4',
-      'tagColor': Color(0xFFE8C4A0),
+      'tag': 'Step 4', 'tagColor': Color(0xFFE8C4A0),
       'desc': 'Clinically tested for reactive skin',
+      'image': 'assets/images/skincare/intl/laroche_barrier.jpg',
     },
     {
       'name': 'Oil-Free Moisturiser',
       'brand': 'Belif',
-      'price': '\$42',
-      'rating': 4.7,
+      'price': '\$42', 'rating': 4.7,
       'skinType': ['Oily', 'Combination', 'Normal'],
-      'tag': 'Step 4',
-      'tagColor': Color(0xFFE8C4A0),
+      'tag': 'Step 4', 'tagColor': Color(0xFFE8C4A0),
       'desc': 'Lightweight formula from comfrey herb',
+      'image': 'assets/images/skincare/intl/belif_moisturiser.jpg',
     },
     {
       'name': 'Mineral SPF 50',
       'brand': 'EltaMD',
-      'price': '\$36',
-      'rating': 4.8,
+      'price': '\$36', 'rating': 4.8,
       'skinType': ['All', 'Sensitive'],
-      'tag': 'Step 5',
-      'tagColor': Color(0xFFF5E07A),
+      'tag': 'Step 5', 'tagColor': Color(0xFFF5E07A),
       'desc': 'Zinc oxide broad-spectrum protection',
+      'image': 'assets/images/skincare/intl/eltamd_spf.jpg',
     },
     {
       'name': 'Retinol Night Serum',
       'brand': 'Paula\'s Choice',
-      'price': '\$52',
-      'rating': 4.7,
+      'price': '\$52', 'rating': 4.7,
       'skinType': ['Oily', 'Combination', 'Normal'],
-      'tag': 'PM Boost',
-      'tagColor': Color(0xFFB8A0C8),
+      'tag': 'PM Boost', 'tagColor': Color(0xFFB8A0C8),
       'desc': 'Encapsulated retinol for smoother skin',
+      'image': 'assets/images/skincare/intl/paulas_retinol.jpg',
     },
   ];
 
@@ -238,15 +249,11 @@ class _SkinCarePageState extends State<SkinCarePage> {
           _buildSliverAppBar(context),
           SliverToBoxAdapter(child: _buildSkinTypeSelector()),
           SliverToBoxAdapter(child: _buildRoutineSection()),
-
-          // ── 🇱🇰 Sri Lankan Section ─────────────────────────────────────────
           SliverToBoxAdapter(
             child: _BrandSectionHeader(
-              emoji: '🇱🇰',
-              title: 'Sri Lankan Brands',
+              emoji: '🇱🇰', title: 'Sri Lankan Brands',
               subtitle: 'Proudly local · Ayurvedic & natural heritage',
-              bgColor: const Color(0xFFFFF8E1),
-              accentColor: const Color(0xFFD4A820),
+              bgColor: const Color(0xFFFFF8E1), accentColor: const Color(0xFFD4A820),
             ),
           ),
           if (lkFiltered.isEmpty)
@@ -256,15 +263,11 @@ class _SkinCarePageState extends State<SkinCarePage> {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               sliver: _buildProductSliver(lkFiltered, isLocal: true),
             ),
-
-          // ── 🌍 International Section ───────────────────────────────────────
           SliverToBoxAdapter(
             child: _BrandSectionHeader(
-              emoji: '🌍',
-              title: 'International Brands',
+              emoji: '🌍', title: 'International Brands',
               subtitle: 'Science-backed · globally trusted',
-              bgColor: const Color(0xFFEEF4FF),
-              accentColor: const Color(0xFF5A7AB8),
+              bgColor: const Color(0xFFEEF4FF), accentColor: const Color(0xFF5A7AB8),
             ),
           ),
           if (intlFiltered.isEmpty)
@@ -279,30 +282,23 @@ class _SkinCarePageState extends State<SkinCarePage> {
     );
   }
 
-  // ── Sliver App Bar ──────────────────────────────────────────────────────────
   Widget _buildSliverAppBar(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 205,
-      pinned: true,
-      backgroundColor: _surface,
+      expandedHeight: 205, pinned: true, backgroundColor: _surface,
       leading: GestureDetector(
         onTap: () => Navigator.pop(context),
         child: Container(
           margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white, borderRadius: BorderRadius.circular(12),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8)],
-          ),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8)]),
           child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: _textPrimary),
         ),
       ),
       actions: [
         Container(
           margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white, borderRadius: BorderRadius.circular(12),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8)],
-          ),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8)]),
           child: IconButton(
             icon: const Icon(Icons.face_retouching_natural_rounded, size: 20, color: _textPrimary),
             onPressed: () {},
@@ -312,10 +308,8 @@ class _SkinCarePageState extends State<SkinCarePage> {
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFE8F4F8), Color(0xFFFDF7FA)],
-              begin: Alignment.topCenter, end: Alignment.bottomCenter,
-            ),
+            gradient: LinearGradient(colors: [Color(0xFFE8F4F8), Color(0xFFFDF7FA)],
+                begin: Alignment.topCenter, end: Alignment.bottomCenter),
           ),
           child: SafeArea(
             child: Padding(
@@ -331,16 +325,16 @@ class _SkinCarePageState extends State<SkinCarePage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text('🌿 SKIN CARE',
-                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700,
-                          color: Color(0xFF5A9AB8), letterSpacing: 1.2)),
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700,
+                            color: Color(0xFF5A9AB8), letterSpacing: 1.2)),
                   ),
                   const SizedBox(height: 6),
                   const Text('Routines Tailored\nTo You',
-                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800,
-                        color: _textPrimary, height: 1.2, letterSpacing: -0.5)),
+                      style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800,
+                          color: _textPrimary, height: 1.2, letterSpacing: -0.5)),
                   const SizedBox(height: 6),
                   Text('Local remedies · global science',
-                    style: TextStyle(fontSize: 13, color: _textMuted)),
+                      style: TextStyle(fontSize: 13, color: _textMuted)),
                 ],
               ),
             ),
@@ -350,16 +344,15 @@ class _SkinCarePageState extends State<SkinCarePage> {
     );
   }
 
-  // ── Skin Type Selector ──────────────────────────────────────────────────────
   Widget _buildSkinTypeSelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
-          child: const Text('Filter by Skin Type',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700,
-                color: _textPrimary, letterSpacing: -0.2)),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 10),
+          child: Text('Filter by Skin Type',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700,
+                  color: _textPrimary, letterSpacing: -0.2)),
         ),
         SizedBox(
           height: 44,
@@ -376,8 +369,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
                   margin: const EdgeInsets.only(right: 8),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   decoration: BoxDecoration(
-                    gradient: active
-                        ? const LinearGradient(colors: [_rose, _orchid]) : null,
+                    gradient: active ? const LinearGradient(colors: [_rose, _orchid]) : null,
                     color: active ? null : _card,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [BoxShadow(
@@ -386,8 +378,8 @@ class _SkinCarePageState extends State<SkinCarePage> {
                     )],
                   ),
                   child: Text(_skinTypes[i],
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
-                        color: active ? Colors.white : _textMuted)),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
+                          color: active ? Colors.white : _textMuted)),
                 ),
               );
             },
@@ -398,7 +390,6 @@ class _SkinCarePageState extends State<SkinCarePage> {
     );
   }
 
-  // ── Routine Carousel ────────────────────────────────────────────────────────
   Widget _buildRoutineSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -406,8 +397,8 @@ class _SkinCarePageState extends State<SkinCarePage> {
         const Padding(
           padding: EdgeInsets.fromLTRB(16, 16, 16, 10),
           child: Text('Daily Routine Steps',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700,
-                color: _textPrimary, letterSpacing: -0.2)),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700,
+                  color: _textPrimary, letterSpacing: -0.2)),
         ),
         SizedBox(
           height: 125,
@@ -442,17 +433,17 @@ class _SkinCarePageState extends State<SkinCarePage> {
                               color: step['color'] as Color),
                         ),
                         Text(step['step'] as String,
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800,
-                              color: (step['color'] as Color).withOpacity(0.5))),
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800,
+                                color: (step['color'] as Color).withOpacity(0.5))),
                       ],
                     ),
                     const Spacer(),
                     Text(step['name'] as String,
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
-                          color: _textPrimary)),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
+                            color: _textPrimary)),
                     const SizedBox(height: 2),
                     Text(step['time'] as String,
-                      style: const TextStyle(fontSize: 10, color: _textMuted)),
+                        style: const TextStyle(fontSize: 10, color: _textMuted)),
                   ],
                 ),
               );
@@ -464,7 +455,6 @@ class _SkinCarePageState extends State<SkinCarePage> {
     );
   }
 
-  // ── Product Sliver (list tiles) ─────────────────────────────────────────────
   Widget _buildProductSliver(List<Map<String, dynamic>> items, {required bool isLocal}) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
@@ -476,6 +466,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
           tag: items[i]['tag'] as String,
           tagColor: items[i]['tagColor'] as Color,
           desc: items[i]['desc'] as String,
+          imagePath: items[i]['image'] as String,
           isLocal: isLocal,
         ),
         childCount: items.length,
@@ -487,10 +478,9 @@ class _SkinCarePageState extends State<SkinCarePage> {
 // ── Shared Brand Section Header ───────────────────────────────────────────────
 class _BrandSectionHeader extends StatelessWidget {
   const _BrandSectionHeader({
-    required this.emoji, required this.title,
-    required this.subtitle, required this.bgColor, required this.accentColor,
+    required this.emoji, required this.title, required this.subtitle,
+    required this.bgColor, required this.accentColor,
   });
-
   final String emoji, title, subtitle;
   final Color bgColor, accentColor;
 
@@ -503,26 +493,20 @@ class _BrandSectionHeader extends StatelessWidget {
         color: bgColor, borderRadius: BorderRadius.circular(16),
         border: Border.all(color: accentColor.withOpacity(0.2), width: 1.2),
       ),
-      child: Row(
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 24)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700,
-                    color: accentColor)),
-                const SizedBox(height: 2),
-                Text(subtitle, style: TextStyle(fontSize: 11,
-                    color: accentColor.withOpacity(0.75))),
-              ],
-            ),
-          ),
-          Text('See all', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
-              color: accentColor)),
-        ],
-      ),
+      child: Row(children: [
+        Text(emoji, style: const TextStyle(fontSize: 24)),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700,
+                color: accentColor)),
+            const SizedBox(height: 2),
+            Text(subtitle, style: TextStyle(fontSize: 11, color: accentColor.withOpacity(0.75))),
+          ]),
+        ),
+        Text('See all', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
+            color: accentColor)),
+      ]),
     );
   }
 }
@@ -530,27 +514,25 @@ class _BrandSectionHeader extends StatelessWidget {
 // ── Empty Filter ──────────────────────────────────────────────────────────────
 class _EmptyFilter extends StatelessWidget {
   const _EmptyFilter();
-
   @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-      child: Center(child: Text('No products match this skin type',
-          style: TextStyle(fontSize: 13, color: Color(0xFF9E8DA8)))),
-    );
-  }
+  Widget build(BuildContext context) => const Padding(
+    padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+    child: Center(child: Text('No products match this skin type',
+        style: TextStyle(fontSize: 13, color: Color(0xFF9E8DA8)))),
+  );
 }
 
 // ── Skin Product Tile ─────────────────────────────────────────────────────────
 class _SkinProductTile extends StatefulWidget {
   const _SkinProductTile({
-    required this.name,    required this.brand,
-    required this.price,   required this.rating,
-    required this.tag,     required this.tagColor,
-    required this.desc,    required this.isLocal,
+    required this.name,      required this.brand,
+    required this.price,     required this.rating,
+    required this.tag,       required this.tagColor,
+    required this.desc,      required this.imagePath,
+    required this.isLocal,
   });
 
-  final String name, brand, price, tag, desc;
+  final String name, brand, price, tag, desc, imagePath;
   final double rating;
   final Color tagColor;
   final bool isLocal;
@@ -566,7 +548,6 @@ class _SkinProductTileState extends State<_SkinProductTile> {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white, borderRadius: BorderRadius.circular(18),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05),
@@ -574,27 +555,54 @@ class _SkinProductTileState extends State<_SkinProductTile> {
       ),
       child: Row(
         children: [
-          // Swatch dot
-          Container(
-            width: 52, height: 52,
-            decoration: BoxDecoration(
-              color: widget.tagColor.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Center(
-              child: Container(
-                width: 26, height: 26,
-                decoration: BoxDecoration(color: widget.tagColor, shape: BoxShape.circle),
+          // ── Product image thumbnail ───────────────────────────────────────
+          ClipRRect(
+            borderRadius: const BorderRadius.horizontal(left: Radius.circular(18)),
+            child: SizedBox(
+              width: 80, height: 90,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Gradient background behind image
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [widget.tagColor.withOpacity(0.25),
+                          widget.tagColor.withOpacity(0.07)],
+                        begin: Alignment.topLeft, end: Alignment.bottomRight,
+                      ),
+                    ),
+                  ),
+                  // Product image
+                  Image.asset(
+                    widget.imagePath,
+                    fit: BoxFit.contain,
+                    alignment: Alignment.center,
+                    errorBuilder: (_, __, ___) => Center(
+                      child: Container(
+                        width: 36, height: 36,
+                        decoration: BoxDecoration(
+                          color: widget.tagColor,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(width: 12),
+
+          // ── Text content ──────────────────────────────────────────────────
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 8, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Tags row
+                  Row(children: [
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                       decoration: BoxDecoration(
@@ -602,73 +610,77 @@ class _SkinProductTileState extends State<_SkinProductTile> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(widget.tag,
-                        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700,
-                            color: widget.tagColor == const Color(0xFFF5E07A)
-                                ? const Color(0xFF9E8A2A) : widget.tagColor)),
+                          style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700,
+                              color: widget.tagColor == const Color(0xFFF5E07A)
+                                  ? const Color(0xFF9E8A2A) : widget.tagColor)),
                     ),
                     if (widget.isLocal) ...[
                       const SizedBox(width: 5),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4A820),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
+                            color: const Color(0xFFD4A820),
+                            borderRadius: BorderRadius.circular(6)),
                         child: const Text('🇱🇰 Local',
-                          style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700,
-                              color: Colors.white)),
+                            style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700,
+                                color: Colors.white)),
                       ),
                     ],
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Text(widget.name,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700,
-                      color: Color(0xFF1C1224))),
-                const SizedBox(height: 2),
-                Text(widget.brand,
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF9E8DA8))),
-                const SizedBox(height: 3),
-                Text(widget.desc,
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF9E8DA8), height: 1.3),
-                  maxLines: 1, overflow: TextOverflow.ellipsis),
-                const SizedBox(height: 6),
-                Row(children: [
-                  const Icon(Icons.star_rounded, size: 12, color: Color(0xFFFFC107)),
-                  const SizedBox(width: 3),
-                  Text('${widget.rating}',
-                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-                        color: Color(0xFF9E8DA8))),
-                ]),
-              ],
+                  ]),
+                  const SizedBox(height: 5),
+                  Text(widget.name,
+                      style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700,
+                          color: Color(0xFF1C1224))),
+                  const SizedBox(height: 2),
+                  Text(widget.brand,
+                      style: const TextStyle(fontSize: 11, color: Color(0xFF9E8DA8))),
+                  const SizedBox(height: 3),
+                  Text(widget.desc,
+                      style: const TextStyle(fontSize: 11, color: Color(0xFF9E8DA8), height: 1.3),
+                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 6),
+                  Row(children: [
+                    const Icon(Icons.star_rounded, size: 12, color: Color(0xFFFFC107)),
+                    const SizedBox(width: 3),
+                    Text('${widget.rating}',
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+                            color: Color(0xFF9E8DA8))),
+                  ]),
+                ],
+              ),
             ),
           ),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(widget.price,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800,
-                    color: Color(0xFFC2516B))),
-              const SizedBox(height: 8),
-              GestureDetector(
-                onTap: () => setState(() => _added = !_added),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(7),
-                  decoration: BoxDecoration(
-                    color: _added ? const Color(0xFFE8708A)
-                        : const Color(0xFFF8AFCB).withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    _added ? Icons.check_rounded : Icons.add_rounded,
-                    size: 16,
-                    color: _added ? Colors.white : const Color(0xFFE8708A),
+
+          // ── Price + add button ────────────────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 12, 12, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(widget.price,
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800,
+                        color: Color(0xFFC2516B))),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () => setState(() => _added = !_added),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: _added ? const Color(0xFFE8708A)
+                          : const Color(0xFFF8AFCB).withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      _added ? Icons.check_rounded : Icons.add_rounded,
+                      size: 16,
+                      color: _added ? Colors.white : const Color(0xFFE8708A),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

@@ -173,6 +173,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     // ── Action buttons ───────────────────────────────────────
                     _buildActionButtons(),
+                    const SizedBox(height: 28),
+                    _sectionLabel("Beauty Profile"),
+                    const SizedBox(height: 14),
+                    _buildBeautyProfile(),
                   ],
                 ),
               ),
@@ -180,6 +184,161 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ),
+    );
+  }
+
+    Widget _buildBeautyProfile() {
+    final u = UserData.instance;
+    return ListenableBuilder(
+      listenable: u,
+      builder: (_, __) {
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 12,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Age row ──────────────────────────────────────────────────
+              if (u.age != null)
+                _beautyRow(
+                  Icons.cake_outlined,
+                  "Age",
+                  "${u.age} years old",
+                ),
+              if (u.age != null) const SizedBox(height: 12),
+ 
+              // ── Skin type row ─────────────────────────────────────────────
+              if (u.skinType.isNotEmpty)
+                _beautyRow(
+                  Icons.face_retouching_natural_rounded,
+                  "Skin Type",
+                  u.skinType,
+                ),
+              if (u.skinType.isNotEmpty) const SizedBox(height: 12),
+ 
+              // ── Skin concerns ─────────────────────────────────────────────
+              if (u.skinConcerns.isNotEmpty) ...[
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8AFCB).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.warning_amber_rounded,
+                          size: 16,
+                          color: Color.fromARGB(255, 255, 152, 191)),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      "Skin Concerns",
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1C1224),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: u.skinConcerns.map((c) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFE8708A), Color(0xFFF8AFCB)],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        c,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+ 
+              // Fallback: no data yet
+              if (u.age == null &&
+                  u.skinType.isEmpty &&
+                  u.skinConcerns.isEmpty)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      "No beauty profile yet.\nComplete your profile to get personalised tips!",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF9E8DA8),
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+ 
+  // ── Helper row ────────────────────────────────────────────────────────────────
+  Widget _beautyRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(7),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8AFCB).withOpacity(0.12),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon,
+              size: 16,
+              color: const Color.fromARGB(255, 255, 152, 191)),
+        ),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                  fontSize: 11,
+                  color: Color(0xFF9E8DA8),
+                  fontWeight: FontWeight.w600),
+            ),
+            Text(
+              value,
+              style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF1C1224),
+                  fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

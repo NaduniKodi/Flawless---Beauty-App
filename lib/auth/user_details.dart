@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:flawless_beauty_app/services/user_data.dart';
 import 'package:flawless_beauty_app/interface/homepage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 
 class UserDetailsPage extends StatefulWidget {
   const UserDetailsPage({super.key});
@@ -82,10 +84,10 @@ class _UserDetailsPageState extends State<UserDetailsPage>
   }
 
   // ── Submit ────────────────────────────────────────────────────────────────────
-  void _submit() {
+    Future<void> _submit() async {
     final name = _nameCtrl.text.trim();
     final age  = int.tryParse(_ageCtrl.text.trim());
-
+ 
     if (name.isEmpty) {
       _snack("Please enter your name");
       return;
@@ -94,31 +96,49 @@ class _UserDetailsPageState extends State<UserDetailsPage>
       _snack("Please select your skin type");
       return;
     }
-
+ 
     setState(() => _isLoading = true);
-
+ 
+    // 1. Save to local UserData singleton (drives UI in real-time)
     UserData.instance.updateDetails(
       name:         name,
       age:          age,
       skinType:     _selectedSkinType,
       skinConcerns: _selectedConcerns.toList(),
     );
-
-    // Simulate a brief save delay for polish
-    Future.delayed(const Duration(milliseconds: 600), () {
-      if (!mounted) return;
-      Navigator.pushAndRemoveUntil(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const HomePage(),
-          transitionsBuilder: (_, anim, __, child) =>
-              FadeTransition(opacity: anim, child: child),
+ 
+    // 2. Mark profile as complete in Supabase user_metadata.
+    //    This is what main.dart's _isNewUser() reads so returning users
+    //    skip onboarding and go straight to HomePage.
+    try {
+      await Supabase.instance.client.auth.updateUser(
+        UserAttributes(
+          data: {
+            'profile_complete': true,
+            'skin_type':        _selectedSkinType,
+            'skin_concerns':    _selectedConcerns.toList(),
+            'age':              age,
+            'full_name':        name,
+          },
         ),
-        (_) => false,
       );
-    });
+    } catch (_) {
+      // Non-fatal — app still works, user just gets onboarding again next time.
+    }
+ 
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (!mounted) return;
+ 
+    Navigator.pushAndRemoveUntil(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => const HomePage(),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+      ),
+      (_) => false,
+    );
   }
-
   void _snack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(msg),

@@ -27,10 +27,8 @@ class _LoginPageState extends State<LoginPage>
   final _passwordCtrl = TextEditingController();
   final _supabase     = Supabase.instance.client;
 
-  bool _isLoading            = false;
-  bool _obscurePassword      = true;
-  bool _showResendBanner     = false;
-  bool _resendLoading        = false;
+  bool _isLoading       = false;
+  bool _obscurePassword = true;
 
   late final AnimationController _ctrl;
   late final Animation<double>   _fade;
@@ -65,7 +63,7 @@ class _LoginPageState extends State<LoginPage>
       return;
     }
 
-    setState(() { _isLoading = true; _showResendBanner = false; });
+    setState(() => _isLoading = true);
 
     try {
       final response = await _supabase.auth
@@ -76,30 +74,10 @@ class _LoginPageState extends State<LoginPage>
         _snack("Login failed. Please try again.");
       }
     } catch (e) {
-      if (AuthErrorHandler.isUnconfirmed(e)) {
-        setState(() => _showResendBanner = true);
-      } else {
-        _snack(AuthErrorHandler.message(e));
-      }
+      _snack(AuthErrorHandler.message(e));
     }
 
     if (mounted) setState(() => _isLoading = false);
-  }
-
-  // ── Resend confirmation ───────────────────────────────────────────────────────
-  Future<void> _resendConfirmation() async {
-    final email = _emailCtrl.text.trim();
-    if (email.isEmpty) { _snack("Enter your email first"); return; }
-
-    setState(() => _resendLoading = true);
-    try {
-      await _supabase.auth.resend(type: OtpType.signup, email: email);
-      _snack("Confirmation email resent — check your inbox!");
-      setState(() => _showResendBanner = false);
-    } catch (e) {
-      _snack(AuthErrorHandler.message(e));
-    }
-    if (mounted) setState(() => _resendLoading = false);
   }
 
   // ── Google sign-in ────────────────────────────────────────────────────────────
@@ -112,23 +90,35 @@ class _LoginPageState extends State<LoginPage>
             '545145256802-rsu335sc2o6ku7ah1vhc3ej62erf9ria.apps.googleusercontent.com',
       );
       final googleUser = await googleSignIn.signIn();
-      if (googleUser == null) { setState(() => _isLoading = false); return; }
+      if (googleUser == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
 
       final googleAuth = await googleUser.authentication;
       final idToken    = googleAuth.idToken;
-      if (idToken == null) { _snack("Failed: No ID token"); return; }
+      if (idToken == null) {
+        _snack("Failed: No ID token");
+        setState(() => _isLoading = false);
+        return;
+      }
 
       final response = await _supabase.auth.signInWithIdToken(
-        provider: OAuthProvider.google, idToken: idToken,
+        provider: OAuthProvider.google,
+        idToken:  idToken,
       );
-      if (response.user != null) _goHome();
-      else _snack("Google sign-in failed");
+      if (response.user != null) {
+        _goHome();
+      } else {
+        _snack("Google sign-in failed");
+      }
     } catch (e) {
       _snack(AuthErrorHandler.message(e));
     }
     if (mounted) setState(() => _isLoading = false);
   }
 
+  // ── Navigation ────────────────────────────────────────────────────────────────
   void _goHome() => Navigator.pushAndRemoveUntil(
         context,
         PageRouteBuilder(
@@ -139,13 +129,17 @@ class _LoginPageState extends State<LoginPage>
         (_) => false,
       );
 
-  void _snack(String msg) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content:         Text(msg),
-        backgroundColor: _orchidDark,
-        behavior:        SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin:          const EdgeInsets.all(16),
-      ));
+  // ── Snackbar ──────────────────────────────────────────────────────────────────
+  void _snack(String msg) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content:         Text(msg),
+          backgroundColor: _orchidDark,
+          behavior:        SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
 
   // ── Build ─────────────────────────────────────────────────────────────────────
   @override
@@ -166,12 +160,7 @@ class _LoginPageState extends State<LoginPage>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ── Unconfirmed-email banner ───────────────────────────
-                      if (_showResendBanner) ...[
-                        _buildConfirmationBanner(),
-                        const SizedBox(height: 20),
-                      ],
-
+                      // ── Email ──────────────────────────────────────────────
                       _fieldLabel("Email Address"),
                       const SizedBox(height: 8),
                       _buildTextField(
@@ -182,6 +171,7 @@ class _LoginPageState extends State<LoginPage>
                       ),
                       const SizedBox(height: 18),
 
+                      // ── Password ───────────────────────────────────────────
                       _fieldLabel("Password"),
                       const SizedBox(height: 8),
                       _buildTextField(
@@ -194,43 +184,55 @@ class _LoginPageState extends State<LoginPage>
                             _obscurePassword
                                 ? Icons.visibility_off_outlined
                                 : Icons.visibility_outlined,
-                            color: _textMuted, size: 18,
+                            color: _textMuted,
+                            size:  18,
                           ),
-                          onPressed: () =>
-                              setState(() => _obscurePassword = !_obscurePassword),
+                          onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword),
                         ),
                       ),
 
+                      // ── Forgot password ────────────────────────────────────
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () {},
-                          child: const Text("Forgot Password?",
-                              style: TextStyle(
-                                  color: _orchidDark,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600)),
+                          onPressed: () {}, // TODO: forgot-password flow
+                          child: const Text(
+                            "Forgot Password?",
+                            style: TextStyle(
+                              color:      _orchidDark,
+                              fontSize:   13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),
 
+                      // ── Sign In button ─────────────────────────────────────
                       _buildPrimaryButton(
-                        label: "Sign In",
-                        onTap: _isLoading ? null : _signInWithEmail,
+                        label:     "Sign In",
+                        onTap:     _isLoading ? null : _signInWithEmail,
                         isLoading: _isLoading,
                       ),
                       const SizedBox(height: 24),
 
                       _buildDivider(),
                       const SizedBox(height: 20),
+
+                      // ── Google button ──────────────────────────────────────
                       _buildGoogleButton(),
                       const SizedBox(height: 32),
 
+                      // ── Sign up link ───────────────────────────────────────
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text("Don't have an account? ",
-                              style: TextStyle(fontSize: 14, color: _textMuted)),
+                          Text(
+                            "Don't have an account? ",
+                            style: TextStyle(
+                                fontSize: 14, color: _textMuted),
+                          ),
                           GestureDetector(
                             onTap: () => Navigator.pushReplacement(
                               context,
@@ -238,14 +240,18 @@ class _LoginPageState extends State<LoginPage>
                                 pageBuilder: (_, __, ___) =>
                                     const CreateAccountPage(),
                                 transitionsBuilder: (_, anim, __, child) =>
-                                    FadeTransition(opacity: anim, child: child),
+                                    FadeTransition(
+                                        opacity: anim, child: child),
                               ),
                             ),
-                            child: const Text("Sign Up",
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                    color: _rose)),
+                            child: const Text(
+                              "Sign Up",
+                              style: TextStyle(
+                                fontSize:   14,
+                                fontWeight: FontWeight.w700,
+                                color:      _rose,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -260,62 +266,7 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  // ── Confirmation banner ───────────────────────────────────────────────────────
-  Widget _buildConfirmationBanner() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color:  const Color(0xFFFFF3E0),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFFFCC80), width: 1.2),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.mark_email_unread_outlined,
-                  color: Color(0xFFE65100), size: 18),
-              SizedBox(width: 8),
-              Text("Email not confirmed",
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFFE65100))),
-            ],
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            "Check your inbox for a confirmation link,\nor tap below to resend it.",
-            style: TextStyle(fontSize: 13, color: Color(0xFF5D4037), height: 1.4),
-          ),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: _resendLoading ? null : _resendConfirmation,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-              decoration: BoxDecoration(
-                color:        const Color(0xFFE65100),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: _resendLoading
-                  ? const SizedBox(
-                      width: 16, height: 16,
-                      child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2))
-                  : const Text("Resend Confirmation Email",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── Reusable widgets ──────────────────────────────────────────────────────────
+  // ── Gradient header ───────────────────────────────────────────────────────────
   Widget _buildGradientHeader() => Container(
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(24, 60, 24, 30),
@@ -343,28 +294,37 @@ class _LoginPageState extends State<LoginPage>
               ),
             ),
             const SizedBox(height: 16),
-            const Text("Welcome Back ✨",
-                style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: -0.5)),
+            const Text(
+              "Welcome Back ✨",
+              style: TextStyle(
+                fontSize:   26,
+                fontWeight: FontWeight.w800,
+                color:      Colors.white,
+                letterSpacing: -0.5,
+              ),
+            ),
             const SizedBox(height: 5),
-            Text("Sign in to continue your beauty journey",
-                style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white.withOpacity(0.85))),
+            Text(
+              "Sign in to continue your beauty journey",
+              style: TextStyle(
+                  fontSize: 14, color: Colors.white.withOpacity(0.85)),
+            ),
           ],
         ),
       );
 
-  Widget _fieldLabel(String text) => Text(text,
-      style: const TextStyle(
-          fontSize: 13,
+  // ── Field label ───────────────────────────────────────────────────────────────
+  Widget _fieldLabel(String text) => Text(
+        text,
+        style: const TextStyle(
+          fontSize:   13,
           fontWeight: FontWeight.w700,
-          color: _textMuted,
-          letterSpacing: 0.4));
+          color:      _textMuted,
+          letterSpacing: 0.4,
+        ),
+      );
 
+  // ── Text field ────────────────────────────────────────────────────────────────
   Widget _buildTextField({
     required TextEditingController controller,
     required String   hint,
@@ -379,9 +339,10 @@ class _LoginPageState extends State<LoginPage>
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-                color:  Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4))
+              color:  Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: TextField(
@@ -391,33 +352,39 @@ class _LoginPageState extends State<LoginPage>
           style: const TextStyle(fontSize: 14, color: _textPrimary),
           decoration: InputDecoration(
             hintText:  hint,
-            hintStyle: TextStyle(fontSize: 14, color: _textMuted.withOpacity(0.6)),
+            hintStyle: TextStyle(
+                fontSize: 14, color: _textMuted.withOpacity(0.6)),
             prefixIcon: Container(
               margin:  const EdgeInsets.all(12),
               padding: const EdgeInsets.all(7),
               decoration: BoxDecoration(
-                  color: _orchid.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(10)),
+                color:  _orchid.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: Icon(icon, size: 16, color: _orchidDark),
             ),
             suffixIcon: suffix,
             border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none),
+              borderRadius: BorderRadius.circular(16),
+              borderSide:   BorderSide.none,
+            ),
             focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: _orchid, width: 1.5)),
-            filled: true, fillColor: Colors.white,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: _orchid, width: 1.5),
+            ),
+            filled:         true,
+            fillColor:      Colors.white,
+            contentPadding: const EdgeInsets.symmetric(
+                vertical: 16, horizontal: 14),
           ),
         ),
       );
 
+  // ── Primary gradient button ───────────────────────────────────────────────────
   Widget _buildPrimaryButton({
-    required String label,
+    required String        label,
     required VoidCallback? onTap,
-    bool isLoading = false,
+    bool                   isLoading = false,
   }) =>
       GestureDetector(
         onTap: onTap,
@@ -426,42 +393,58 @@ class _LoginPageState extends State<LoginPage>
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-                colors: [Color(0xFFE96A85), _orchid],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight),
+              colors: [Color(0xFFE96A85), _orchid],
+              begin:  Alignment.centerLeft,
+              end:    Alignment.centerRight,
+            ),
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                  color: _rose.withOpacity(0.35),
-                  blurRadius: 18,
-                  offset: const Offset(0, 7))
+                color:  _rose.withOpacity(0.35),
+                blurRadius: 18,
+                offset: const Offset(0, 7),
+              ),
             ],
           ),
           child: Center(
             child: isLoading
                 ? const SizedBox(
-                    width: 22, height: 22,
-                    child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2.5))
-                : Text(label,
+                    width:  22,
+                    height: 22,
+                    child:  CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2.5),
+                  )
+                : Text(
+                    label,
                     style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.3)),
+                      color:      Colors.white,
+                      fontSize:   16,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
           ),
         ),
       );
 
-  Widget _buildDivider() => Row(children: [
-        Expanded(child: Divider(color: _orchid.withOpacity(0.4), thickness: 1)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          child: Text("or", style: TextStyle(fontSize: 13, color: _textMuted)),
-        ),
-        Expanded(child: Divider(color: _orchid.withOpacity(0.4), thickness: 1)),
-      ]);
+  // ── Divider ───────────────────────────────────────────────────────────────────
+  Widget _buildDivider() => Row(
+        children: [
+          Expanded(
+              child: Divider(
+                  color: _orchid.withOpacity(0.4), thickness: 1)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Text("or",
+                style: TextStyle(fontSize: 13, color: _textMuted)),
+          ),
+          Expanded(
+              child: Divider(
+                  color: _orchid.withOpacity(0.4), thickness: 1)),
+        ],
+      );
 
+  // ── Google button ─────────────────────────────────────────────────────────────
   Widget _buildGoogleButton() => GestureDetector(
         onTap: _isLoading ? null : _signInWithGoogle,
         child: Container(
@@ -470,12 +453,14 @@ class _LoginPageState extends State<LoginPage>
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: _orchid.withOpacity(0.4), width: 1.2),
+            border: Border.all(
+                color: _orchid.withOpacity(0.4), width: 1.2),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3))
+                color:  Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
             ],
           ),
           child: Row(
@@ -483,11 +468,14 @@ class _LoginPageState extends State<LoginPage>
             children: [
               Image.asset("assets/images/google.png", height: 22),
               const SizedBox(width: 10),
-              const Text("Continue with Google",
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: _textPrimary)),
+              const Text(
+                "Continue with Google",
+                style: TextStyle(
+                  fontSize:   15,
+                  fontWeight: FontWeight.w600,
+                  color:      _textPrimary,
+                ),
+              ),
             ],
           ),
         ),

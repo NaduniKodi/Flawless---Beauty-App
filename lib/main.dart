@@ -1,12 +1,8 @@
+import 'package:flawless_beauty_app/auth/user_details.dart';
 import 'package:flawless_beauty_app/interface/intro_page.dart';
-import 'package:flawless_beauty_app/interface/settings_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flawless_beauty_app/auth/login_page.dart';
-import 'package:flawless_beauty_app/auth/create_account_page.dart';
 import 'package:flawless_beauty_app/interface/homepage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flawless_beauty_app/auth/create_account_page.dart';
-import 'package:flawless_beauty_app/screens/aicamera_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,125 +11,109 @@ Future<void> main() async {
     url: 'https://vejkddtyqkpbpttdapop.supabase.co',
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlamtkZHR5cWtwYnB0dGRhcG9wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NzMzMTgsImV4cCI6MjA3ODE0OTMxOH0.bqpj8ZPZ4KRUOvGbpRTFZ0IbSdqrVgZJ7rUkWcxTEuQ',
+    authOptions: const FlutterAuthClientOptions(
+      authFlowType: AuthFlowType.pkce, // required for deep-link email confirm
+    ),
   );
 
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flawless beauty app',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      debugShowCheckedModeBanner: false,
-      home: IntroPage(),
-    );
-  }
+  State<MyApp> createState() => _MyAppState();
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class _MyAppState extends State<MyApp> {
+  final _navigatorKey = GlobalKey<NavigatorState>();
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+  void initState() {
+    super.initState();
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final event   = data.event;
+      final session = data.session;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      // ── User tapped the confirmation link in their email ───────────────────
+      // AuthChangeEvent.signedIn fires both on email-confirm deep-link AND on
+      // normal password login. We only want to redirect to UserDetailsPage when
+      // coming from the email confirmation link (passwordRecovery / initial
+      // signup confirm). We detect the email-confirm case by checking that the
+      // navigator is currently NOT already showing the app's main pages.
+      //
+      // The cleanest way: only act on signedIn when there is no current route
+      // deeper than IntroPage, i.e. we came from a cold deep-link open.
+      if (event == AuthChangeEvent.signedIn && session != null) {
+        final nav = _navigatorKey.currentState;
+        if (nav == null) return;
+
+        // If the app was opened via the confirmation deep-link (cold start),
+        // the navigator stack is just IntroPage. Push the user forward.
+        // If the user logged in normally via LoginPage, LoginPage already
+        // handles navigation itself — but this listener may also fire.
+        // Using pushAndRemoveUntil here is safe: if they're already on
+        // HomePage the transition is instant and harmless.
+
+        // Check whether the user has completed their beauty profile:
+        // UserData.instance.skinType will be empty for brand-new users.
+        // For returning users (normal login), their profile would have been
+        // loaded. For new email-confirmed users skinType is always empty.
+        final isNewUser = _isNewUser();
+
+        nav.pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) =>
+                isNewUser ? const UserDetailsPage() : const HomePage(),
+          ),
+          (_) => false,
+        );
+      }
+
+      // ── User signed out ────────────────────────────────────────────────────
+      if (event == AuthChangeEvent.signedOut) {
+        _navigatorKey.currentState?.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const IntroPage()),
+          (_) => false,
+        );
+      }
     });
   }
 
+  /// Treat a user as "new" (needs onboarding) if they have no app_metadata
+  /// or no user_metadata indicating a completed profile.
+  /// Since we save skin type to UserData locally, we check the Supabase
+  /// user metadata as the source of truth.
+  bool _isNewUser() {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return true;
+
+    // After UserDetailsPage saves data to Supabase (see note below),
+    // we mark the profile as complete via user_metadata.
+    // If 'profile_complete' is not set, treat as new user.
+    final meta = user.userMetadata;
+    if (meta == null) return true;
+    return meta['profile_complete'] != true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+    return MaterialApp(
+      navigatorKey:            _navigatorKey,
+      title:                   'Flawless Beauty',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFE8708A), // rose — matches app palette
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      // On a fresh cold start, show IntroPage.
+      // If a session already exists (returning user), go straight to HomePage.
+      home: Supabase.instance.client.auth.currentSession != null
+          ? const HomePage()
+          : const IntroPage(),
     );
   }
 }

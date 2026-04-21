@@ -6,6 +6,8 @@ import 'package:flawless_beauty_app/interface/homepage.dart';
 import 'package:flawless_beauty_app/interface/settings_page.dart';
 import 'package:flawless_beauty_app/screens/aicamera_page.dart ';
 import 'package:flawless_beauty_app/interface/analytics_page.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -53,6 +55,166 @@ class _ProfilePageState extends State<ProfilePage> {
     _emailCtrl.dispose();
     super.dispose();
   }
+
+   // ── Pick image from gallery ──────────────────────────────────────────────────
+ Future<void> _pickImage() async {
+  // ── Step 1: show confirmation dialog ──────────────────────────────────────
+  final bool? confirmed = await showDialog<bool>(
+    context: context,
+    barrierDismissible: true,
+    builder: (ctx) => Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      backgroundColor: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Icon
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFE8708A), Color(0xFFF8AFCB)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: const Icon(Icons.camera_alt_outlined,
+                  color: Colors.white, size: 28),
+            ),
+            const SizedBox(height: 16),
+
+            // Title
+            const Text(
+              "Update Profile Photo",
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1C1224),
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Subtitle
+            const Text(
+              "Choose a new photo from your gallery to update your profile picture.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                color: Color(0xFF9E8DA8),
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Buttons
+            Row(
+              children: [
+                // Cancel
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(ctx, false),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5F0F3),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "Cancel",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF9E8DA8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Upload
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(ctx, true),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFE8708A), Color(0xFFF8AFCB)],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFF8AFCB).withOpacity(0.4),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "Upload",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  // ── Step 2: open gallery only if confirmed ────────────────────────────────
+  if (confirmed != true) return;
+
+  final picker = ImagePicker();
+  final XFile? picked = await picker.pickImage(
+    source: ImageSource.gallery,
+    imageQuality: 85,
+    maxWidth: 600,
+  );
+  if (picked == null) return; // user cancelled gallery
+
+  // ── Step 3: update UserData → triggers rebuild everywhere instantly ────────
+  UserData.instance.updateAvatar(File(picked.path));
+
+  // ── Step 4: success snackbar ───────────────────────────────────────────────
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Row(
+          children: [
+            Icon(Icons.check_circle_outline_rounded,
+                color: Colors.white, size: 18),
+            SizedBox(width: 8),
+            Text("Profile photo updated!"),
+          ],
+        ),
+        backgroundColor: const Color.fromARGB(255, 255, 152, 191),
+        behavior: SnackBarBehavior.floating,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+}
+
 
   void _save() {
     UserData.instance.update(
@@ -425,13 +587,15 @@ class _ProfilePageState extends State<ProfilePage> {
                 color: Colors.white,
               ),
               child: CircleAvatar(
-                radius: 54,
-                backgroundImage: AssetImage(
-                    UserData.instance.avatarAsset ?? "assets/images/profile.webp"),
+                radius: 80,
+                backgroundImage: UserData.instance.avatarFile != null
+      ? FileImage(UserData.instance.avatarFile!)          // picked photo
+      : AssetImage(UserData.instance.avatarAsset          // fallback asset
+              ?? "assets/images/profile.png") as ImageProvider,
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 5),
 
           // Displayed name (live from controller)
           ListenableBuilder(
@@ -462,9 +626,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
           // Change photo chip
           GestureDetector(
-            onTap: () {
-              // TODO: image picker
-            },
+            onTap: _pickImage,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
               decoration: BoxDecoration(

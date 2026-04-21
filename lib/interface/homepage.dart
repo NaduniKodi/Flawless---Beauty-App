@@ -10,6 +10,7 @@ import 'package:flawless_beauty_app/interface/cosmetics_page.dart';
 import 'package:flawless_beauty_app/interface/skin_care_page.dart';
 import 'package:flawless_beauty_app/interface/face_yoga.dart';
 import 'package:flawless_beauty_app/interface/products_page.dart';
+import 'dart:io';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -257,8 +258,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
                 child: CircleAvatar(
                   radius: 22,
-                  backgroundImage: AssetImage(
-                      user.avatarAsset ?? "assets/images/profile.webp"),
+                  backgroundImage:user.avatarFile != null
+                      ? FileImage(user.avatarFile!) as ImageProvider
+                      : AssetImage(user.avatarAsset ?? "assets/images/profile.png"),
                 ),
               ),
             ),

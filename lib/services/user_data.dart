@@ -1,5 +1,6 @@
 // lib/services/user_data.dart
 import 'package:flutter/material.dart';
+import 'dart:io';
 
 class UserData extends ChangeNotifier {
   static final UserData instance = UserData._();
@@ -18,7 +19,8 @@ class UserData extends ChangeNotifier {
   List<String> skinConcerns = [];          // e.g. ["Acne", "Dark Spots"]
 
   // ── Avatar ───────────────────────────────────────────────────────────────────
-  String? avatarAsset = "assets/images/profile.webp";
+  String? avatarAsset = "assets/images/profile.png";
+  File?   avatarFile; 
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -55,4 +57,11 @@ class UserData extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+void updateAvatar(File file) {
+    avatarFile = file;
+    notifyListeners();
+  }
+
+
 }

@@ -1,11 +1,3 @@
-// ============================================================
-// pubspec.yaml — replace youtube_player_flutter with:
-//   youtube_player_iframe: ^2.4.2
-//
-// android/app/build.gradle — ensure:
-//   minSdkVersion 19
-// ============================================================
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

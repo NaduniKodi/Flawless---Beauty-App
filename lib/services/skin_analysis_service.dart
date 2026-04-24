@@ -208,6 +208,7 @@ class SkinAnalysisService {
   static const String _apiUrl = 'https://openrouter.ai/api/v1/chat/completions';
 
   static const List<String> _freeModels = [
+    'google/gemma-4-31b-it:free',
     'google/gemma-3-27b-it:free',
     'qwen/qwen2.5-vl-7b-instruct:free',
     'mistralai/mistral-small-3.1-24b-instruct:free',
@@ -217,6 +218,7 @@ class SkinAnalysisService {
     'meta-llama/llama-3.2-11b-vision-instruct:free',
     'bytedance-research/ui-tars-7b:free',
     'qwen/qwen2.5-vl-72b-instruct:free',
+    '',
     
   ];
 

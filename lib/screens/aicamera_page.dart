@@ -400,10 +400,12 @@ class _AICameraPageState extends State<AICameraPage>
               ? Size(image.height.toDouble(), image.width.toDouble())
               : Size(image.width.toDouble(), image.height.toDouble());
 
-      if (mounted) setState(() {
-        _faces     = faces;
-        _imageSize = rotatedSize;
-      });
+      if (mounted) {
+        setState(() {
+          _faces     = faces;
+          _imageSize = rotatedSize;
+        });
+      }
     } catch (e) {
       debugPrint("❌ Face detection error: $e");
     } finally {

@@ -247,7 +247,7 @@ class MakeupAnalysisService {
   }
 
   // ── Step 3: Build tutorial recommendations from features ──────────────────
-  static List<MakeupTutorial> _buildTutorials(FaceFeatures f) {
+  static List<MakeupTutorial> buildTutorialsPublic(FaceFeatures f) {
     final tutorials = <MakeupTutorial>[];
 
     // ─ Face shape tutorial ──────────────────────────────────────────────────
@@ -485,7 +485,7 @@ class MakeupAnalysisService {
   }
 
   // ── Step 4: Quick tips ─────────────────────────────────────────────────────
-  static List<MakeupTip> _buildTips(FaceFeatures f) => [
+  static List<MakeupTip> buildTipsPublic(FaceFeatures f) => [
         MakeupTip(
           emoji: '✨',
           feature: 'Face Shape',
@@ -580,8 +580,8 @@ class MakeupAnalysisService {
 
     return MakeupAnalysisResult(
       features: features,
-      tutorials: _buildTutorials(features),
-      quickTips: _buildTips(features),
+      tutorials: buildTutorialsPublic(features),
+      quickTips: buildTipsPublic(features),
       overallStyle: _overallStyle(features),
     );
   }

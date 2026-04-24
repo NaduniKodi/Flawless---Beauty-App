@@ -10,6 +10,7 @@ import '../ai/ar_makeup_painter.dart';
 import '../interface/makeup_report_page.dart';
 import '../services/makeup_analysis_service.dart';
 import 'package:flawless_beauty_app/screens/makeup_page.dart';
+import 'package:flawless_beauty_app/services/makeup_history.dart';
 
 const Color _rose       = Color(0xFFE8708A);
 const Color _orchid     = Color(0xFFF8AFCB);
@@ -140,6 +141,9 @@ class _MakeupPageState extends State<MakeupPage>
         mlKitFaces: _faces,
         useAI: true,
       );
+
+      // Save to Supabase immediately after analysis
+      await MakeupHistory.instance.add(result, file.path);
 
       if (mounted) {
         setState(() => _analyzing = false);

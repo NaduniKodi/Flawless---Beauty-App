@@ -1,134 +1,208 @@
 // lib/services/makeup_history.dart
 
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
-import 'makeup_analysis_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flawless_beauty_app/services/makeup_analysis_service.dart';
+import 'package:flawless_beauty_app/services/makeup_history.dart';
 
 // ── Model ─────────────────────────────────────────────────────────────────────
 class MakeupRecord {
   final String id;
-  final String imagePath;
+  final String imagePath; // local path OR remote Supabase Storage URL
   final MakeupAnalysisResult result;
   final DateTime scannedAt;
+  final bool isRemote;
 
   const MakeupRecord({
     required this.id,
     required this.imagePath,
     required this.result,
     required this.scannedAt,
+    this.isRemote = false,
   });
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'imagePath': imagePath,
-    'scannedAt': scannedAt.toIso8601String(),
-    'overallStyle': result.overallStyle,
-    'faceShape': result.features.faceShape,
-    'eyeShape': result.features.eyeShape,
-    'lipShape': result.features.lipShape,
-    'noseShape': result.features.noseShape,
-    'eyebrowShape': result.features.eyebrowShape,
-    'skinUndertone': result.features.skinUndertone,
-    'rawAIAnalysis': result.features.rawAIAnalysis,
-  };
-
-  factory MakeupRecord.fromJson(Map<String, dynamic> j) {
-    // Re-build a lightweight MakeupAnalysisResult from stored JSON
-    final features = FaceFeatures(
-      faceShape: j['faceShape'] ?? 'oval',
-      eyeShape: j['eyeShape'] ?? 'almond',
-      lipShape: j['lipShape'] ?? 'full',
-      noseShape: j['noseShape'] ?? 'button',
-      eyebrowShape: j['eyebrowShape'] ?? 'arched',
-      skinUndertone: j['skinUndertone'] ?? 'neutral',
-      faceWidth: 0,
-      faceHeight: 0,
-      rawAIAnalysis: j['rawAIAnalysis'] ?? '',
-    );
-    final result = MakeupAnalysisResult(
-      features: features,
-      tutorials: [],
-      quickTips: [],
-      overallStyle: j['overallStyle'] ?? 'Natural Glow',
-    );
-    return MakeupRecord(
-      id: j['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
-      imagePath: j['imagePath'] ?? '',
-      result: result,
-      scannedAt: DateTime.tryParse(j['scannedAt'] ?? '') ?? DateTime.now(),
-    );
-  }
 }
 
-// ── Service ───────────────────────────────────────────────────────────────────
+// ── Singleton ─────────────────────────────────────────────────────────────────
 class MakeupHistory extends ChangeNotifier {
   MakeupHistory._();
   static final MakeupHistory instance = MakeupHistory._();
 
-  List<MakeupRecord> _records = [];
-  bool _isLoading = false;
-  String? _error;
+  final _db      = Supabase.instance.client;
+  final _storage = Supabase.instance.client.storage;
+
+  final List<MakeupRecord> _records = [];
+  bool _loaded   = false;
+  bool isLoading = false;
+  String? error;
 
   List<MakeupRecord> get records => List.unmodifiable(_records);
-  bool get isLoading => _isLoading;
-  String? get error => _error;
 
-  static Future<File> _file() async {
-    final dir = await getApplicationDocumentsDirectory();
-    return File('${dir.path}/makeup_history.json');
-  }
-
+  // ── Load all records for the signed-in user ────────────────────────────────
   Future<void> load({bool force = false}) async {
-    if (_isLoading) return;
-    if (_records.isNotEmpty && !force) return;
+    final uid = _db.auth.currentUser?.id;
+    if (uid == null) return;
+    if (_loaded && !force) return;
 
-    _isLoading = true;
-    _error = null;
+    isLoading = true;
+    error     = null;
     notifyListeners();
 
     try {
-      final f = await _file();
-      if (await f.exists()) {
-        final raw = await f.readAsString();
-        final list = jsonDecode(raw) as List<dynamic>;
-        _records =
-            list
-                .map((e) => MakeupRecord.fromJson(e as Map<String, dynamic>))
-                .toList()
-              ..sort((a, b) => b.scannedAt.compareTo(a.scannedAt));
+      final rows = await _db
+          .from('makeup_reports')
+          .select()
+          .eq('user_id', uid)
+          .order('scanned_at', ascending: false);
+
+      _records.clear();
+      for (final row in rows as List<dynamic>) {
+        _records.add(_fromRow(row as Map<String, dynamic>));
       }
+      _loaded = true;
     } catch (e) {
-      _error = e.toString();
-      debugPrint('[MakeupHistory] load error: $e');
+      error = e.toString();
+      debugPrint('❌ MakeupHistory.load error: $e');
     } finally {
-      _isLoading = false;
+      isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> add(MakeupRecord record) async {
-    _records.insert(0, record);
-    notifyListeners();
-    await _persist();
-  }
+  // ── Save a new makeup scan ─────────────────────────────────────────────────
+  Future<void> add(MakeupAnalysisResult result, String localImagePath) async {
+    final uid = _db.auth.currentUser?.id;
+    if (uid == null) return;
 
-  Future<void> remove(String id) async {
-    _records.removeWhere((r) => r.id == id);
-    notifyListeners();
-    await _persist();
-  }
+    String? imageUrl;
 
-  Future<void> _persist() async {
+    // 1. Upload image to the shared scan-images bucket
     try {
-      final f = await _file();
-      await f.writeAsString(
-        jsonEncode(_records.map((r) => r.toJson()).toList()),
-      );
+      final file     = File(localImagePath);
+      final fileName = 'makeup/$uid/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      await _storage.from('scan-images').upload(
+            fileName,
+            file,
+            fileOptions: const FileOptions(contentType: 'image/jpeg'),
+          );
+      imageUrl = _storage.from('scan-images').getPublicUrl(fileName);
     } catch (e) {
-      debugPrint('[MakeupHistory] persist error: $e');
+      debugPrint('⚠️ MakeupHistory image upload failed: $e');
     }
+
+    // 2. Insert DB row
+    try {
+      final row = await _db
+          .from('makeup_reports')
+          .insert({
+            'user_id'         : uid,
+            'face_shape'      : result.features.faceShape,
+            'eye_shape'       : result.features.eyeShape,
+            'lip_shape'       : result.features.lipShape,
+            'nose_shape'      : result.features.noseShape,
+            'eyebrow_shape'   : result.features.eyebrowShape,
+            'skin_undertone'  : result.features.skinUndertone,
+            'overall_style'   : result.overallStyle,
+            'raw_ai_analysis' : result.features.rawAIAnalysis,
+            'image_url'       : imageUrl,
+          })
+          .select()
+          .single();
+
+      _records.insert(
+        0,
+        _fromRow(row as Map<String, dynamic>, localFallback: localImagePath),
+      );
+      notifyListeners();
+    } catch (e) {
+      debugPrint('❌ MakeupHistory.add DB error: $e');
+      // Keep in memory for this session even if DB write failed
+      _records.insert(
+        0,
+        MakeupRecord(
+          id        : 'local_${DateTime.now().millisecondsSinceEpoch}',
+          imagePath : localImagePath,
+          result    : result,
+          scannedAt : DateTime.now(),
+          isRemote  : false,
+        ),
+      );
+      notifyListeners();
+    }
+  }
+
+  // ── Delete a record ────────────────────────────────────────────────────────
+  Future<void> remove(String recordId) async {
+    final idx = _records.indexWhere((r) => r.id == recordId);
+    if (idx == -1) return;
+
+    final record = _records[idx];
+    _records.removeAt(idx);
+    notifyListeners();
+
+    if (record.id.startsWith('local_')) return;
+
+    try {
+      await _db.from('makeup_reports').delete().eq('id', record.id);
+
+      if (record.isRemote) {
+        final uid = _db.auth.currentUser?.id;
+        if (uid != null) {
+          final uri        = Uri.parse(record.imagePath);
+          final segments   = uri.pathSegments;
+          final afterBucket = segments
+              .skipWhile((s) => s != 'scan-images')
+              .skip(1)
+              .join('/');
+          if (afterBucket.isNotEmpty) {
+            await _storage.from('scan-images').remove([afterBucket]);
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('⚠️ MakeupHistory remote delete failed: $e');
+    }
+  }
+
+  // ── Clear on logout ────────────────────────────────────────────────────────
+  void clear() {
+    _records.clear();
+    _loaded = false;
+    error   = null;
+    notifyListeners();
+  }
+
+  // ── Row → MakeupRecord ─────────────────────────────────────────────────────
+  MakeupRecord _fromRow(Map<String, dynamic> row, {String? localFallback}) {
+    final features = FaceFeatures(
+      faceShape     : row['face_shape']?.toString()     ?? 'oval',
+      eyeShape      : row['eye_shape']?.toString()      ?? 'almond',
+      lipShape      : row['lip_shape']?.toString()      ?? 'full',
+      noseShape     : row['nose_shape']?.toString()     ?? 'button',
+      eyebrowShape  : row['eyebrow_shape']?.toString()  ?? 'arched',
+      skinUndertone : row['skin_undertone']?.toString() ?? 'neutral',
+      faceWidth     : 0,
+      faceHeight    : 0,
+      rawAIAnalysis : row['raw_ai_analysis']?.toString() ?? '',
+    );
+
+    // Rebuild tutorials + tips from stored features so the report page still works
+    final fullResult = MakeupAnalysisResult(
+      features    : features,
+      tutorials   : MakeupAnalysisService.buildTutorialsPublic(features),
+      quickTips   : MakeupAnalysisService.buildTipsPublic(features),
+      overallStyle: row['overall_style']?.toString() ?? 'Natural Glow',
+    );
+
+    final imageUrl  = row['image_url'] as String?;
+    final imagePath = imageUrl ?? localFallback ?? '';
+
+    return MakeupRecord(
+      id        : row['id'] as String,
+      imagePath : imagePath,
+      result    : fullResult,
+      scannedAt : DateTime.parse(row['scanned_at'] as String),
+      isRemote  : imageUrl != null,
+    );
   }
 }

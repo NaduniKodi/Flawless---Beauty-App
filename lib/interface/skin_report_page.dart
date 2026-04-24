@@ -75,41 +75,52 @@ class _SkinReportPageState extends State<SkinReportPage> {
   }
 
   Widget _imageWidget({double? width, double? height, BoxFit fit = BoxFit.cover}) {
-    final path = widget.imagePath;
-    if (path.isEmpty) {
-      return Container(
-        width: width, height: height,
-        color: _orchid.withOpacity(0.1),
-        child: const Icon(Icons.face_outlined, color: _orchid, size: 48),
-      );
-    }
-    final isRemote = path.startsWith('http://') || path.startsWith('https://');
-    if (isRemote) {
-      return Image.network(path, width: width, height: height, fit: fit,
-        loadingBuilder: (_, child, progress) {
-          if (progress == null) return child;
-          return Container(
-            width: width, height: height,
-            color: _orchid.withOpacity(0.08),
-            child: Center(
-              child: CircularProgressIndicator(
-                value: progress.expectedTotalBytes != null
-                    ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
-                    : null,
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(_orchid),
-              ),
-            ),
-          );
-        },
-        errorBuilder: (_, __, ___) => _imageFallback(width, height),
-      );
-    }
-    final file = File(path);
-    if (!file.existsSync()) return _imageFallback(width, height);
-    return Image.file(file, width: width, height: height, fit: fit,
-        errorBuilder: (_, __, ___) => _imageFallback(width, height));
+  final path = widget.imagePath;
+
+  if (path.isEmpty) {
+    return _imageFallback(width, height);
   }
+
+  // Remote URL (Supabase Storage)
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return Image.network(
+      path,
+      width: width,
+      height: height,
+      fit: fit,
+      // Add cache headers so it doesn't re-fetch on every rebuild
+      headers: const {'Cache-Control': 'max-age=3600'},
+      loadingBuilder: (_, child, progress) {
+        if (progress == null) return child;
+        return Container(
+          width: width,
+          height: height,
+          color: _orchid.withOpacity(0.08),
+          child: Center(
+            child: CircularProgressIndicator(
+              value: progress.expectedTotalBytes != null
+                  ? progress.cumulativeBytesLoaded /
+                      progress.expectedTotalBytes!
+                  : null,
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(_orchid),
+            ),
+          ),
+        );
+      },
+      errorBuilder: (_, __, ___) => _imageFallback(width, height),
+    );
+  }
+
+    final file = File(path);
+      return Image.file(
+    file,
+    width: width,
+    height: height,
+    fit: fit,
+    errorBuilder: (_, __, ___) => _imageFallback(width, height),
+  );
+}
 
   Widget _imageFallback(double? width, double? height) => Container(
         width: width, height: height,

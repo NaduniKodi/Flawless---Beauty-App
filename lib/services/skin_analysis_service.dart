@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 // ── Core Skin Models ──────────────────────────────────────────────────────────
@@ -203,8 +204,7 @@ class FacialYogaExercise {
 // ── Service ───────────────────────────────────────────────────────────────────
 
 class SkinAnalysisService {
-  static const String _apiKey =
-      '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';
+  static final String _apiKey = dotenv.env['openrouterai'] ?? 'MISSING_API_KEY';
   static const String _apiUrl = 'https://openrouter.ai/api/v1/chat/completions';
 
   static const List<String> _freeModels = [
@@ -218,7 +218,7 @@ class SkinAnalysisService {
     'meta-llama/llama-3.2-11b-vision-instruct:free',
     'bytedance-research/ui-tars-7b:free',
     'qwen/qwen2.5-vl-72b-instruct:free',
-    '',
+    
     
   ];
 

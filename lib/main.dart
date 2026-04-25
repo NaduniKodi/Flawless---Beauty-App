@@ -3,14 +3,16 @@ import 'package:flawless_beauty_app/interface/intro_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flawless_beauty_app/interface/homepage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await dotenv.load(fileName: ".env");
+
   await Supabase.initialize(
-    url: 'https://vejkddtyqkpbpttdapop.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlamtkZHR5cWtwYnB0dGRhcG9wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1NzMzMTgsImV4cCI6MjA3ODE0OTMxOH0.bqpj8ZPZ4KRUOvGbpRTFZ0IbSdqrVgZJ7rUkWcxTEuQ',
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_KEY']!,
     authOptions: const FlutterAuthClientOptions(
       authFlowType: AuthFlowType.pkce, // required for deep-link email confirm
     ),

@@ -141,6 +141,25 @@ class _LoginPageState extends State<LoginPage>
         ),
       );
 
+// ── Forgot password ───────────────────────────────────────────────────────────
+    Future<void> _forgotPassword() async {
+    final email = _emailCtrl.text.trim();
+
+    if (email.isEmpty) {
+      _snack("Enter your email first");
+      return;
+    }
+
+    try {
+      await _supabase.auth.resetPasswordForEmail(email);
+
+      _snack("Password reset link sent to your email 📩");
+    } catch (e) {
+      _snack(AuthErrorHandler.message(e));
+    }
+  }
+
+
   // ── Build ─────────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
@@ -196,7 +215,7 @@ class _LoginPageState extends State<LoginPage>
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () {}, // TODO: forgot-password flow
+                          onPressed:_forgotPassword, // TODO: forgot-password flow
                           child: const Text(
                             "Forgot Password?",
                             style: TextStyle(

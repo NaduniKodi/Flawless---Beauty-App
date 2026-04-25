@@ -41,6 +41,11 @@ dependencies:
   image_picker: ^1.1.2
   youtube_player_iframe: ^5.1.4
 
+  local_auth: ^2.1.6
+  flutter_secure_storage: ^9.0.0
+
+  flutter_dotenv: ^5.1.0
+  
 dependency_overrides:
   image: ^3.0.2
 
@@ -78,6 +83,7 @@ flutter:
 
   
   assets:
+    - .env
     - assets/images/
     - assets/images/cosmetics/lk/
     - assets/images/cosmetics/intl/

@@ -151,18 +151,18 @@ class _IntroPageState extends State<IntroPage>
                             text: const TextSpan(
                               children: [
                                 TextSpan(
-                                  text: "Flawless ",
+                                  text: "Flaw ",
                                   style: TextStyle(
-                                    fontSize:   32,
+                                    fontSize:   35,
                                     fontWeight: FontWeight.w800,
                                     color:      _textPrimary,
                                     letterSpacing: -0.5,
                                   ),
                                 ),
                                 TextSpan(
-                                  text: "Beauty",
+                                  text: "less",
                                   style: TextStyle(
-                                    fontSize:   32,
+                                    fontSize:   35,
                                     fontWeight: FontWeight.w800,
                                     color:      _rose,
                                     letterSpacing: -0.5,

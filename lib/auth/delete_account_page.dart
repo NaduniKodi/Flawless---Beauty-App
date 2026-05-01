@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../services/profile_service.dart';
+import '../services/user_data.dart';
 
 class DeleteAccountPage extends StatefulWidget {
   const DeleteAccountPage({super.key});
@@ -12,6 +14,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
   final _confirmController = TextEditingController();
   bool _understood = false;
   int _step = 1;
+  bool _isDeleting = false;
 
   final List<String> _reasons = [
     'I\'m not using the app anymore',
@@ -26,6 +29,44 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
   void dispose() {
     _confirmController.dispose();
     super.dispose();
+  }
+
+  Future<void> _deleteAccount() async {
+    setState(() => _isDeleting = true);
+
+    try {
+      final success = await ProfileService.instance.deleteAccount();
+
+      if (!mounted) return;
+
+      if (success) {
+        // Clear local state
+        UserData.instance.clear();
+
+        // Navigate to login/splash and remove all previous routes
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/login', // ← replace with your login/splash route name
+          (route) => false,
+        );
+      } else {
+        setState(() => _isDeleting = false);
+        _showError('Failed to delete account. Please try again.');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isDeleting = false);
+      _showError('An error occurred: ${e.toString()}');
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -62,7 +103,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
           child: Row(
             children: [
               GestureDetector(
-                onTap: () => Navigator.pop(context),
+                onTap: _isDeleting ? null : () => Navigator.pop(context),
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -73,9 +114,11 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 ),
               ),
               const Expanded(
-                child: Text('Delete Account',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
+                child: Text(
+                  'Delete Account',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+                ),
               ),
               const SizedBox(width: 38),
             ],
@@ -109,9 +152,11 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 child: const Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 36),
               ),
               const SizedBox(height: 14),
-              const Text('Are you sure you want to leave?',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17, color: Color(0xFF212121))),
+              const Text(
+                'Are you sure you want to leave?',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17, color: Color(0xFF212121)),
+              ),
               const SizedBox(height: 8),
               const Text(
                 'Deleting your account is permanent. You will lose all your data, posts, followers, and cannot undo this action.',
@@ -124,8 +169,10 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
         const SizedBox(height: 20),
 
         // What you'll lose
-        const Text('WHAT YOU\'LL LOSE',
-            style: TextStyle(color: Color(0xFFB0BEC5), fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5)),
+        const Text(
+          'WHAT YOU\'LL LOSE',
+          style: TextStyle(color: Color(0xFFB0BEC5), fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5),
+        ),
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
@@ -150,8 +197,10 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
         const SizedBox(height: 20),
 
         // Reason
-        const Text('REASON FOR LEAVING',
-            style: TextStyle(color: Color(0xFFB0BEC5), fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5)),
+        const Text(
+          'REASON FOR LEAVING',
+          style: TextStyle(color: Color(0xFFB0BEC5), fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5),
+        ),
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
@@ -161,7 +210,6 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
           ),
           child: Column(
             children: _reasons.map((reason) {
-              final isSelected = _selectedReason == reason;
               return Column(
                 children: [
                   RadioListTile<String>(
@@ -190,7 +238,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
-                child: const Text('Keep Account', style: TextStyle(color: Color(0xFFF06292), fontWeight: FontWeight.w600)),
+                child: const Text('Keep Account',
+                    style: TextStyle(color: Color(0xFFF06292), fontWeight: FontWeight.w600)),
               ),
             ),
             const SizedBox(width: 12),
@@ -203,7 +252,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
-                child: const Text('Continue', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                child: const Text('Continue',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
               ),
             ),
           ],
@@ -214,6 +264,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
   }
 
   Widget _buildStep2(BuildContext context) {
+    final canDelete = _confirmController.text == 'DELETE' && _understood && !_isDeleting;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -225,11 +277,12 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.redAccent.withOpacity(0.4)),
           ),
-          child: Column(
-            children: const [
+          child: const Column(
+            children: [
               Icon(Icons.delete_forever, color: Colors.redAccent, size: 48),
               SizedBox(height: 12),
-              Text('Final Step', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: Colors.redAccent)),
+              Text('Final Step',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: Colors.redAccent)),
               SizedBox(height: 8),
               Text(
                 'Type "DELETE" below to confirm you want to permanently delete your account. This cannot be undone.',
@@ -246,6 +299,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
           controller: _confirmController,
           onChanged: (_) => setState(() {}),
           textCapitalization: TextCapitalization.characters,
+          enabled: !_isDeleting,
           decoration: InputDecoration(
             hintText: 'Type DELETE to confirm',
             filled: true,
@@ -253,7 +307,9 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(
-                color: _confirmController.text == 'DELETE' ? Colors.redAccent : const Color(0xFFE0E0E0),
+                color: _confirmController.text == 'DELETE'
+                    ? Colors.redAccent
+                    : const Color(0xFFE0E0E0),
               ),
             ),
             focusedBorder: OutlineInputBorder(
@@ -277,7 +333,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
             children: [
               Checkbox(
                 value: _understood,
-                onChanged: (v) => setState(() => _understood = v!),
+                onChanged: _isDeleting ? null : (v) => setState(() => _understood = v!),
                 activeColor: Colors.redAccent,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
               ),
@@ -292,34 +348,43 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
         ),
         const SizedBox(height: 24),
 
-        // Final buttons
+        // Delete button
         SizedBox(
           width: double.infinity,
           height: 52,
           child: ElevatedButton(
-            onPressed: _confirmController.text == 'DELETE' && _understood
-                ? () => _showFinalConfirm(context)
-                : null,
+            onPressed: canDelete ? () => _showFinalConfirm(context) : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
               disabledBackgroundColor: Colors.redAccent.withOpacity(0.4),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
-            child: const Text('Permanently Delete Account',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15)),
+            child: _isDeleting
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                  )
+                : const Text(
+                    'Permanently Delete Account',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15),
+                  ),
           ),
         ),
         const SizedBox(height: 12),
+
+        // Go back button
         SizedBox(
           width: double.infinity,
           height: 52,
           child: OutlinedButton(
-            onPressed: () => setState(() => _step = 1),
+            onPressed: _isDeleting ? null : () => setState(() => _step = 1),
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Color(0xFFF06292)),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
-            child: const Text('Go Back', style: TextStyle(color: Color(0xFFF06292), fontWeight: FontWeight.w600, fontSize: 15)),
+            child: const Text('Go Back',
+                style: TextStyle(color: Color(0xFFF06292), fontWeight: FontWeight.w600, fontSize: 15)),
           ),
         ),
         const SizedBox(height: 20),
@@ -337,10 +402,13 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
   void _showFinalConfirm(BuildContext context) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Last chance!', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.redAccent)),
-        content: const Text('Your account and all data will be permanently deleted. Are you absolutely sure?'),
+        title: const Text('Last chance!',
+            style: TextStyle(fontWeight: FontWeight.w700, color: Colors.redAccent)),
+        content: const Text(
+            'Your account and all data will be permanently deleted from our servers. Are you absolutely sure?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -348,11 +416,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
-              // Navigate to login or splash
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Account deleted.'), backgroundColor: Colors.redAccent),
-              );
+              Navigator.pop(context); // close dialog
+              _deleteAccount();       // trigger real deletion
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,

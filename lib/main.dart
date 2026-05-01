@@ -1,29 +1,59 @@
+// lib/main.dart
 import 'package:flawless_beauty_app/auth/user_details.dart';
 import 'package:flawless_beauty_app/interface/intro_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flawless_beauty_app/interface/homepage.dart';
+import 'package:flawless_beauty_app/services/user_data.dart';
+import 'package:flawless_beauty_app/services/interest_data.dart';
+import 'package:flawless_beauty_app/services/notification_settings.dart';
+import 'package:flawless_beauty_app/services/scan_history.dart';
+import 'package:flawless_beauty_app/services/makeup_history.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: '.env');
 
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL']!,
     anonKey: dotenv.env['SUPABASE_KEY']!,
     authOptions: const FlutterAuthClientOptions(
-      authFlowType: AuthFlowType.pkce, // required for deep-link email confirm
+      authFlowType: AuthFlowType.pkce,
     ),
   );
+
+  // If a session already exists (returning user / app resumed after OS killed
+  // the process), load all data before the first frame — no empty-state flash.
+  if (Supabase.instance.client.auth.currentSession != null) {
+    await _loadAll();
+  }
 
   runApp(const MyApp());
 }
 
+/// Loads every singleton for the currently signed-in user.
+Future<void> _loadAll() => Future.wait([
+      UserData.instance.load(),
+      InterestData.instance.load(),
+      NotificationSettings.instance.load(),
+      ScanHistory.instance.load(),    // ← added
+      MakeupHistory.instance.load(),  // ← added
+    ]);
+
+/// Wipes every singleton so the next sign-in starts completely fresh.
+/// Prevents data leaking between accounts on the same device.
+void _clearAll() {
+  UserData.instance.clear();
+  InterestData.instance.clear();
+  NotificationSettings.instance.clear();
+  ScanHistory.instance.clear();    // ← added
+  MakeupHistory.instance.clear();  // ← added
+}
+
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
-
   @override
   State<MyApp> createState() => _MyAppState();
 }
@@ -35,48 +65,32 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
       final event   = data.event;
       final session = data.session;
+      final nav     = _navigatorKey.currentState;
+      if (nav == null) return;
 
-      // ── User tapped the confirmation link in their email ───────────────────
-      // AuthChangeEvent.signedIn fires both on email-confirm deep-link AND on
-      // normal password login. We only want to redirect to UserDetailsPage when
-      // coming from the email confirmation link (passwordRecovery / initial
-      // signup confirm). We detect the email-confirm case by checking that the
-      // navigator is currently NOT already showing the app's main pages.
-      //
-      // The cleanest way: only act on signedIn when there is no current route
-      // deeper than IntroPage, i.e. we came from a cold deep-link open.
+      // ── Sign-in / email confirmation ──────────────────────────────────────
       if (event == AuthChangeEvent.signedIn && session != null) {
-        final nav = _navigatorKey.currentState;
-        if (nav == null) return;
+        // Wipe stale data first, then load this user's data fresh.
+        _clearAll();
+        await _loadAll();
 
-        // If the app was opened via the confirmation deep-link (cold start),
-        // the navigator stack is just IntroPage. Push the user forward.
-        // If the user logged in normally via LoginPage, LoginPage already
-        // handles navigation itself — but this listener may also fire.
-        // Using pushAndRemoveUntil here is safe: if they're already on
-        // HomePage the transition is instant and harmless.
-
-        // Check whether the user has completed their beauty profile:
-        // UserData.instance.skinType will be empty for brand-new users.
-        // For returning users (normal login), their profile would have been
-        // loaded. For new email-confirmed users skinType is always empty.
-        final isNewUser = _isNewUser();
-
+        final isNew = _isNewUser();
         nav.pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (_) =>
-                isNewUser ? const UserDetailsPage() : const HomePage(),
+                isNew ? const UserDetailsPage() : const HomePage(),
           ),
           (_) => false,
         );
       }
 
-      // ── User signed out ────────────────────────────────────────────────────
+      // ── Sign-out ──────────────────────────────────────────────────────────
       if (event == AuthChangeEvent.signedOut) {
-        _navigatorKey.currentState?.pushAndRemoveUntil(
+        _clearAll();
+        nav.pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const IntroPage()),
           (_) => false,
         );
@@ -84,35 +98,20 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  /// Treat a user as "new" (needs onboarding) if they have no app_metadata
-  /// or no user_metadata indicating a completed profile.
-  /// Since we save skin type to UserData locally, we check the Supabase
-  /// user metadata as the source of truth.
   bool _isNewUser() {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return true;
-
-    // After UserDetailsPage saves data to Supabase (see note below),
-    // we mark the profile as complete via user_metadata.
-    // If 'profile_complete' is not set, treat as new user.
-    final meta = user.userMetadata;
-    if (meta == null) return true;
-    return meta['profile_complete'] != true;
+    final meta = Supabase.instance.client.auth.currentUser?.userMetadata;
+    return meta == null || meta['profile_complete'] != true;
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorKey:            _navigatorKey,
-      title:                   'Flawless Beauty',
+      navigatorKey: _navigatorKey,
+      title: 'Flawless Beauty',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFE8708A), // rose — matches app palette
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFE8708A)),
       ),
-      // On a fresh cold start, show IntroPage.
-      // If a session already exists (returning user), go straight to HomePage.
       home: Supabase.instance.client.auth.currentSession != null
           ? const HomePage()
           : const IntroPage(),

@@ -8,6 +8,7 @@ import 'package:flawless_beauty_app/screens/aicamera_page.dart ';
 import 'package:flawless_beauty_app/interface/analytics_page.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:flawless_beauty_app/widgets/user_avatar.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -557,104 +558,98 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // ── Profile avatar + name display card ──────────────────────────────────────
-  Widget _buildProfileCard() {
-    return Center(
-      child: Column(
-        children: [
-          // Avatar
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
+  
+// ── Profile avatar + name display card ──────────────────────────────────────
+Widget _buildProfileCard() {
+  return Center(
+    child: Column(
+      children: [
+        // Avatar with gradient ring
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              colors: [_rose, _orchid],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: _orchid.withOpacity(0.3),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(3),
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [_rose, _orchid],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: _orchid.withOpacity(0.3),
-                  blurRadius: 18,
-                  offset: const Offset(0, 6),
-                ),
-              ],
+              color: Colors.white,
             ),
-            child: Container(
-              padding: const EdgeInsets.all(3),
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-              ),
-              child: CircleAvatar(
-                radius: 80,
-                backgroundImage: UserData.instance.avatarFile != null
-      ? FileImage(UserData.instance.avatarFile!)          // picked photo
-      : AssetImage(UserData.instance.avatarAsset          // fallback asset
-              ?? "assets/images/profile.png") as ImageProvider,
-              ),
-            ),
+            // ✅ radius: 80  (was 22 — wrong size)
+            // ✅ no extra closing parenthesis
+            child: UserAvatar(radius: 80),
           ),
-          const SizedBox(height: 5),
+        ),
+        const SizedBox(height: 5),
 
-          // Displayed name (live from controller)
-          ListenableBuilder(
-            listenable: UserData.instance,
-            builder: (_, __) => Column(
+        // Displayed name + username (live from UserData)
+        ListenableBuilder(
+          listenable: UserData.instance,
+          builder: (_, __) => Column(
+            children: [
+              Text(
+                UserData.instance.name,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: _textPrimary,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                UserData.instance.username,
+                style: const TextStyle(fontSize: 13, color: _textMuted),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Change photo chip
+        GestureDetector(
+          onTap: _pickImage,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+            decoration: BoxDecoration(
+              color: _orchid.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: _orchid.withOpacity(0.3)),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
+                Icon(Icons.camera_alt_outlined, size: 15, color: _orchidDark),
+                SizedBox(width: 6),
                 Text(
-                  UserData.instance.name,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: _textPrimary,
-                    letterSpacing: -0.3,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  UserData.instance.username,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: _textMuted,
+                  "Change Photo",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: _orchidDark,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 12),
-
-          // Change photo chip
-          GestureDetector(
-            onTap: _pickImage,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
-              decoration: BoxDecoration(
-                color: _orchid.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: _orchid.withOpacity(0.3)),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.camera_alt_outlined, size: 15, color: _orchidDark),
-                  SizedBox(width: 6),
-                  Text(
-                    "Change Photo",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: _orchidDark,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   // ── Section label ────────────────────────────────────────────────────────────
   Widget _sectionLabel(String text) {

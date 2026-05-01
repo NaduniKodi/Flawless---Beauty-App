@@ -177,15 +177,17 @@ class _AnalyzingScreenState extends State<_AnalyzingScreen>
             ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
+                onPressed: (){Navigator.pop(context);
+                Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                },
+                child: const Text('Exit', style: TextStyle(color: Colors.white54)),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                   _analyze();
                 },
-                child: Text('Retry',
+                child: Text('Try Again',
                     style: TextStyle(color: _orchidDark)),
               ),
             ],

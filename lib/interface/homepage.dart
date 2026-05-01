@@ -1,17 +1,109 @@
+// lib/interface/homepage.dart
 import 'package:flawless_beauty_app/interface/analytics_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flawless_beauty_app/services/user_data.dart';
 import 'package:flawless_beauty_app/interface/profilepage.dart';
 import 'package:flawless_beauty_app/interface/settings_page.dart';
-import 'package:flawless_beauty_app/screens/aicamera_page.dart ';
-import 'package:flawless_beauty_app/screens/makeup_page.dart';
+import 'package:flawless_beauty_app/screens/aicamera_page.dart';
 import 'package:flawless_beauty_app/screens/makeup_page.dart';
 import 'package:flawless_beauty_app/interface/cosmetics_page.dart';
 import 'package:flawless_beauty_app/interface/skin_care_page.dart';
 import 'package:flawless_beauty_app/interface/face_yoga.dart';
 import 'package:flawless_beauty_app/interface/products_page.dart';
-import 'dart:io';
+import 'package:flawless_beauty_app/interface/interests_page.dart';
+import 'package:flawless_beauty_app/services/interest_data.dart';
+import 'package:flawless_beauty_app/widgets/user_avatar.dart'; // ✅ fixes avatar sync
 
+// ── Colour tokens ─────────────────────────────────────────────────────────────
+const Color _rose = Color(0xFFE8708A);
+const Color _roseDark = Color(0xFFC2516B);
+const Color _orchid = Color(0xFFF8AFCB);
+const Color _orchidDark = Color.fromARGB(255, 255, 152, 191);
+const Color _surface = Color(0xFFFDF7FA);
+const Color _card = Color(0xFFFFFFFF);
+const Color _textPrimary = Color(0xFF1C1224);
+const Color _textMuted = Color(0xFF9E8DA8);
+
+// ── All searchable items ──────────────────────────────────────────────────────
+class _SearchItem {
+  final String title;
+  final String subtitle;
+  final String tag; // filter category
+  final String emoji;
+  final Widget Function(BuildContext) navigate;
+
+  const _SearchItem({
+    required this.title,
+    required this.subtitle,
+    required this.tag,
+    required this.emoji,
+    required this.navigate,
+  });
+}
+
+const _allItems = <_SearchItem>[
+  _SearchItem(
+    title: 'Make Up',
+    subtitle: 'AI-guided looks for your skin tone',
+    tag: 'Makeup',
+    emoji: '💄',
+    navigate: _toMakeup,
+  ),
+  _SearchItem(
+    title: 'Cosmetics',
+    subtitle: 'Explore top-rated cosmetics',
+    tag: 'Cosmetics',
+    emoji: '✨',
+    navigate: _toCosmetics,
+  ),
+  _SearchItem(
+    title: 'Face Yoga',
+    subtitle: 'Tone & lift with daily routines',
+    tag: 'Wellness',
+    emoji: '🧘',
+    navigate: _toFaceYoga,
+  ),
+  _SearchItem(
+    title: 'Skin Care',
+    subtitle: 'Routines tailored to you',
+    tag: 'Skin Care',
+    emoji: '🌿',
+    navigate: _toSkinCare,
+  ),
+  _SearchItem(
+    title: 'Products',
+    subtitle: 'Curated beauty essentials',
+    tag: 'Products',
+    emoji: '🛍️',
+    navigate: _toProducts,
+  ),
+  _SearchItem(
+    title: 'AI Face Scan',
+    subtitle: 'Analyse your skin with AI',
+    tag: 'Skin Care',
+    emoji: '🤖',
+    navigate: _toCamera,
+  ),
+];
+
+// Static navigate helpers (needed for const constructor)
+Widget _toMakeup(BuildContext ctx) => const MakeupPage();
+Widget _toCosmetics(BuildContext ctx) => const CosmeticsPage();
+Widget _toFaceYoga(BuildContext ctx) => const FaceYogaPage();
+Widget _toSkinCare(BuildContext ctx) => const SkinCarePage();
+Widget _toProducts(BuildContext ctx) => const ProductsPage();
+Widget _toCamera(BuildContext ctx) => const AICameraPage();
+
+const _filterTags = [
+  'All',
+  'Makeup',
+  'Skin Care',
+  'Cosmetics',
+  'Wellness',
+  'Products',
+];
+
+// ── HomePage ──────────────────────────────────────────────────────────────────
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -19,20 +111,31 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
   late AnimationController _bannerController;
   late Animation<double> _bannerFade;
 
-  // ── Colour tokens ────────────────────────────────────────────────────────────
-  static const Color _rose        = Color(0xFFE8708A);
-  static const Color _roseDark    = Color(0xFFC2516B);
-  static const Color _orchid      = Color(0xFFF8AFCB);
-  static const Color _orchidDark  = Color.fromARGB(255, 255, 152, 191);
-  static const Color _surface     = Color(0xFFFDF7FA);
-  static const Color _card        = Color(0xFFFFFFFF);
-  static const Color _textPrimary = Color(0xFF1C1224);
-  static const Color _textMuted   = Color(0xFF9E8DA8);
+  // ── Search state ──────────────────────────────────────────────────────────
+  final TextEditingController _searchCtrl = TextEditingController();
+  final FocusNode _searchFocus = FocusNode();
+  String _query = '';
+  String _activeFilter = 'All';
+  bool _isSearching = false;
+
+  List<_SearchItem> get _filtered {
+    final q = _query.toLowerCase();
+    return _allItems.where((item) {
+      final matchesFilter = _activeFilter == 'All' || item.tag == _activeFilter;
+      final matchesQuery =
+          q.isEmpty ||
+          item.title.toLowerCase().contains(q) ||
+          item.subtitle.toLowerCase().contains(q) ||
+          item.tag.toLowerCase().contains(q);
+      return matchesFilter && matchesQuery;
+    }).toList();
+  }
 
   @override
   void initState() {
@@ -41,63 +144,104 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
-    _bannerFade = CurvedAnimation(parent: _bannerController, curve: Curves.easeOut);
+    _bannerFade = CurvedAnimation(
+      parent: _bannerController,
+      curve: Curves.easeOut,
+    );
     _bannerController.forward();
+
+    _searchCtrl.addListener(() {
+      setState(() {
+        _query = _searchCtrl.text;
+        _isSearching = _query.isNotEmpty;
+      });
+    });
+
+    _searchFocus.addListener(() {
+      if (!_searchFocus.hasFocus && _query.isEmpty) {
+        setState(() => _isSearching = false);
+      }
+    });
   }
 
   @override
   void dispose() {
     _bannerController.dispose();
+    _searchCtrl.dispose();
+    _searchFocus.dispose();
     super.dispose();
   }
 
+  void _clearSearch() {
+    _searchCtrl.clear();
+    _searchFocus.unfocus();
+    setState(() {
+      _query = '';
+      _isSearching = false;
+    });
+  }
+
+  void _showFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _FilterSheet(
+        activeFilter: _activeFilter,
+        onSelect: (tag) {
+          setState(() {
+            _activeFilter = tag;
+            _isSearching = _query.isNotEmpty || tag != 'All';
+          });
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+
+  // ── Nav ───────────────────────────────────────────────────────────────────
   void _onNavTap(int index) {
     setState(() => _currentIndex = index);
     switch (index) {
       case 1:
-        Navigator.push(context,
-            _fadeRoute(const AICameraPage()));
+        Navigator.push(context, _fadeRoute(const AICameraPage()));
         break;
-        case 2:
-        Navigator.push(context,
-            _fadeRoute(const ProfilePage()));
+      case 2:
+        Navigator.push(context, _fadeRoute(const ProfilePage()));
         break;
       case 3:
-        Navigator.push(context,
-            _fadeRoute(const AnalyticsPage()));
+        Navigator.push(context, _fadeRoute(const AnalyticsPage()));
         break;
       case 4:
-        Navigator.push(context,
-            _slideRoute(const SettingsPage()));
+        Navigator.push(context, _slideRoute(const SettingsPage()));
         break;
     }
   }
 
   PageRoute _fadeRoute(Widget page) => PageRouteBuilder(
-        pageBuilder: (_, __, ___) => page,
-        transitionsBuilder: (_, anim, __, child) =>
-            FadeTransition(opacity: anim, child: child),
-      );
+    pageBuilder: (_, __, ___) => page,
+    transitionsBuilder: (_, a, __, child) =>
+        FadeTransition(opacity: a, child: child),
+  );
 
   PageRoute _slideRoute(Widget page) => PageRouteBuilder(
-        pageBuilder: (_, __, ___) => page,
-        transitionsBuilder: (_, anim, __, child) => SlideTransition(
-          position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
-              .animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
-          child: child,
-        ),
-      );
+    pageBuilder: (_, __, ___) => page,
+    transitionsBuilder: (_, a, __, child) => SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(1, 0),
+        end: Offset.zero,
+      ).animate(CurvedAnimation(parent: a, curve: Curves.easeOutCubic)),
+      child: child,
+    ),
+  );
 
-  // ── Build ────────────────────────────────────────────────────────────────────
+  // ── Build ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _surface,
       extendBody: true,
-
-      // ── Bottom nav ──────────────────────────────────────────────────────────
       bottomNavigationBar: _buildBottomNav(),
-
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
@@ -109,14 +253,29 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               _buildHeader(),
               const SizedBox(height: 18),
               _buildSearchBar(),
-              const SizedBox(height: 24),
-              _buildBanner(),
-              const SizedBox(height: 28),
-              _buildScanButton(),
-              const SizedBox(height: 32),
-              _buildSectionTitle("Browse Categories"),
-              const SizedBox(height: 14),
-              _buildCategoriesGrid(),
+
+              // ── Active filter chip row ──────────────────────────────────
+              if (_activeFilter != 'All') ...[
+                const SizedBox(height: 10),
+                _buildActiveFilterRow(),
+              ],
+
+              // ── Search results overlay ──────────────────────────────────
+              if (_isSearching) ...[
+                const SizedBox(height: 14),
+                _buildSearchResults(),
+              ] else ...[
+                const SizedBox(height: 20),
+                _buildInterestsStrip(),
+                const SizedBox(height: 24),
+                _buildBanner(),
+                const SizedBox(height: 28),
+                _buildScanButton(),
+                const SizedBox(height: 32),
+                _buildSectionTitle('Browse Categories'),
+                const SizedBox(height: 14),
+                _buildCategoriesGrid(),
+              ],
             ],
           ),
         ),
@@ -124,93 +283,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
-  // ── Bottom nav bar ───────────────────────────────────────────────────────────
-  Widget _buildBottomNav() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: _roseDark.withOpacity(0.08),
-            blurRadius: 24,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _navItem(icon: Icons.home_rounded,        index: 0),
-              _navItem(icon: Icons.auto_awesome_rounded, index: 1),
-              _navLogo(),
-              _navItem(icon: Icons.analytics_rounded, index: 3),
-              _navItem(icon: Icons.settings_rounded,       index: 4),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _navItem({required IconData icon, required int index}) {
-    final bool active = _currentIndex == index;
-    return GestureDetector(
-      onTap: () => _onNavTap(index),
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: active ? _orchid.withOpacity(0.12) : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Icon(
-          icon,
-          size: 24,
-          color: active ? _orchidDark : _textMuted,
-        ),
-      ),
-    );
-  }
-
-  Widget _navLogo() {
-    return GestureDetector(
-      onTap: () => _onNavTap(2),
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: const LinearGradient(
-            colors: [_rose, _orchid],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: _orchid.withOpacity(0.35),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(3),
-        child: ClipOval(
-          child: Image.asset(
-            "assets/images/logo.png",
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ── Header ──────────────────────────────────────────────────────────────────
+  // ── Header ────────────────────────────────────────────────────────────────
   Widget _buildHeader() {
     return ListenableBuilder(
       listenable: UserData.instance,
@@ -223,7 +296,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Good Day ✨",
+                  'Good Day ✨',
                   style: TextStyle(
                     fontSize: 13,
                     color: _textMuted,
@@ -232,7 +305,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  user.name,
+                  user.name.isEmpty ? 'Beauty lover' : user.name,
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
@@ -242,8 +315,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 ),
               ],
             ),
+            // ✅ UserAvatar handles avatarFile → avatarUrl → asset fallback
             GestureDetector(
-              onTap: () => _onNavTap(4),
+              onTap: () => _onNavTap(2),
               child: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -256,12 +330,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     ),
                   ],
                 ),
-                child: CircleAvatar(
-                  radius: 22,
-                  backgroundImage:user.avatarFile != null
-                      ? FileImage(user.avatarFile!) as ImageProvider
-                      : AssetImage(user.avatarAsset ?? "assets/images/profile.png"),
-                ),
+                child: const UserAvatar(radius: 22), // ✅ fixed
               ),
             ),
           ],
@@ -270,7 +339,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
-  // ── Search bar ──────────────────────────────────────────────────────────────
+  // ── Search bar ────────────────────────────────────────────────────────────
   Widget _buildSearchBar() {
     return Container(
       height: 50,
@@ -286,21 +355,38 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         ],
       ),
       child: TextField(
+        controller: _searchCtrl,
+        focusNode: _searchFocus,
         style: const TextStyle(fontSize: 14, color: _textPrimary),
         decoration: InputDecoration(
-          hintText: "Search products, tips…",
+          hintText: 'Search makeup, skin care, yoga…',
           hintStyle: TextStyle(fontSize: 14, color: _textMuted),
           prefixIcon: Icon(Icons.search_rounded, color: _textMuted, size: 20),
-          suffixIcon: Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [_rose, _orchid],
-              ),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.tune_rounded, color: Colors.white, size: 18),
-          ),
+          // Clear button while typing, filter button otherwise
+          suffixIcon: _query.isNotEmpty
+              ? GestureDetector(
+                  onTap: _clearSearch,
+                  child: const Icon(
+                    Icons.close_rounded,
+                    color: _textMuted,
+                    size: 18,
+                  ),
+                )
+              : GestureDetector(
+                  onTap: _showFilterSheet,
+                  child: Container(
+                    margin: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(colors: [_rose, _orchid]),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.tune_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 14),
         ),
@@ -308,7 +394,219 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
-  // ── Sale banner ─────────────────────────────────────────────────────────────
+  // ── Active filter badge ───────────────────────────────────────────────────
+  Widget _buildActiveFilterRow() {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [_rose, _orchidDark]),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _activeFilter,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(width: 6),
+              GestureDetector(
+                onTap: () => setState(() {
+                  _activeFilter = 'All';
+                  _isSearching = _query.isNotEmpty;
+                }),
+                child: const Icon(
+                  Icons.close_rounded,
+                  color: Colors.white,
+                  size: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '${_filtered.length} result${_filtered.length != 1 ? 's' : ''}',
+          style: TextStyle(fontSize: 12, color: _textMuted),
+        ),
+      ],
+    );
+  }
+
+  // ── Search results list ───────────────────────────────────────────────────
+  Widget _buildSearchResults() {
+    if (_filtered.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: _card,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          children: [
+            const Text('🔍', style: TextStyle(fontSize: 40)),
+            const SizedBox(height: 12),
+            const Text(
+              'No results found',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: _textPrimary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Try a different term or clear the filter',
+              style: TextStyle(fontSize: 13, color: _textMuted),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '${_filtered.length} result${_filtered.length != 1 ? 's' : ''}'
+          '${_query.isNotEmpty ? ' for "$_query"' : ''}',
+          style: TextStyle(fontSize: 12, color: _textMuted),
+        ),
+        const SizedBox(height: 10),
+        ..._filtered.map(
+          (item) => _SearchResultCard(
+            item: item,
+            query: _query,
+            onTap: () {
+              _clearSearch();
+              Navigator.push(context, _fadeRoute(item.navigate(context)));
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── Interests strip ───────────────────────────────────────────────────────
+  Widget _buildInterestsStrip() {
+    return ListenableBuilder(
+      listenable: InterestData.instance,
+      builder: (_, __) {
+        final interests = InterestData.instance.selected.toList();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    ShaderMask(
+                      shaderCallback: (b) => const LinearGradient(
+                        colors: [_rose, _orchid],
+                      ).createShader(b),
+                      child: const Icon(
+                        Icons.favorite_rounded,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Text(
+                      'My Interests',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: _textPrimary,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ],
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.push(
+                    context,
+                    _slideRoute(const InterestsPage()),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [_rose, _orchid],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      'Edit ✏️',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            interests.isEmpty
+                ? _buildEmptyInterestsPrompt()
+                : SizedBox(
+                    height: 38,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: interests.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (_, i) => _InterestChip(label: interests[i]),
+                    ),
+                  ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyInterestsPrompt() {
+    return GestureDetector(
+      onTap: () => Navigator.push(context, _slideRoute(const InterestsPage())),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          color: _card,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _orchid.withOpacity(0.5), width: 1.2),
+        ),
+        child: Row(
+          children: [
+            const Text('✨', style: TextStyle(fontSize: 18)),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Tell us what you love — tap to pick your beauty interests!',
+                style: TextStyle(fontSize: 13, color: _textMuted),
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: _orchidDark, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Banner ────────────────────────────────────────────────────────────────
   Widget _buildBanner() {
     return FadeTransition(
       opacity: _bannerFade,
@@ -336,13 +634,16 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
-                      "LIMITED OFFER",
+                      'LIMITED OFFER',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 10,
@@ -353,7 +654,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    "Big Sale!",
+                    'Big Sale!',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
@@ -363,7 +664,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   ),
                   const SizedBox(height: 4),
                   const Text(
-                    "Up to 50% off on trending\nbeauty products",
+                    'Up to 50% off on trending\nbeauty products',
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 13,
@@ -371,18 +672,32 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Text(
-                      "Shop Now →",
-                      style: TextStyle(
-                        color: _roseDark,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProductsPage(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 7,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Text(
+                        'Shop Now →',
+
+                        style: TextStyle(
+                          color: _roseDark,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ),
@@ -393,8 +708,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Image.asset(
-                "assets/images/banner.webp",
-                width: 100,
+                'assets/images/banner.webp',
+                width: 200,
                 height: 120,
                 fit: BoxFit.cover,
               ),
@@ -405,11 +720,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
-  // ── Scan button ─────────────────────────────────────────────────────────────
+  // ── Scan button ───────────────────────────────────────────────────────────
   Widget _buildScanButton() {
     return GestureDetector(
-      onTap: () => Navigator.push(
-          context, _fadeRoute(const AICameraPage())),
+      onTap: () => Navigator.push(context, _fadeRoute(const AICameraPage())),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -428,13 +742,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ),
           ],
         ),
-        child: Row(
+        child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+          children: [
             Icon(Icons.face_retouching_natural, color: Colors.white, size: 20),
             SizedBox(width: 10),
             Text(
-              "Start AI Face Scan",
+              'Start AI Face Scan',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.white,
@@ -448,7 +762,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
-  // ── Section title ───────────────────────────────────────────────────────────
+  // ── Section title ─────────────────────────────────────────────────────────
   Widget _buildSectionTitle(String title) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -462,36 +776,77 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             letterSpacing: -0.2,
           ),
         ),
-        Text(
-          "See all",
-          style: TextStyle(
-            fontSize: 13,
-            color: _orchidDark,
-            fontWeight: FontWeight.w600,
+        GestureDetector(
+          onTap: _showFilterSheet,
+          child: Text(
+            'Filter',
+            style: TextStyle(
+              fontSize: 13,
+              color: _orchidDark,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
     );
   }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DROP-IN REPLACEMENT for _buildCategoriesGrid() and _CategoryCard
-// in home_page.dart
-//
-// ADD this import at the top of home_page.dart:
-//   import 'package:flawless_beauty_app/screens/makeup_page.dart';
-// ─────────────────────────────────────────────────────────────────────────────
-
-  // ── Categories grid ─────────────────────────────────────────────────────────
+  // ── Categories grid ───────────────────────────────────────────────────────
   static const _categories = [
-    ("Make up",   "AI-guided looks for your skin tone",  "assets/images/makeup.webp"),
-    ("Cosmetics", "Explore top-rated cosmetics",          "assets/images/cosmetics.jpg"),
-    ("Face Yoga", "Tone & lift with daily routines",     "assets/images/faceyoga.jpg"),
-    ("Skin Care", "Routines tailored to you",            "assets/images/skincare.jpg"),
-    ("Products",  "Curated beauty essentials",           "assets/images/products.png"),
+    (
+      'Make up',
+      'AI-guided looks for your skin tone',
+      'assets/images/makeup.webp',
+      'Makeup',
+    ),
+    (
+      'Cosmetics',
+      'Explore top-rated cosmetics',
+      'assets/images/cosmetics.jpg',
+      'Cosmetics',
+    ),
+    (
+      'Face Yoga',
+      'Tone & lift with daily routines',
+      'assets/images/faceyoga.jpg',
+      'Wellness',
+    ),
+    (
+      'Skin Care',
+      'Routines tailored to you',
+      'assets/images/skincare.jpg',
+      'Skin Care',
+    ),
+    (
+      'Products',
+      'Curated beauty essentials',
+      'assets/images/products.png',
+      'Products',
+    ),
   ];
 
   Widget _buildCategoriesGrid() {
+    // When a filter is active but no search text, filter the grid too
+    final filtered = _activeFilter == 'All'
+        ? _categories
+        : _categories.where((c) => c.$4 == _activeFilter).toList();
+
+    if (filtered.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: _card,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Center(
+          child: Text(
+            'No categories match "$_activeFilter"',
+            style: TextStyle(color: _textMuted, fontSize: 13),
+          ),
+        ),
+      );
+    }
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -501,30 +856,32 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         mainAxisSpacing: 14,
         childAspectRatio: 0.88,
       ),
-      itemCount: _categories.length,
+      itemCount: filtered.length,
       itemBuilder: (context, i) {
-        final (title, sub, img) = _categories[i];
-
-        // ── Route logic per category ───────────────────────────────────────
-                VoidCallback? onTap;
+        final (title, sub, img, _) = filtered[i];
+        VoidCallback? onTap;
         switch (title) {
-          case "Make up":
-            onTap = () => Navigator.push(context, _fadeRoute(const MakeupPage()));
+          case 'Make up':
+            onTap = () =>
+                Navigator.push(context, _fadeRoute(const MakeupPage()));
             break;
-          case "Cosmetics":
-            onTap = () => Navigator.push(context, _fadeRoute(const CosmeticsPage()));
+          case 'Cosmetics':
+            onTap = () =>
+                Navigator.push(context, _fadeRoute(const CosmeticsPage()));
             break;
-          case "Face Yoga":
-            onTap = () => Navigator.push(context, _fadeRoute(const FaceYogaPage()));
+          case 'Face Yoga':
+            onTap = () =>
+                Navigator.push(context, _fadeRoute(const FaceYogaPage()));
             break;
-          case "Skin Care":
-            onTap = () => Navigator.push(context, _fadeRoute(const SkinCarePage()));
+          case 'Skin Care':
+            onTap = () =>
+                Navigator.push(context, _fadeRoute(const SkinCarePage()));
             break;
-          case "Products":
-            onTap = () => Navigator.push(context, _fadeRoute(const ProductsPage()));
+          case 'Products':
+            onTap = () =>
+                Navigator.push(context, _fadeRoute(const ProductsPage()));
             break;
         }
-        
         return _CategoryCard(
           title: title,
           subtitle: sub,
@@ -534,21 +891,457 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       },
     );
   }
+
+  // ── Bottom nav ────────────────────────────────────────────────────────────
+  Widget _buildBottomNav() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: _roseDark.withOpacity(0.08),
+            blurRadius: 24,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _navItem(icon: Icons.home_rounded, index: 0),
+              _navItem(icon: Icons.auto_awesome_rounded, index: 1),
+              _navLogo(),
+              _navItem(icon: Icons.analytics_rounded, index: 3),
+              _navItem(icon: Icons.settings_rounded, index: 4),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _navItem({required IconData icon, required int index}) {
+    final bool active = _currentIndex == index;
+    return GestureDetector(
+      onTap: () => _onNavTap(index),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: active ? _orchid.withOpacity(0.12) : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Icon(icon, size: 24, color: active ? _orchidDark : _textMuted),
+      ),
+    );
+  }
+
+  Widget _navLogo() {
+    return GestureDetector(
+      onTap: () => _onNavTap(2),
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            colors: [_rose, _orchid],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: _orchid.withOpacity(0.35),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(3),
+        child: ClipOval(
+          child: Image.asset('assets/images/logo.png', fit: BoxFit.cover),
+        ),
+      ),
+    );
+  }
 }
 
-// ── Category Card widget ─────────────────────────────────────────────────────
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  SEARCH RESULT CARD                                                      ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+class _SearchResultCard extends StatelessWidget {
+  final _SearchItem item;
+  final String query;
+  final VoidCallback onTap;
+
+  const _SearchResultCard({
+    required this.item,
+    required this.query,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: _card,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: _orchid.withOpacity(0.25)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Emoji bubble
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: _orchid.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Center(
+                child: Text(item.emoji, style: const TextStyle(fontSize: 22)),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: _textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    item.subtitle,
+                    style: const TextStyle(fontSize: 12, color: _textMuted),
+                  ),
+                  const SizedBox(height: 5),
+                  // Tag pill
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _rose.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      item.tag,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: _rose,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 13,
+              color: _textMuted,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  FILTER BOTTOM SHEET                                                     ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+class _FilterSheet extends StatelessWidget {
+  final String activeFilter;
+  final ValueChanged<String> onSelect;
+
+  const _FilterSheet({required this.activeFilter, required this.onSelect});
+
+  static const _icons = {
+    'All': '✨',
+    'Makeup': '💄',
+    'Skin Care': '🌿',
+    'Cosmetics': '🪞',
+    'Wellness': '🧘',
+    'Products': '🛍️',
+  };
+
+  static const _descriptions = {
+    'All': 'Show everything',
+    'Makeup': 'AR try-on & tutorials',
+    'Skin Care': 'Routines & analysis',
+    'Cosmetics': 'Top-rated products',
+    'Wellness': 'Face yoga & lifestyle',
+    'Products': 'Curated essentials',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: _surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle bar
+          Container(
+            margin: const EdgeInsets.only(top: 12),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: _orchid.withOpacity(0.4),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                const Text(
+                  'Filter by Category',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: _textPrimary,
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: _orchid.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      size: 18,
+                      color: _textMuted,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Filter options
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: _filterTags.map((tag) {
+                final isActive = tag == activeFilter;
+                return GestureDetector(
+                  onTap: () => onSelect(tag),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 13,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: isActive
+                          ? const LinearGradient(
+                              colors: [_rose, _orchidDark],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            )
+                          : null,
+                      color: isActive ? null : _card,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isActive
+                            ? Colors.transparent
+                            : _orchid.withOpacity(0.3),
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: isActive
+                              ? _rose.withOpacity(0.25)
+                              : Colors.black.withOpacity(0.03),
+                          blurRadius: isActive ? 12 : 6,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          _icons[tag] ?? '✨',
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                tag,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: isActive ? Colors.white : _textPrimary,
+                                ),
+                              ),
+                              Text(
+                                _descriptions[tag] ?? '',
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: isActive ? Colors.white70 : _textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (isActive)
+                          const Icon(
+                            Icons.check_circle_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+}
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  INTEREST CHIP                                                           ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+const _interestIcons = <String, String>{
+  'Oily': '🫧',
+  'Dry': '🌵',
+  'Combination': '🌓',
+  'Sensitive': '🌸',
+  'Normal': '✨',
+  'Acne-Prone': '🔴',
+  'Anti-Aging': '⏳',
+  'Brightening': '☀️',
+  'Hydration': '💧',
+  'Pore Minimizing': '🔬',
+  'Even Tone': '🌟',
+  'Glow Up': '💫',
+  'Natural': '🌿',
+  'Glam': '💎',
+  'Bold': '💋',
+  'Minimal': '🪞',
+  'Editorial': '🎭',
+  'Night Out': '🌙',
+  'Cruelty-Free': '🐰',
+  'Vegan': '🌱',
+  'K-Beauty': '🎀',
+  'Drugstore': '🛍️',
+  'Luxury': '👑',
+  'DIY Beauty': '🧪',
+  'AM Routine': '☀️',
+  'PM Routine': '🌙',
+  'Face Masking': '🧖',
+  'Facial Massage': '💆',
+  'SPF Obsessed': '☂️',
+  'Face Yoga': '🧘',
+  'Hair Care': '💆',
+  'Nail Art': '💅',
+  'Body Care': '🧴',
+  'Fragrance': '🌸',
+  'Brows': '🪮',
+  'Lip Looks': '💄',
+};
+
+class _InterestChip extends StatelessWidget {
+  const _InterestChip({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = _interestIcons[label] ?? '✨';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _orchid.withOpacity(0.6), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: _rose.withOpacity(0.08),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(icon, style: const TextStyle(fontSize: 14)),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              color: Color(0xFF4A3B52),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  CATEGORY CARD                                                           ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
 class _CategoryCard extends StatefulWidget {
   const _CategoryCard({
     required this.title,
     required this.subtitle,
     required this.imgPath,
-    this.onTap,                          // ← optional navigation callback
+    this.onTap,
   });
 
   final String title;
   final String subtitle;
   final String imgPath;
-  final VoidCallback? onTap;             // ← NEW
+  final VoidCallback? onTap;
 
   @override
   State<_CategoryCard> createState() => _CategoryCardState();
@@ -560,7 +1353,7 @@ class _CategoryCardState extends State<_CategoryCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onTap,               // ← uses the callback (null = no-op)
+      onTap: widget.onTap,
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) => setState(() => _pressed = false),
       onTapCancel: () => setState(() => _pressed = false),
@@ -571,12 +1364,8 @@ class _CategoryCardState extends State<_CategoryCard> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(18),
-            // Highlight active (tappable) cards with a subtle orchid border
             border: widget.onTap != null
-                ? Border.all(
-                    color: const Color(0xFFF8AFCB).withOpacity(0.35),
-                    width: 1.2,
-                  )
+                ? Border.all(color: _orchid.withOpacity(0.35), width: 1.2)
                 : null,
             boxShadow: [
               BoxShadow(
@@ -589,12 +1378,12 @@ class _CategoryCardState extends State<_CategoryCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Image ──────────────────────────────────────────────────────
               Stack(
                 children: [
                   ClipRRect(
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(18)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(18),
+                    ),
                     child: Image.asset(
                       widget.imgPath,
                       height: 112,
@@ -602,22 +1391,23 @@ class _CategoryCardState extends State<_CategoryCard> {
                       fit: BoxFit.cover,
                     ),
                   ),
-                  // "Tap to explore" badge only on linked cards
                   if (widget.onTap != null)
                     Positioned(
                       top: 8,
                       right: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xFFE8708A), Color(0xFFF8AFCB)],
+                            colors: [_rose, _orchid],
                           ),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Text(
-                          "Try Now",
+                          'Try Now',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 9.5,
@@ -629,8 +1419,6 @@ class _CategoryCardState extends State<_CategoryCard> {
                     ),
                 ],
               ),
-
-              // ── Text ───────────────────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
                 child: Column(

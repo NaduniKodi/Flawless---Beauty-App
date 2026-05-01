@@ -1,33 +1,12 @@
+// lib/interface/notifications_page.dart
 import 'package:flutter/material.dart';
+import 'package:flawless_beauty_app/services/notification_settings.dart';
 
-class NotificationsPage extends StatefulWidget {
+class NotificationsPage extends StatelessWidget {
   const NotificationsPage({super.key});
 
-  @override
-  State<NotificationsPage> createState() => _NotificationsPageState();
-}
-
-class _NotificationsPageState extends State<NotificationsPage> {
-  // Push Notifications
-  bool _pushAll = true;
-  bool _pushMessages = true;
-  bool _pushLikes = true;
-  bool _pushComments = true;
-  bool _pushFollowers = false;
-  bool _pushPromotions = false;
-
-  // Email Notifications
-  bool _emailWeekly = true;
-  bool _emailUpdates = false;
-  bool _emailTips = true;
-
-  // Sound & Vibration
-  bool _sound = true;
-  bool _vibration = true;
-  bool _doNotDisturb = false;
-
-  final LinearGradient _gradient = const LinearGradient(
-    colors: [Color(0xFFF48FB1), Color(0xFFF06292)],
+  static const LinearGradient _gradient = LinearGradient(
+    colors: [Color(0xFFE8708A), Color(0xFFF8AFCB)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -35,80 +14,100 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFCE4EC),
+      backgroundColor: const Color(0xFFFDF7FA),
       body: Column(
         children: [
           _buildHeader(context),
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSectionLabel('PUSH NOTIFICATIONS'),
-                  const SizedBox(height: 8),
-                  _buildCard([
-                    _buildSwitchTile(
-                      'All Notifications',
-                      'Master toggle for all push notifications',
-                      Icons.notifications_outlined,
-                      _pushAll,
-                      (v) => setState(() {
-                        _pushAll = v;
-                        _pushMessages = v;
-                        _pushLikes = v;
-                        _pushComments = v;
-                      }),
-                      isMaster: true,
-                    ),
-                    const Divider(height: 1, indent: 56),
-                    _buildSwitchTile('Messages', 'New messages and replies', Icons.chat_bubble_outline, _pushMessages,
-                        (v) => setState(() => _pushMessages = v)),
-                    const Divider(height: 1, indent: 56),
-                    _buildSwitchTile('Likes', 'When someone likes your content', Icons.favorite_border, _pushLikes,
-                        (v) => setState(() => _pushLikes = v)),
-                    const Divider(height: 1, indent: 56),
-                    _buildSwitchTile('Comments', 'New comments on your posts', Icons.comment_outlined, _pushComments,
-                        (v) => setState(() => _pushComments = v)),
-                    const Divider(height: 1, indent: 56),
-                    _buildSwitchTile('New Followers', 'When someone follows you', Icons.person_add_outlined,
-                        _pushFollowers, (v) => setState(() => _pushFollowers = v)),
-                    const Divider(height: 1, indent: 56),
-                    _buildSwitchTile('Promotions & Offers', 'Exclusive deals and offers', Icons.local_offer_outlined,
-                        _pushPromotions, (v) => setState(() => _pushPromotions = v)),
-                  ]),
+            // ListenableBuilder rebuilds the whole scroll area whenever any
+            // toggle changes — cheap because the tree is small.
+            child: ListenableBuilder(
+              listenable: NotificationSettings.instance,
+              builder: (_, __) {
+                final ns = NotificationSettings.instance;
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ── Push notifications ────────────────────────────────────
+                      _sectionLabel('PUSH NOTIFICATIONS'),
+                      const SizedBox(height: 8),
+                      _buildCard([
+                        _tile(
+                          'All Notifications',
+                          'Master toggle for all push notifications',
+                          Icons.notifications_outlined,
+                          ns.pushAll,
+                          ns.setPushAll,
+                          isMaster: true,
+                        ),
+                        _divider(),
+                        _tile('Messages', 'New messages and replies',
+                            Icons.chat_bubble_outline,
+                            ns.pushMessages, ns.setPushMessages),
+                        _divider(),
+                        _tile('Likes', 'When someone likes your content',
+                            Icons.favorite_border,
+                            ns.pushLikes, ns.setPushLikes),
+                        _divider(),
+                        _tile('Comments', 'New comments on your posts',
+                            Icons.comment_outlined,
+                            ns.pushComments, ns.setPushComments),
+                        _divider(),
+                        _tile('New Followers', 'When someone follows you',
+                            Icons.person_add_outlined,
+                            ns.pushFollowers, ns.setPushFollowers),
+                        _divider(),
+                        _tile('Promotions & Offers', 'Exclusive deals and offers',
+                            Icons.local_offer_outlined,
+                            ns.pushPromos, ns.setPushPromos),
+                      ]),
 
-                  const SizedBox(height: 20),
-                  _buildSectionLabel('EMAIL NOTIFICATIONS'),
-                  const SizedBox(height: 8),
-                  _buildCard([
-                    _buildSwitchTile('Weekly Digest', 'Summary of your weekly activity', Icons.mail_outline,
-                        _emailWeekly, (v) => setState(() => _emailWeekly = v)),
-                    const Divider(height: 1, indent: 56),
-                    _buildSwitchTile('App Updates', 'New features and improvements', Icons.system_update_outlined,
-                        _emailUpdates, (v) => setState(() => _emailUpdates = v)),
-                    const Divider(height: 1, indent: 56),
-                    _buildSwitchTile('Tips & Tutorials', 'How to get the most out of the app', Icons.lightbulb_outline,
-                        _emailTips, (v) => setState(() => _emailTips = v)),
-                  ]),
+                      const SizedBox(height: 20),
 
-                  const SizedBox(height: 20),
-                  _buildSectionLabel('SOUND & VIBRATION'),
-                  const SizedBox(height: 8),
-                  _buildCard([
-                    _buildSwitchTile('Sound', 'Play sound for notifications', Icons.volume_up_outlined, _sound,
-                        (v) => setState(() => _sound = v)),
-                    const Divider(height: 1, indent: 56),
-                    _buildSwitchTile('Vibration', 'Vibrate for notifications', Icons.vibration, _vibration,
-                        (v) => setState(() => _vibration = v)),
-                    const Divider(height: 1, indent: 56),
-                    _buildSwitchTile('Do Not Disturb', 'Silence all notifications', Icons.do_not_disturb_on_outlined,
-                        _doNotDisturb, (v) => setState(() => _doNotDisturb = v)),
-                  ]),
+                      // ── Email notifications ───────────────────────────────────
+                      _sectionLabel('EMAIL NOTIFICATIONS'),
+                      const SizedBox(height: 8),
+                      _buildCard([
+                        _tile('Weekly Digest', 'Summary of your weekly activity',
+                            Icons.mail_outline,
+                            ns.emailWeekly, ns.setEmailWeekly),
+                        _divider(),
+                        _tile('App Updates', 'New features and improvements',
+                            Icons.system_update_outlined,
+                            ns.emailUpdates, ns.setEmailUpdates),
+                        _divider(),
+                        _tile('Tips & Tutorials',
+                            'How to get the most out of the app',
+                            Icons.lightbulb_outline,
+                            ns.emailTips, ns.setEmailTips),
+                      ]),
 
-                  const SizedBox(height: 20),
-                ],
-              ),
+                      const SizedBox(height: 20),
+
+                      // ── Sound & vibration ─────────────────────────────────────
+                      _sectionLabel('SOUND & VIBRATION'),
+                      const SizedBox(height: 8),
+                      _buildCard([
+                        _tile('Sound', 'Play sound for notifications',
+                            Icons.volume_up_outlined,
+                            ns.sound, ns.setSound),
+                        _divider(),
+                        _tile('Vibration', 'Vibrate for notifications',
+                            Icons.vibration,
+                            ns.vibration, ns.setVibration),
+                        _divider(),
+                        _tile('Do Not Disturb', 'Silence all notifications',
+                            Icons.do_not_disturb_on_outlined,
+                            ns.doNotDisturb, ns.setDoNotDisturb),
+                      ]),
+
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -116,9 +115,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 
+  // ── Widgets ───────────────────────────────────────────────────────────────────
+
   Widget _buildHeader(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(gradient: _gradient),
+      decoration: const BoxDecoration(gradient: _gradient),
       child: SafeArea(
         bottom: false,
         child: Padding(
@@ -130,17 +131,22 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withOpacity(0.25),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.chevron_left, color: Colors.white, size: 22),
+                  child: const Icon(Icons.chevron_left,
+                      color: Colors.white, size: 22),
                 ),
               ),
               const Expanded(
                 child: Text(
                   'Notifications',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
               const SizedBox(width: 38),
@@ -151,10 +157,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 
-  Widget _buildSectionLabel(String label) {
+  Widget _sectionLabel(String label) {
     return Text(
       label,
-      style: const TextStyle(color: Color(0xFFB0BEC5), fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 1.2),
+      style: const TextStyle(
+        color: Color(0xFF9E8DA8),
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 1.4,
+      ),
     );
   }
 
@@ -163,13 +174,22 @@ class _NotificationsPageState extends State<NotificationsPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.pink.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFE8708A).withOpacity(0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(children: children),
     );
   }
 
-  Widget _buildSwitchTile(
+  Widget _divider() =>
+      const Divider(height: 1, indent: 56, color: Color(0xFFF3ECF1));
+
+  Widget _tile(
     String title,
     String subtitle,
     IconData icon,
@@ -180,19 +200,35 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return SwitchListTile(
       value: value,
       onChanged: onChanged,
-      activeColor: const Color(0xFFF06292),
+      activeColor: const Color(0xFFE8708A),
       secondary: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: isMaster
-              ? const Color(0xFFF06292).withOpacity(0.1)
-              : const Color(0xFFF48FB1).withOpacity(0.1),
+              ? const Color(0xFFE8708A).withOpacity(0.10)
+              : const Color(0xFFF8AFCB).withOpacity(0.15),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, color: isMaster ? const Color(0xFFF06292) : const Color(0xFFF48FB1), size: 20),
+        child: Icon(
+          icon,
+          size: 20,
+          color: isMaster
+              ? const Color(0xFFE8708A)
+              : const Color(0xFFE8708A).withOpacity(0.75),
+        ),
       ),
-      title: Text(title, style: TextStyle(fontWeight: isMaster ? FontWeight.w600 : FontWeight.w500, fontSize: 15)),
-      subtitle: Text(subtitle, style: const TextStyle(color: Color(0xFFB0BEC5), fontSize: 12)),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: isMaster ? FontWeight.w700 : FontWeight.w500,
+          fontSize: 14.5,
+          color: const Color(0xFF1C1224),
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: const TextStyle(color: Color(0xFF9E8DA8), fontSize: 12),
+      ),
     );
   }
 }

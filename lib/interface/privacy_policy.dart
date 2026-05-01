@@ -191,7 +191,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                               children: [
                                 Icon(Icons.mail_outline, color: Colors.white, size: 16),
                                 SizedBox(width: 8),
-                                Text('privacy@app.com',
+                                Text('support@flawless.lk',
                                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                               ],
                             ),

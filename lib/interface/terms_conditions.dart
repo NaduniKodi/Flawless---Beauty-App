@@ -52,7 +52,7 @@ class TermsAndConditionsPage extends StatelessWidget {
     {
       'title': '10. Contact Us',
       'content':
-          'If you have any questions about these Terms and Conditions, please contact us at support@app.com or through the help section within the application. We aim to respond to all inquiries within 2 business days.',
+          'If you have any questions about these Terms and Conditions, please contact us at support@flawless.lk or through the help section within the application. We aim to respond to all inquiries within 2 business days.',
     },
   ];
 

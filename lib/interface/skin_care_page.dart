@@ -5,25 +5,25 @@ import 'package:flutter/material.dart';
 //
 //   assets/images/skincare/
 //   ├── lk/
-//   │   ├── spaceylon_coconut_cleanser.jpg
-//   │   ├── siddhalepa_neem_wash.jpg
-//   │   ├── janet_papaya_wash.jpg
-//   │   ├── janet_aloe_toner.jpg
-//   │   ├── swabha_brightening_serum.jpg
-//   │   ├── dlas_vitc_serum.jpg
-//   │   ├── spaceylon_sandalwood_moist.jpg
-//   │   ├── british_oil_control.jpg
-//   │   ├── prevense_spf50.jpg
-//   │   └── velvet_body_lotion.jpg
+//   │   ├── spaceylon_coconut_cleanser.jpg 1
+//   │   ├── siddhalepa_neem_wash.jpg 2
+//   │   ├── janet_papaya_wash.jpg 3
+//   │   ├── janet_aloe_toner.jpg 4
+//   │   ├── swabha_brightening_serum.jpg 5
+//   │   ├── dlas_vitc_serum.jpg 6
+//   │   ├── spaceylon_sandalwood_moist.jpg 7
+//   │   ├── british_oil_control.jpg 8
+//   │   ├── prevense_spf50.jpg 9
+//   │   └── velvet_body_lotion.jpg 10
 //   └── intl/
-//       ├── cerave_cleanser.jpg
-//       ├── klairs_toner.jpg
-//       ├── ordinary_niacinamide.jpg
-//       ├── neutrogena_ha.jpg
-//       ├── laroche_barrier.jpg
-//       ├── belif_moisturiser.jpg
-//       ├── eltamd_spf.jpg
-//       └── paulas_retinol.jpg
+//       ├── cerave_cleanser.jpg 11
+//       ├── klairs_toner.jpg 12
+//       ├── ordinary_niacinamide.jpg 13
+//       ├── neutrogena_ha.jpg 14
+//       ├── laroche_barrier.jpg 15
+//       ├── belif_moisturiser.jpg 16
+//       ├── eltamd_spf.jpg 17
+//       └── paulas_retinol.jpg 18
 //
 // pubspec.yaml:
 //   - assets/images/skincare/lk/
@@ -69,7 +69,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['All', 'Dry', 'Sensitive', 'Normal'],
       'tag': 'Step 1', 'tagColor': Color(0xFF7EB8D4),
       'desc': 'Gentle Ayurvedic cleanser with raw coconut milk',
-      'image': 'assets/images/skincare/lk/spaceylon_coconut_cleanser.jpg',
+      'image': 'assets/images/skincare/lk/1.png',
     },
     {
       'name': 'Neem & Turmeric Face Wash',
@@ -78,7 +78,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['All', 'Oily', 'Combination'],
       'tag': 'Step 1', 'tagColor': Color(0xFF7EB8D4),
       'desc': 'Traditional Ayurvedic formula for clear skin',
-      'image': 'assets/images/skincare/lk/siddhalepa_neem_wash.jpg',
+      'image': 'assets/images/skincare/lk/2.png',
     },
     {
       'name': 'Papaya Face Wash',
@@ -87,7 +87,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['All', 'Normal', 'Combination'],
       'tag': 'Step 1', 'tagColor': Color(0xFF7EB8D4),
       'desc': 'Brightening papaya extract for a natural glow',
-      'image': 'assets/images/skincare/lk/janet_papaya_wash.jpg',
+      'image': 'assets/images/skincare/lk/3.webp',
     },
     {
       'name': 'Aloe Vera Toner',
@@ -96,7 +96,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['All', 'Sensitive', 'Dry'],
       'tag': 'Step 2', 'tagColor': Color(0xFFB4D4A8),
       'desc': 'Soothing aloe vera for balanced, calm skin',
-      'image': 'assets/images/skincare/lk/janet_aloe_toner.jpg',
+      'image': 'assets/images/skincare/lk/4.webp',
     },
     {
       'name': 'Herbal Brightening Serum',
@@ -105,7 +105,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['All', 'Normal', 'Dry'],
       'tag': 'Step 3', 'tagColor': Color(0xFFF8AFCB),
       'desc': 'Modern Ayurveda meets science for radiant skin',
-      'image': 'assets/images/skincare/lk/swabha_brightening_serum.jpg',
+      'image': 'assets/images/skincare/lk/5.jpg',
     },
     {
       'name': 'Nature\'s secret Vitamin C Serum',
@@ -114,7 +114,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['All', 'Oily', 'Combination'],
       'tag': 'Step 3', 'tagColor': Color(0xFFF8AFCB),
       'desc': '100% natural organic ingredients from Sri Lankan fields',
-      'image': 'assets/images/skincare/lk/nature_secret_vitc_serum.jpg',
+      'image': 'assets/images/skincare/lk/6.png',
     },
     {
       'name': 'Sandalwood Moisturiser',
@@ -123,7 +123,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['All', 'Dry', 'Normal', 'Sensitive'],
       'tag': 'Step 4', 'tagColor': Color(0xFFE8C4A0),
       'desc': 'Rich sandalwood & coconut oil hydration ritual',
-      'image': 'assets/images/skincare/lk/spaceylon_sandalwood_moist.jpg',
+      'image': 'assets/images/skincare/lk/7.png',
     },
     {
       'name': 'Oil-Control Moisturiser',
@@ -132,7 +132,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['Oily', 'Combination'],
       'tag': 'Step 4', 'tagColor': Color(0xFFE8C4A0),
       'desc': 'Designed for Sri Lankan humidity & oily skin',
-      'image': 'assets/images/skincare/lk/british_oil_control.jpg',
+      'image': 'assets/images/skincare/lk/8.jpg',
     },
     {
       'name': 'Daily SPF 50 Sunscreen',
@@ -141,7 +141,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['All', 'Sensitive'],
       'tag': 'Step 5', 'tagColor': Color(0xFFF5E07A),
       'desc': 'Lightweight SPF suited to tropical climate',
-      'image': 'assets/images/skincare/lk/prevense_spf50.jpg',
+      'image': 'assets/images/skincare/lk/9.jpg',
     },
     {
       'name': 'Velvet Body Lotion',
@@ -150,7 +150,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['All', 'Dry', 'Normal'],
       'tag': 'Body', 'tagColor': Color(0xFFD4C0E8),
       'desc': 'Designed specifically for Sri Lankan skin & climate',
-      'image': 'assets/images/skincare/lk/velvet_body_lotion.jpg',
+      'image': 'assets/images/skincare/lk/10.jpg',
     },
   ];
 
@@ -163,7 +163,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['All', 'Oily', 'Combination'],
       'tag': 'Step 1', 'tagColor': Color(0xFF7EB8D4),
       'desc': 'Dermatologist recommended with ceramides',
-      'image': 'assets/images/skincare/intl/cerave_cleanser.jpg',
+      'image': 'assets/images/skincare/intl/11.avif',
     },
     {
       'name': 'Hydrating Toner',
@@ -172,7 +172,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['All', 'Dry', 'Sensitive', 'Normal'],
       'tag': 'Step 2', 'tagColor': Color(0xFFB4D4A8),
       'desc': 'K-beauty essential for glass skin',
-      'image': 'assets/images/skincare/intl/klairs_toner.jpg',
+      'image': 'assets/images/skincare/intl/12.jpg',
     },
     {
       'name': 'Niacinamide 10% + Zinc',
@@ -181,7 +181,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['Oily', 'Combination'],
       'tag': 'Step 3', 'tagColor': Color(0xFFF8AFCB),
       'desc': 'Pore-minimising & sebum-control serum',
-      'image': 'assets/images/skincare/intl/ordinary_niacinamide.jpg',
+      'image': 'assets/images/skincare/intl/13.jpg',
     },
     {
       'name': 'Hyaluronic Acid Serum',
@@ -190,7 +190,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['Dry', 'Normal', 'Sensitive'],
       'tag': 'Step 3', 'tagColor': Color(0xFFF8AFCB),
       'desc': 'Deep hydration with multi-weight HA',
-      'image': 'assets/images/skincare/intl/neutrogena_ha.jpg',
+      'image': 'assets/images/skincare/intl/14.webp',
     },
     {
       'name': 'Barrier Repair Cream',
@@ -199,7 +199,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['Sensitive', 'Dry'],
       'tag': 'Step 4', 'tagColor': Color(0xFFE8C4A0),
       'desc': 'Clinically tested for reactive skin',
-      'image': 'assets/images/skincare/intl/laroche_barrier.jpg',
+      'image': 'assets/images/skincare/intl/15.webp',
     },
     {
       'name': 'Oil-Free Moisturiser',
@@ -208,7 +208,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['Oily', 'Combination', 'Normal'],
       'tag': 'Step 4', 'tagColor': Color(0xFFE8C4A0),
       'desc': 'Lightweight formula from comfrey herb',
-      'image': 'assets/images/skincare/intl/belif_moisturiser.jpg',
+      'image': 'assets/images/skincare/intl/16.jpg',
     },
     {
       'name': 'Mineral SPF 50',
@@ -217,7 +217,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['All', 'Sensitive'],
       'tag': 'Step 5', 'tagColor': Color(0xFFF5E07A),
       'desc': 'Zinc oxide broad-spectrum protection',
-      'image': 'assets/images/skincare/intl/eltamd_spf.jpg',
+      'image': 'assets/images/skincare/intl/17.avif',
     },
     {
       'name': 'Retinol Night Serum',
@@ -226,7 +226,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['Oily', 'Combination', 'Normal'],
       'tag': 'PM Boost', 'tagColor': Color(0xFFB8A0C8),
       'desc': 'Encapsulated retinol for smoother skin',
-      'image': 'assets/images/skincare/intl/paulas_retinol.jpg',
+      'image': 'assets/images/skincare/intl/18.avif',
     },
   ];
 
@@ -576,7 +576,7 @@ class _SkinProductTileState extends State<_SkinProductTile> {
                   // Product image
                   Image.asset(
                     widget.imagePath,
-                    fit: BoxFit.contain,
+                    fit: BoxFit.fill,
                     alignment: Alignment.center,
                     errorBuilder: (_, __, ___) => Center(
                       child: Container(

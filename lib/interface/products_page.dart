@@ -5,25 +5,25 @@ import 'package:flutter/material.dart';
 //
 //   assets/images/products/
 //   ├── lk/
-//   │   ├── spaceylon_coconut_serum.jpg
-//   │   ├── siddhalepa_neem_mask.jpg
-//   │   ├── janet_aloe_mist.jpg
-//   │   ├── swabha_turmeric_mask.jpg
-//   │   ├── british_vitc_serum.jpg
-//   │   ├── spaceylon_herbal_mist.jpg
-//   │   ├── dlas_rosehip_serum.jpg
-//   │   ├── prevense_collagen.jpg
-//   │   ├── spaceylon_gua_sha.jpg
-//   │   └── janet_scrub.jpg
+//   │   ├── spaceylon_coconut_serum.jpg 1
+//   │   ├── siddhalepa_neem_mask.jpg 2
+//   │   ├── janet_aloe_mist.jpg 3
+//   │   ├── swabha_turmeric_mask.jpg 4
+//   │   ├── british_vitc_serum.jpg 5
+//   │   ├── spaceylon_herbal_mist.jpg 6
+//   │   ├── dlas_rosehip_serum.jpg 7
+//   │   ├── prevense_collagen.jpg 8
+//   │   ├── spaceylon_gua_sha.jpg 9
+//   │   └── janet_scrub.jpg 10
 //   └── intl/
-//       ├── medik8_retinol.jpg
-//       ├── herbivore_roller.jpg
-//       ├── skinceuticals_ha.jpg
-//       ├── fresh_clay_mask.jpg
-//       ├── mario_rosewater.jpg
-//       ├── hum_collagen.jpg
-//       ├── currentbody_led.jpg
-//       └── laneige_sleeping_mask.jpg
+//       ├── medik8_retinol.jpg 11
+//       ├── herbivore_roller.jpg 12
+//       ├── skinceuticals_ha.jpg 13
+//       ├── fresh_clay_mask.jpg 14
+//       ├── mario_rosewater.jpg 15
+//       ├── hum_collagen.jpg 16
+//       ├── currentbody_led.jpg 17
+//       └── laneige_sleeping_mask.jpg 18
 //
 // pubspec.yaml:
 //   - assets/images/products/lk/
@@ -63,7 +63,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.9, 'reviews': 1240,
       'category': 'Serums', 'badge': 'Luxury',
       'badgeColor': Color(0xFFD4A820), 'accent': Color(0xFFFFF0D6),
-      'image': 'assets/images/products/lk/spaceylon_coconut_serum.jpg',
+      'image': 'assets/images/products/lk/1.png',
     },
     {
       'name': 'Neem Herbal Mask',
@@ -72,7 +72,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.6, 'reviews': 874,
       'category': 'Masks', 'badge': 'Ayurvedic',
       'badgeColor': Color(0xFF7EC4A4), 'accent': Color(0xFFEEFAF4),
-      'image': 'assets/images/products/lk/siddhalepa_neem_mask.jpg',
+      'image': 'assets/images/products/lk/2.png',
     },
     {
       'name': 'Aloe Vera Mist',
@@ -81,7 +81,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.5, 'reviews': 632,
       'category': 'Mists', 'badge': 'Natural',
       'badgeColor': Color(0xFFB4D4A8), 'accent': Color(0xFFEEFAF4),
-      'image': 'assets/images/products/lk/janet_aloe_mist.jpg',
+      'image': 'assets/images/products/lk/3.webp',
     },
     {
       'name': 'Turmeric Glow Mask',
@@ -90,7 +90,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.7, 'reviews': 521,
       'category': 'Masks', 'badge': 'Best Seller',
       'badgeColor': Color(0xFFE8708A), 'accent': Color(0xFFFFF8E1),
-      'image': 'assets/images/products/lk/swabha_turmeric_mask.jpg',
+      'image': 'assets/images/products/lk/4.webp',
     },
     {
       'name': 'Vitamin C Brightening Serum',
@@ -99,7 +99,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.6, 'reviews': 398,
       'category': 'Serums', 'badge': 'New',
       'badgeColor': Color(0xFF9EB8D4), 'accent': Color(0xFFEEF4FF),
-      'image': 'assets/images/products/lk/british_vitc_serum.jpg',
+      'image': 'assets/images/products/lk/5.webp',
     },
     {
       'name': 'Herbal Body Mist',
@@ -108,7 +108,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.8, 'reviews': 703,
       'category': 'Mists', 'badge': 'Popular',
       'badgeColor': Color(0xFFD4A820), 'accent': Color(0xFFFFF8E1),
-      'image': 'assets/images/products/lk/spaceylon_herbal_mist.jpg',
+      'image': 'assets/images/products/lk/6.webp',
     },
     {
       'name': 'Organic Rose Hip Serum',
@@ -117,7 +117,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.7, 'reviews': 284,
       'category': 'Serums', 'badge': 'Organic',
       'badgeColor': Color(0xFF7EC4A4), 'accent': Color(0xFFD4E8D4),
-      'image': 'assets/images/products/lk/dlas_rosehip_serum.jpg',
+      'image': 'assets/images/products/lk/7.jpg',
     },
     {
       'name': 'Collagen Beauty Supplement',
@@ -126,7 +126,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.5, 'reviews': 156,
       'category': 'Supplements', 'badge': 'Wellness',
       'badgeColor': Color(0xFFB8A0C8), 'accent': Color(0xFFEEE8F8),
-      'image': 'assets/images/products/lk/prevense_collagen.jpg',
+      'image': 'assets/images/products/lk/8.png',
     },
     {
       'name': 'Gua Sha Stone',
@@ -135,7 +135,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.8, 'reviews': 412,
       'category': 'Tools', 'badge': 'Luxury',
       'badgeColor': Color(0xFFD4A820), 'accent': Color(0xFFFFF8E1),
-      'image': 'assets/images/products/lk/spaceylon_gua_sha.jpg',
+      'image': 'assets/images/products/lk/9.avif',
     },
     {
       'name': 'Herbal Exfoliating Scrub',
@@ -144,7 +144,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.4, 'reviews': 341,
       'category': 'Masks', 'badge': 'Value',
       'badgeColor': Color(0xFF7EC4A4), 'accent': Color(0xFFEEFAF4),
-      'image': 'assets/images/products/lk/janet_scrub.jpg',
+      'image': 'assets/images/products/lk/10.webp',
     },
   ];
 
@@ -157,7 +157,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.9, 'reviews': 2341,
       'category': 'Serums', 'badge': 'Best Seller',
       'badgeColor': Color(0xFFE8708A), 'accent': Color(0xFFF8AFCB),
-      'image': 'assets/images/products/intl/medik8_retinol.jpg',
+      'image': 'assets/images/products/intl/11.jpg',
     },
     {
       'name': 'Jade Facial Roller',
@@ -166,7 +166,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.7, 'reviews': 891,
       'category': 'Tools', 'badge': 'Trending',
       'badgeColor': Color(0xFF7EC4A4), 'accent': Color(0xFFB4D4A8),
-      'image': 'assets/images/products/intl/herbivore_roller.jpg',
+      'image': 'assets/images/products/intl/12.webp',
     },
     {
       'name': 'Hyaluronic Serum',
@@ -175,7 +175,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.8, 'reviews': 1203,
       'category': 'Serums', 'badge': 'Premium',
       'badgeColor': Color(0xFFB8A0C8), 'accent': Color(0xFFD4C0E8),
-      'image': 'assets/images/products/intl/skinceuticals_ha.jpg',
+      'image': 'assets/images/products/intl/13.webp',
     },
     {
       'name': 'Rose Clay Mask',
@@ -184,7 +184,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.6, 'reviews': 756,
       'category': 'Masks', 'badge': 'New',
       'badgeColor': Color(0xFF9EB8D4), 'accent': Color(0xFFE8C8C8),
-      'image': 'assets/images/products/intl/fresh_clay_mask.jpg',
+      'image': 'assets/images/products/intl/14.jpg',
     },
     {
       'name': 'Rosewater Mist',
@@ -193,7 +193,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.7, 'reviews': 4521,
       'category': 'Mists', 'badge': 'Fan Fave',
       'badgeColor': Color(0xFFE8708A), 'accent': Color(0xFFF8AFCB),
-      'image': 'assets/images/products/intl/mario_rosewater.jpg',
+      'image': 'assets/images/products/intl/15.jpg',
     },
     {
       'name': 'Collagen Gummies',
@@ -202,7 +202,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.5, 'reviews': 678,
       'category': 'Supplements', 'badge': 'Wellness',
       'badgeColor': Color(0xFFF5C97A), 'accent': Color(0xFFFFF0D6),
-      'image': 'assets/images/products/intl/hum_collagen.jpg',
+      'image': 'assets/images/products/intl/16.avif',
     },
     {
       'name': 'LED Light Mask',
@@ -211,7 +211,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.8, 'reviews': 432,
       'category': 'Tools', 'badge': 'Pro',
       'badgeColor': Color(0xFF9EB8D4), 'accent': Color(0xFFD4E4F8),
-      'image': 'assets/images/products/intl/currentbody_led.jpg',
+      'image': 'assets/images/products/intl/17.jpg',
     },
     {
       'name': 'Overnight Sleeping Mask',
@@ -220,7 +220,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'rating': 4.9, 'reviews': 3102,
       'category': 'Masks', 'badge': 'Best Seller',
       'badgeColor': Color(0xFFE8708A), 'accent': Color(0xFFF8AFCB),
-      'image': 'assets/images/products/intl/laneige_sleeping_mask.jpg',
+      'image': 'assets/images/products/intl/18.jpg',
     },
   ];
 
@@ -605,7 +605,7 @@ class _ProductCardState extends State<_ProductCard> {
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
                 child: Stack(
-                  fit: StackFit.expand,
+                  fit: StackFit.expand, alignment: Alignment.center,
                   children: [
                     // Gradient background
                     Container(
@@ -620,7 +620,7 @@ class _ProductCardState extends State<_ProductCard> {
                     // Product image with fallback
                     Image.asset(
                       widget.imagePath,
-                      fit: BoxFit.contain,
+                      fit: BoxFit.fill,
                       alignment: Alignment.center,
                       errorBuilder: (_, __, ___) => Center(
                         child: Container(

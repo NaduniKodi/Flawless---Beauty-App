@@ -125,15 +125,59 @@ class _MakeupReportPageState extends State<MakeupReportPage>
     );
   }
 
+  Widget _buildHeroImage() {
+  final path = widget.imagePath;
+  if (path.isEmpty) {
+    return Container(color: Colors.grey.shade200,
+        child: const Icon(Icons.face_retouching_natural, size: 60));
+  }
+  // Remote URL (loaded from Supabase history)
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return Image.network(
+      path,
+      fit: BoxFit.cover,
+      loadingBuilder: (_, child, progress) {
+        if (progress == null) return child;
+        return Container(
+          color: const Color(0xFFFDF7FA),
+          child: Center(
+            child: CircularProgressIndicator(
+              value: progress.expectedTotalBytes != null
+                  ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
+                  : null,
+              valueColor: const AlwaysStoppedAnimation<Color>(_orchid),
+              strokeWidth: 2,
+            ),
+          ),
+        );
+      },
+      errorBuilder: (_, __, ___) => Container(
+        color: const Color(0xFFFDF7FA),
+        child: const Icon(Icons.broken_image_outlined,
+            color: _orchid, size: 48),
+      ),
+    );
+  }
+  // Local file (just captured)
+  return Image.file(
+    File(path),
+    fit: BoxFit.cover,
+    errorBuilder: (_, __, ___) => Container(
+      color: const Color(0xFFFDF7FA),
+      child: const Icon(Icons.broken_image_outlined,
+          color: _orchid, size: 48),
+    ),
+  );
+}
+
   Widget _buildHeroHeader() {
     return Stack(
       fit: StackFit.expand,
       children: [
         // Captured photo
         ClipRRect(
-          child: Image.file(File(widget.imagePath), fit: BoxFit.cover),
+          child: _buildHeroImage(),
         ),
-
         // Soft light-mode gradient overlay
         Container(
           decoration: BoxDecoration(

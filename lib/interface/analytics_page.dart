@@ -450,7 +450,11 @@ class _ScanCardState extends State<_ScanCard> {
           context,
           PageRouteBuilder(
             pageBuilder: (_, __, ___) =>
-                SkinReportPage(result: r.result, imagePath: r.imagePath),
+                SkinReportPage(
+                  result: r.result, 
+                  imagePath: r.imagePath,
+                  isNewScan: false
+                ),
             transitionsBuilder: (_, a, __, child) =>
                 FadeTransition(opacity: a, child: child),
           ),

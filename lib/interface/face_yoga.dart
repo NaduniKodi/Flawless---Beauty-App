@@ -287,6 +287,355 @@ class _FaceYogaPageState extends State<FaceYogaPage>
     );
   }
 
+  // ── See All: Routines ──────────────────────────────────────────────────────
+  void _showAllRoutines() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.92,
+        maxChildSize: 0.96,
+        minChildSize: 0.5,
+        expand: false,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: _surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2)),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                child: Row(children: [
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      const Text('All Routines',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800,
+                              color: _textPrimary, letterSpacing: -0.3)),
+                      const SizedBox(height: 2),
+                      Text('${_routines.length} routines · all levels',
+                          style: const TextStyle(fontSize: 13, color: _textMuted)),
+                    ]),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white, borderRadius: BorderRadius.circular(12),
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8)],
+                      ),
+                      child: const Icon(Icons.close_rounded, size: 18, color: _textPrimary),
+                    ),
+                  ),
+                ]),
+              ),
+              Divider(height: 1, color: Colors.grey.withOpacity(0.12)),
+              Expanded(
+                child: StatefulBuilder(
+                  builder: (sheetContext, setSheetState) {
+                    int? activeInSheet;
+                    return StatefulBuilder(
+                      builder: (ctx, setInnerState) => ListView.builder(
+                        controller: scrollController,
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                        itemCount: _routines.length,
+                        itemBuilder: (ctx, i) {
+                          final routine = _routines[i];
+                          final isExp = activeInSheet == i;
+                          return GestureDetector(
+                            onTap: () => setInnerState(() =>
+                                activeInSheet = isExp ? null : i),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                color: _card, borderRadius: BorderRadius.circular(18),
+                                border: isExp ? Border.all(
+                                    color: (routine['accent'] as Color).withOpacity(0.3),
+                                    width: 1.5) : null,
+                                boxShadow: [BoxShadow(
+                                    color: Colors.black.withOpacity(0.06),
+                                    blurRadius: isExp ? 16 : 10,
+                                    offset: const Offset(0, 4))],
+                              ),
+                              child: Column(children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(14),
+                                  child: Row(children: [
+                                    Container(
+                                      width: 52, height: 52,
+                                      decoration: BoxDecoration(
+                                          color: routine['color'] as Color,
+                                          borderRadius: BorderRadius.circular(14)),
+                                      child: Center(child: Text(routine['emoji'] as String,
+                                          style: const TextStyle(fontSize: 24))),
+                                    ),
+                                    const SizedBox(width: 14),
+                                    Expanded(child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(routine['title'] as String,
+                                              style: const TextStyle(fontSize: 15,
+                                                  fontWeight: FontWeight.w700, color: _textPrimary)),
+                                          const SizedBox(height: 3),
+                                          Text(routine['desc'] as String,
+                                              style: const TextStyle(fontSize: 11.5, color: _textMuted),
+                                              maxLines: 2),
+                                          const SizedBox(height: 6),
+                                          Row(children: [
+                                            _pill('⏱ ${routine['duration']}', routine['accent'] as Color),
+                                            const SizedBox(width: 6),
+                                            _pill('${routine['moves']} moves', _textMuted),
+                                            const SizedBox(width: 6),
+                                            _pill(routine['level'] as String, routine['accent'] as Color),
+                                          ]),
+                                        ])),
+                                    Icon(isExp
+                                        ? Icons.keyboard_arrow_up_rounded
+                                        : Icons.keyboard_arrow_down_rounded,
+                                        color: _textMuted),
+                                  ]),
+                                ),
+                                if (isExp) ...[
+                                  Divider(height: 1, color: Colors.grey.withOpacity(0.1)),
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(14, 12, 14, 16),
+                                    child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text('Exercises',
+                                              style: TextStyle(fontSize: 12,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: _textMuted, letterSpacing: 0.5)),
+                                          const SizedBox(height: 10),
+                                          ...(routine['exercises'] as List<String>)
+                                              .asMap()
+                                              .entries
+                                              .map((e) => Padding(
+                                            padding: const EdgeInsets.only(bottom: 8),
+                                            child: Row(children: [
+                                              Container(
+                                                width: 22, height: 22,
+                                                decoration: BoxDecoration(
+                                                    color: (routine['accent'] as Color).withOpacity(0.15),
+                                                    borderRadius: BorderRadius.circular(6)),
+                                                child: Center(child: Text('${e.key + 1}',
+                                                    style: TextStyle(fontSize: 10,
+                                                        fontWeight: FontWeight.w700,
+                                                        color: routine['accent'] as Color))),
+                                              ),
+                                              const SizedBox(width: 10),
+                                              Expanded(child: Text(e.value,
+                                                  style: const TextStyle(
+                                                      fontSize: 13, color: _textPrimary))),
+                                            ]),
+                                          )),
+                                          const SizedBox(height: 12),
+                                          GestureDetector(
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                              _onStartRoutine(routine);
+                                            },
+                                            child: Container(
+                                              width: double.infinity,
+                                              padding: const EdgeInsets.symmetric(vertical: 14),
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(colors: [
+                                                  routine['accent'] as Color,
+                                                  (routine['accent'] as Color).withOpacity(0.75)
+                                                ]),
+                                                borderRadius: BorderRadius.circular(12),
+                                                boxShadow: [BoxShadow(
+                                                    color: (routine['accent'] as Color).withOpacity(0.38),
+                                                    blurRadius: 12, offset: const Offset(0, 5))],
+                                              ),
+                                              child: Row(mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    const Icon(Icons.play_circle_fill_rounded,
+                                                        color: Colors.white, size: 18),
+                                                    const SizedBox(width: 8),
+                                                    Text('Start Routine  •  ${routine['duration']}',
+                                                        style: const TextStyle(color: Colors.white,
+                                                            fontWeight: FontWeight.w700, fontSize: 14)),
+                                                  ]),
+                                            ),
+                                          ),
+                                        ]),
+                                  ),
+                                ],
+                              ]),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── See All: Videos ────────────────────────────────────────────────────────
+  void _showAllVideos() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.92,
+        maxChildSize: 0.96,
+        minChildSize: 0.5,
+        expand: false,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: _surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2)),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                child: Row(children: [
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      const Text('All Videos',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800,
+                              color: _textPrimary, letterSpacing: -0.3)),
+                      const SizedBox(height: 2),
+                      Text('${_videos.length} guided sessions',
+                          style: const TextStyle(fontSize: 13, color: _textMuted)),
+                    ]),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white, borderRadius: BorderRadius.circular(12),
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8)],
+                      ),
+                      child: const Icon(Icons.close_rounded, size: 18, color: _textPrimary),
+                    ),
+                  ),
+                ]),
+              ),
+              Divider(height: 1, color: Colors.grey.withOpacity(0.12)),
+              Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                  itemCount: _videos.length,
+                  itemBuilder: (ctx, i) {
+                    final video = _videos[i];
+                    final String videoId  = video['id']       as String;
+                    final String title    = video['title']    as String;
+                    final String channel  = video['channel']  as String;
+                    final String duration = video['duration'] as String;
+                    final String tag      = video['tag']      as String;
+                    final Color  tagColor = video['tagColor'] as Color;
+                    final thumbUrl = 'https://img.youtube.com/vi/$videoId/hqdefault.jpg';
+
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                        _openVideoSheet(video);
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: _card, borderRadius: BorderRadius.circular(16),
+                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06),
+                              blurRadius: 10, offset: const Offset(0, 4))],
+                        ),
+                        child: Row(children: [
+                          // Thumbnail
+                          ClipRRect(
+                            borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+                            child: Stack(children: [
+                              Image.network(thumbUrl, width: 110, height: 80, fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                      width: 110, height: 80,
+                                      color: _rose.withOpacity(0.12),
+                                      child: const Center(child: Icon(
+                                          Icons.play_circle_fill_rounded, size: 28, color: _rose)))),
+                              Container(
+                                  width: 110, height: 80,
+                                  color: Colors.black.withOpacity(0.18),
+                                  child: const Center(child: Icon(
+                                      Icons.play_circle_fill_rounded, size: 30, color: Colors.white))),
+                              Positioned(bottom: 6, right: 6, child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.65),
+                                    borderRadius: BorderRadius.circular(4)),
+                                child: Text(duration, style: const TextStyle(
+                                    fontSize: 9, color: Colors.white, fontWeight: FontWeight.w600)),
+                              )),
+                            ]),
+                          ),
+                          // Info
+                          Expanded(child: Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                            child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min, children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                    decoration: BoxDecoration(
+                                        color: tagColor.withOpacity(0.13),
+                                        borderRadius: BorderRadius.circular(5)),
+                                    child: Text(tag, style: TextStyle(fontSize: 9,
+                                        fontWeight: FontWeight.w700, color: tagColor)),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(title, maxLines: 2, overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: _textPrimary, height: 1.3)),
+                                  const SizedBox(height: 3),
+                                  Row(children: [
+                                    const Icon(Icons.play_circle_outline_rounded,
+                                        size: 11, color: _textMuted),
+                                    const SizedBox(width: 3),
+                                    Expanded(child: Text(channel,
+                                        maxLines: 1, overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontSize: 10, color: _textMuted))),
+                                  ]),
+                                ]),
+                          )),
+                        ]),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() { _countdownTimer?.cancel(); _stopwatchTimer?.cancel(); super.dispose(); }
 
@@ -308,7 +657,7 @@ class _FaceYogaPageState extends State<FaceYogaPage>
           _buildSliverAppBar(context),
           SliverToBoxAdapter(child: _buildStatsRow()),
           SliverToBoxAdapter(child: _buildLevelFilter()),
-          SliverToBoxAdapter(child: _buildSectionHeader('Routines')),
+          SliverToBoxAdapter(child: _buildSectionHeader('Routines', onTap: _showAllRoutines)),
           SliverToBoxAdapter(child: _buildRoutinesList()),
           SliverToBoxAdapter(child: _buildVideosSection()),
           SliverToBoxAdapter(child: _buildTipsSection()),
@@ -405,12 +754,29 @@ class _FaceYogaPageState extends State<FaceYogaPage>
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  // ── Updated section header with optional onTap ─────────────────────────────
+  Widget _buildSectionHeader(String title, {VoidCallback? onTap}) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: _textPrimary, letterSpacing: -0.2)),
-        Text('See all', style: TextStyle(fontSize: 13, color: _orchidDark, fontWeight: FontWeight.w600)),
+        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700,
+            color: _textPrimary, letterSpacing: -0.2)),
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: _orchid.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Text('See all', style: TextStyle(fontSize: 13, color: _orchidDark,
+                  fontWeight: FontWeight.w700)),
+              const SizedBox(width: 3),
+              Icon(Icons.arrow_forward_ios_rounded, size: 10, color: _orchidDark),
+            ]),
+          ),
+        ),
       ]),
     );
   }
@@ -507,7 +873,7 @@ class _FaceYogaPageState extends State<FaceYogaPage>
   );
 
   Widget _buildVideosSection() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    _buildSectionHeader('Watch and Learn'),
+    _buildSectionHeader('Watch and Learn', onTap: _showAllVideos),
     SizedBox(height: 224, child: ListView.builder(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -591,8 +957,7 @@ class _FaceYogaPageState extends State<FaceYogaPage>
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// INLINE VIDEO PLAYER — youtube_player_iframe (uses webview_flutter, not
-// flutter_inappwebview, so it builds cleanly on new AGP versions)
+// INLINE VIDEO PLAYER
 // ════════════════════════════════════════════════════════════════════════════
 class _VideoPlayerSheet extends StatefulWidget {
   final Map<String, dynamic> video;
@@ -639,10 +1004,7 @@ class _VideoPlayerSheetState extends State<_VideoPlayerSheet> {
         Container(width: 40, height: 4,
             decoration: BoxDecoration(color: Colors.grey.withOpacity(0.3), borderRadius: BorderRadius.circular(2))),
         const SizedBox(height: 10),
-
-        // Embedded player — plays inline, no YouTube app redirect
         YoutubePlayer(controller: _controller),
-
         Padding(padding: const EdgeInsets.fromLTRB(16, 14, 16, 4), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
             Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -662,7 +1024,6 @@ class _VideoPlayerSheetState extends State<_VideoPlayerSheet> {
             Text(channel, style: const TextStyle(fontSize: 12, color: _textMuted)),
           ]),
         ])),
-
         Padding(
           padding: EdgeInsets.fromLTRB(16, 10, 16, MediaQuery.of(context).padding.bottom + 20),
           child: Row(children: [
@@ -808,7 +1169,6 @@ class _TimerStopwatchSheetState extends State<_TimerStopwatchSheet> with SingleT
   Widget _timerTab() => SingleChildScrollView(
     padding: const EdgeInsets.symmetric(horizontal: 24),
     child: Column(children: [
-      // Circular countdown ring
       SizedBox(width: 160, height: 160, child: Stack(alignment: Alignment.center, children: [
         SizedBox.expand(child: CircularProgressIndicator(value: _timerProgress, strokeWidth: 9,
           backgroundColor: Colors.grey.withOpacity(0.12),

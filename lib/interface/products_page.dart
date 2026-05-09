@@ -242,6 +242,144 @@ class _ProductsPageState extends State<ProductsPage> {
     return filtered;
   }
 
+  // ── See All sheet ─────────────────────────────────────────────────────────
+  void _showSeeAll({
+    required List<Map<String, dynamic>> products,
+    required bool isLocal,
+    required String title,
+    required Color accentColor,
+  }) {
+    // Apply current sort to the full unfiltered list shown in See All
+    final sorted = List<Map<String, dynamic>>.from(products);
+    switch (_sortBy) {
+      case 'Price: Low':
+        sorted.sort((a, b) => (a['price'] as double).compareTo(b['price'] as double));
+        break;
+      case 'Price: High':
+        sorted.sort((a, b) => (b['price'] as double).compareTo(a['price'] as double));
+        break;
+      case 'Rating':
+        sorted.sort((a, b) => (b['rating'] as double).compareTo(a['rating'] as double));
+        break;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.92,
+        maxChildSize: 0.96,
+        minChildSize: 0.5,
+        expand: false,
+        builder: (context, scrollController) {
+          final wishlist = isLocal ? _lkWishlist : _intlWishlist;
+          return Container(
+            decoration: const BoxDecoration(
+              color: _surface,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 12),
+                Container(
+                  width: 40, height: 4,
+                  decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(2)),
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(title,
+                                style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800,
+                                    color: _textPrimary,
+                                    letterSpacing: -0.3)),
+                            const SizedBox(height: 2),
+                            Text('${sorted.length} products',
+                                style: const TextStyle(
+                                    fontSize: 13, color: _textMuted)),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 8)],
+                          ),
+                          child: const Icon(Icons.close_rounded,
+                              size: 18, color: _textPrimary),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Divider(height: 1, color: Colors.grey.withOpacity(0.12)),
+                Expanded(
+                  child: StatefulBuilder(
+                    builder: (context, setSheetState) => GridView.builder(
+                      controller: scrollController,
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 0.72,
+                      ),
+                      itemCount: sorted.length,
+                      itemBuilder: (context, i) {
+                        final p = sorted[i];
+                        // Use index within full list for wishlist key
+                        final fullIdx = products.indexOf(p);
+                        return _ProductCard(
+                          name: p['name'] as String,
+                          brand: p['brand'] as String,
+                          displayPrice: p['displayPrice'] as String,
+                          rating: p['rating'] as double,
+                          reviews: p['reviews'] as int,
+                          badge: p['badge'] as String,
+                          badgeColor: p['badgeColor'] as Color,
+                          accent: p['accent'] as Color,
+                          imagePath: p['image'] as String,
+                          isLocal: isLocal,
+                          inWishlist: wishlist.contains(fullIdx),
+                          onWishlistToggle: () {
+                            setSheetState(() {
+                              setState(() {
+                                wishlist.contains(fullIdx)
+                                    ? wishlist.remove(fullIdx)
+                                    : wishlist.add(fullIdx);
+                              });
+                            });
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final lkFiltered   = _applyFilter(_lkProducts);
@@ -259,6 +397,12 @@ class _ProductsPageState extends State<ProductsPage> {
               emoji: '🇱🇰', title: 'Sri Lankan Brands',
               subtitle: 'Shop local · Ayurvedic, organic & homegrown',
               bgColor: const Color(0xFFFFF8E1), accentColor: const Color(0xFFD4A820),
+              onSeeAll: () => _showSeeAll(
+                products: _lkProducts,
+                isLocal: true,
+                title: '🇱🇰 Sri Lankan Brands',
+                accentColor: const Color(0xFFD4A820),
+              ),
             ),
           ),
           if (lkFiltered.isEmpty)
@@ -273,6 +417,12 @@ class _ProductsPageState extends State<ProductsPage> {
               emoji: '🌍', title: 'International Brands',
               subtitle: 'Global favourites · premium & trusted',
               bgColor: const Color(0xFFEEF4FF), accentColor: const Color(0xFF5A7AB8),
+              onSeeAll: () => _showSeeAll(
+                products: _intlProducts,
+                isLocal: false,
+                title: '🌍 International Brands',
+                accentColor: const Color(0xFF5A7AB8),
+              ),
             ),
           ),
           if (intlFiltered.isEmpty)
@@ -520,9 +670,11 @@ class _BrandSectionHeader extends StatelessWidget {
   const _BrandSectionHeader({
     required this.emoji, required this.title, required this.subtitle,
     required this.bgColor, required this.accentColor,
+    this.onSeeAll,
   });
   final String emoji, title, subtitle;
   final Color bgColor, accentColor;
+  final VoidCallback? onSeeAll;
 
   @override
   Widget build(BuildContext context) {
@@ -544,8 +696,22 @@ class _BrandSectionHeader extends StatelessWidget {
             Text(subtitle, style: TextStyle(fontSize: 11, color: accentColor.withOpacity(0.75))),
           ]),
         ),
-        Text('See all', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
-            color: accentColor)),
+        GestureDetector(
+          onTap: onSeeAll,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: accentColor.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Text('See all', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
+                  color: accentColor)),
+              const SizedBox(width: 3),
+              Icon(Icons.arrow_forward_ios_rounded, size: 10, color: accentColor),
+            ]),
+          ),
+        ),
       ]),
     );
   }
@@ -589,7 +755,6 @@ class _ProductCardState extends State<_ProductCard> {
 
   @override
   Widget build(BuildContext context) {
-    // SizedBox.expand fills the grid cell exactly → overflow impossible
     return SizedBox.expand(
       child: Container(
         decoration: BoxDecoration(
@@ -600,14 +765,12 @@ class _ProductCardState extends State<_ProductCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Image (Expanded = takes whatever height remains) ─────────────
             Expanded(
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
                 child: Stack(
                   fit: StackFit.expand, alignment: Alignment.center,
                   children: [
-                    // Gradient background
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -617,7 +780,6 @@ class _ProductCardState extends State<_ProductCard> {
                         ),
                       ),
                     ),
-                    // Product image with fallback
                     Image.asset(
                       widget.imagePath,
                       fit: BoxFit.fill,
@@ -637,7 +799,6 @@ class _ProductCardState extends State<_ProductCard> {
                         ),
                       ),
                     ),
-                    // Badge row top-left
                     Positioned(
                       top: 8, left: 8,
                       child: Row(children: [
@@ -662,7 +823,6 @@ class _ProductCardState extends State<_ProductCard> {
                         ],
                       ]),
                     ),
-                    // Wishlist top-right
                     Positioned(
                       top: 8, right: 8,
                       child: GestureDetector(
@@ -686,8 +846,6 @@ class _ProductCardState extends State<_ProductCard> {
                 ),
               ),
             ),
-
-            // ── Info (fixed height — mainAxisSize.min prevents overflow) ─────
             Padding(
               padding: const EdgeInsets.fromLTRB(11, 9, 11, 10),
               child: Column(

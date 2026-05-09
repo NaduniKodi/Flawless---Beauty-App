@@ -248,6 +248,107 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
     return list.where((p) => p['category'] == label).toList();
   }
 
+  // ── See All sheet ─────────────────────────────────────────────────────────
+  void _showSeeAll({
+    required List<Map<String, dynamic>> products,
+    required bool isLocal,
+    required String title,
+    required Color accentColor,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.92,
+        maxChildSize: 0.96,
+        minChildSize: 0.5,
+        expand: false,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: _surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2)),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(title,
+                              style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  color: _textPrimary,
+                                  letterSpacing: -0.3)),
+                          const SizedBox(height: 2),
+                          Text('${products.length} products',
+                              style: const TextStyle(
+                                  fontSize: 13, color: _textMuted)),
+                        ],
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 8)],
+                        ),
+                        child: const Icon(Icons.close_rounded,
+                            size: 18, color: _textPrimary),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(height: 1, color: Colors.grey.withOpacity(0.12)),
+              Expanded(
+                child: GridView.builder(
+                  controller: scrollController,
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 0.68,
+                  ),
+                  itemCount: products.length,
+                  itemBuilder: (context, i) => _CosmeticCard(
+                    name: products[i]['name'] as String,
+                    brand: products[i]['brand'] as String,
+                    price: products[i]['price'] as String,
+                    rating: products[i]['rating'] as double,
+                    shadeColor: products[i]['shade'] as Color,
+                    tag: products[i]['tag'] as String,
+                    imagePath: products[i]['image'] as String,
+                    isLocal: isLocal,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final lkFiltered   = _applyFilter(_lkProducts);
@@ -269,6 +370,12 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
               subtitle: 'Proudly local · support homegrown beauty',
               bgColor: const Color(0xFFFFF8E1),
               accentColor: const Color(0xFFD4A820),
+              onSeeAll: () => _showSeeAll(
+                products: _lkProducts,
+                isLocal: true,
+                title: '🇱🇰 Sri Lankan Brands',
+                accentColor: const Color(0xFFD4A820),
+              ),
             ),
           ),
           if (lkFiltered.isEmpty)
@@ -287,6 +394,12 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
               subtitle: 'Global bestsellers · premium picks',
               bgColor: const Color(0xFFEEF4FF),
               accentColor: const Color(0xFF5A7AB8),
+              onSeeAll: () => _showSeeAll(
+                products: _intlProducts,
+                isLocal: false,
+                title: '🌍 International Brands',
+                accentColor: const Color(0xFF5A7AB8),
+              ),
             ),
           ),
           if (intlFiltered.isEmpty)
@@ -460,10 +573,12 @@ class _BrandSectionHeader extends StatelessWidget {
     required this.subtitle,
     required this.bgColor,
     required this.accentColor,
+    this.onSeeAll,
   });
 
   final String emoji, title, subtitle;
   final Color bgColor, accentColor;
+  final VoidCallback? onSeeAll;
 
   @override
   Widget build(BuildContext context) {
@@ -495,9 +610,26 @@ class _BrandSectionHeader extends StatelessWidget {
               ],
             ),
           ),
-          Text('See all',
-              style: TextStyle(
-                  fontSize: 12, fontWeight: FontWeight.w600, color: accentColor)),
+          GestureDetector(
+            onTap: onSeeAll,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: accentColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Text('See all',
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: accentColor)),
+                const SizedBox(width: 3),
+                Icon(Icons.arrow_forward_ios_rounded,
+                    size: 10, color: accentColor),
+              ]),
+            ),
+          ),
         ],
       ),
     );
@@ -547,9 +679,6 @@ class _CosmeticCardState extends State<_CosmeticCard> {
 
   @override
   Widget build(BuildContext context) {
-    // SizedBox.expand fills the grid cell exactly.
-    // Expanded on the image section means it takes whatever height
-    // remains after the fixed-height info section — overflow is impossible.
     return SizedBox.expand(
       child: Container(
         decoration: BoxDecoration(
@@ -565,7 +694,7 @@ class _CosmeticCardState extends State<_CosmeticCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Image section (Expanded = fills remaining cell height) ──────
+            // ── Image section ─────────────────────────────────────────────
             Expanded(
               child: ClipRRect(
                 borderRadius:
@@ -573,7 +702,6 @@ class _CosmeticCardState extends State<_CosmeticCard> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // Gradient background
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -586,11 +714,9 @@ class _CosmeticCardState extends State<_CosmeticCard> {
                         ),
                       ),
                     ),
-
-                    // Product image — fills the Expanded area, contains aspect
                     Image.asset(
                       widget.imagePath,
-                      fit:BoxFit.fill,
+                      fit: BoxFit.fill,
                       alignment: Alignment.center,
                       errorBuilder: (_, __, ___) => Center(
                         child: Container(
@@ -610,8 +736,6 @@ class _CosmeticCardState extends State<_CosmeticCard> {
                         ),
                       ),
                     ),
-
-                    // 🇱🇰 Local badge
                     if (widget.isLocal)
                       Positioned(
                         top: 8,
@@ -630,8 +754,6 @@ class _CosmeticCardState extends State<_CosmeticCard> {
                                   fontWeight: FontWeight.w700)),
                         ),
                       ),
-
-                    // Wishlist button
                     Positioned(
                       top: 8,
                       right: 8,
@@ -666,14 +788,13 @@ class _CosmeticCardState extends State<_CosmeticCard> {
               ),
             ),
 
-            // ── Info section (fixed height — never overflows) ───────────────
+            // ── Info section ──────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(10, 7, 10, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Tag pill
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 6, vertical: 2),
@@ -693,8 +814,6 @@ class _CosmeticCardState extends State<_CosmeticCard> {
                                 : widget.shadeColor)),
                   ),
                   const SizedBox(height: 4),
-
-                  // Product name
                   Text(widget.name,
                       style: const TextStyle(
                           fontSize: 13,
@@ -703,14 +822,10 @@ class _CosmeticCardState extends State<_CosmeticCard> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 2),
-
-                  // Brand
                   Text(widget.brand,
                       style: const TextStyle(
                           fontSize: 11, color: Color(0xFF9E8DA8))),
                   const SizedBox(height: 5),
-
-                  // Price + rating
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

@@ -236,6 +236,102 @@ class _SkinCarePageState extends State<SkinCarePage> {
     return list.where((p) => (p['skinType'] as List<String>).contains(label)).toList();
   }
 
+  // ── See All sheet ─────────────────────────────────────────────────────────
+  void _showSeeAll({
+    required List<Map<String, dynamic>> products,
+    required bool isLocal,
+    required String title,
+    required Color accentColor,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.92,
+        maxChildSize: 0.96,
+        minChildSize: 0.5,
+        expand: false,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: _surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2)),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(title,
+                              style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  color: _textPrimary,
+                                  letterSpacing: -0.3)),
+                          const SizedBox(height: 2),
+                          Text('${products.length} products',
+                              style: const TextStyle(
+                                  fontSize: 13, color: _textMuted)),
+                        ],
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 8)],
+                        ),
+                        child: const Icon(Icons.close_rounded,
+                            size: 18, color: _textPrimary),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(height: 1, color: Colors.grey.withOpacity(0.12)),
+              Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                  itemCount: products.length,
+                  itemBuilder: (context, i) => _SkinProductTile(
+                    name: products[i]['name'] as String,
+                    brand: products[i]['brand'] as String,
+                    price: products[i]['price'] as String,
+                    rating: products[i]['rating'] as double,
+                    tag: products[i]['tag'] as String,
+                    tagColor: products[i]['tagColor'] as Color,
+                    desc: products[i]['desc'] as String,
+                    imagePath: products[i]['image'] as String,
+                    isLocal: isLocal,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final lkFiltered   = _applyFilter(_lkProducts);
@@ -254,6 +350,12 @@ class _SkinCarePageState extends State<SkinCarePage> {
               emoji: '🇱🇰', title: 'Sri Lankan Brands',
               subtitle: 'Proudly local · Ayurvedic & natural heritage',
               bgColor: const Color(0xFFFFF8E1), accentColor: const Color(0xFFD4A820),
+              onSeeAll: () => _showSeeAll(
+                products: _lkProducts,
+                isLocal: true,
+                title: '🇱🇰 Sri Lankan Brands',
+                accentColor: const Color(0xFFD4A820),
+              ),
             ),
           ),
           if (lkFiltered.isEmpty)
@@ -268,6 +370,12 @@ class _SkinCarePageState extends State<SkinCarePage> {
               emoji: '🌍', title: 'International Brands',
               subtitle: 'Science-backed · globally trusted',
               bgColor: const Color(0xFFEEF4FF), accentColor: const Color(0xFF5A7AB8),
+              onSeeAll: () => _showSeeAll(
+                products: _intlProducts,
+                isLocal: false,
+                title: '🌍 International Brands',
+                accentColor: const Color(0xFF5A7AB8),
+              ),
             ),
           ),
           if (intlFiltered.isEmpty)
@@ -480,9 +588,11 @@ class _BrandSectionHeader extends StatelessWidget {
   const _BrandSectionHeader({
     required this.emoji, required this.title, required this.subtitle,
     required this.bgColor, required this.accentColor,
+    this.onSeeAll,
   });
   final String emoji, title, subtitle;
   final Color bgColor, accentColor;
+  final VoidCallback? onSeeAll;
 
   @override
   Widget build(BuildContext context) {
@@ -504,8 +614,22 @@ class _BrandSectionHeader extends StatelessWidget {
             Text(subtitle, style: TextStyle(fontSize: 11, color: accentColor.withOpacity(0.75))),
           ]),
         ),
-        Text('See all', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
-            color: accentColor)),
+        GestureDetector(
+          onTap: onSeeAll,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: accentColor.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Text('See all', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700,
+                  color: accentColor)),
+              const SizedBox(width: 3),
+              Icon(Icons.arrow_forward_ios_rounded, size: 10, color: accentColor),
+            ]),
+          ),
+        ),
       ]),
     );
   }
@@ -563,7 +687,6 @@ class _SkinProductTileState extends State<_SkinProductTile> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Gradient background behind image
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -573,7 +696,6 @@ class _SkinProductTileState extends State<_SkinProductTile> {
                       ),
                     ),
                   ),
-                  // Product image
                   Image.asset(
                     widget.imagePath,
                     fit: BoxFit.fill,
@@ -601,7 +723,6 @@ class _SkinProductTileState extends State<_SkinProductTile> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Tags row
                   Row(children: [
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),

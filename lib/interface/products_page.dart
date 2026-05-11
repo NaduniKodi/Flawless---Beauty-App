@@ -1,34 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ASSET FOLDER STRUCTURE — add your images here:
-//
-//   assets/images/products/
-//   ├── lk/
-//   │   ├── spaceylon_coconut_serum.jpg 1
-//   │   ├── siddhalepa_neem_mask.jpg 2
-//   │   ├── janet_aloe_mist.jpg 3
-//   │   ├── swabha_turmeric_mask.jpg 4
-//   │   ├── british_vitc_serum.jpg 5
-//   │   ├── spaceylon_herbal_mist.jpg 6
-//   │   ├── dlas_rosehip_serum.jpg 7
-//   │   ├── prevense_collagen.jpg 8
-//   │   ├── spaceylon_gua_sha.jpg 9
-//   │   └── janet_scrub.jpg 10
-//   └── intl/
-//       ├── medik8_retinol.jpg 11
-//       ├── herbivore_roller.jpg 12
-//       ├── skinceuticals_ha.jpg 13
-//       ├── fresh_clay_mask.jpg 14
-//       ├── mario_rosewater.jpg 15
-//       ├── hum_collagen.jpg 16
-//       ├── currentbody_led.jpg 17
-//       └── laneige_sleeping_mask.jpg 18
-//
-// pubspec.yaml:
-//   - assets/images/products/lk/
-//   - assets/images/products/intl/
-// ─────────────────────────────────────────────────────────────────────────────
+Future<void> _openUrl(BuildContext context, String url) async {
+  final uri = Uri.parse(url);
+  try {
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) throw Exception();
+  } catch (_) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text('Unable to open product page'),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ));
+    }
+  }
+}
 
 class ProductsPage extends StatefulWidget {
   const ProductsPage({super.key});
@@ -64,6 +50,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Serums', 'badge': 'Luxury',
       'badgeColor': Color(0xFFD4A820), 'accent': Color(0xFFFFF0D6),
       'image': 'assets/images/products/lk/1.png',
+      'buyUrl': 'https://spaceylon.com/collections/serums',
     },
     {
       'name': 'Neem Herbal Mask',
@@ -73,6 +60,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Masks', 'badge': 'Ayurvedic',
       'badgeColor': Color(0xFF7EC4A4), 'accent': Color(0xFFEEFAF4),
       'image': 'assets/images/products/lk/2.png',
+      'buyUrl': 'https://www.daraz.lk/catalog/?q=siddhalepa+neem+herbal+mask',
     },
     {
       'name': 'Aloe Vera Mist',
@@ -82,6 +70,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Mists', 'badge': 'Natural',
       'badgeColor': Color(0xFFB4D4A8), 'accent': Color(0xFFEEFAF4),
       'image': 'assets/images/products/lk/3.webp',
+      'buyUrl': 'https://www.daraz.lk/catalog/?q=janet+aloe+vera+mist',
     },
     {
       'name': 'Turmeric Glow Mask',
@@ -91,6 +80,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Masks', 'badge': 'Best Seller',
       'badgeColor': Color(0xFFE8708A), 'accent': Color(0xFFFFF8E1),
       'image': 'assets/images/products/lk/4.webp',
+      'buyUrl': 'https://www.swabhaceylon.com',
     },
     {
       'name': 'Vitamin C Brightening Serum',
@@ -100,6 +90,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Serums', 'badge': 'New',
       'badgeColor': Color(0xFF9EB8D4), 'accent': Color(0xFFEEF4FF),
       'image': 'assets/images/products/lk/5.webp',
+      'buyUrl': 'https://www.daraz.lk/catalog/?q=british+cosmetics+vitamin+c+brightening+serum',
     },
     {
       'name': 'Herbal Body Mist',
@@ -109,6 +100,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Mists', 'badge': 'Popular',
       'badgeColor': Color(0xFFD4A820), 'accent': Color(0xFFFFF8E1),
       'image': 'assets/images/products/lk/6.webp',
+      'buyUrl': 'https://spaceylon.com/collections/body-mists',
     },
     {
       'name': 'Organic Rose Hip Serum',
@@ -118,6 +110,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Serums', 'badge': 'Organic',
       'badgeColor': Color(0xFF7EC4A4), 'accent': Color(0xFFD4E8D4),
       'image': 'assets/images/products/lk/7.jpg',
+      'buyUrl': 'https://www.daraz.lk/catalog/?q=dlas+rosehip+serum',
     },
     {
       'name': 'Collagen Beauty Supplement',
@@ -127,6 +120,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Supplements', 'badge': 'Wellness',
       'badgeColor': Color(0xFFB8A0C8), 'accent': Color(0xFFEEE8F8),
       'image': 'assets/images/products/lk/8.png',
+      'buyUrl': 'https://www.daraz.lk/catalog/?q=prevense+collagen+beauty+supplement',
     },
     {
       'name': 'Gua Sha Stone',
@@ -136,6 +130,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Tools', 'badge': 'Luxury',
       'badgeColor': Color(0xFFD4A820), 'accent': Color(0xFFFFF8E1),
       'image': 'assets/images/products/lk/9.avif',
+      'buyUrl': 'https://spaceylon.com/collections/tools',
     },
     {
       'name': 'Herbal Exfoliating Scrub',
@@ -145,6 +140,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Masks', 'badge': 'Value',
       'badgeColor': Color(0xFF7EC4A4), 'accent': Color(0xFFEEFAF4),
       'image': 'assets/images/products/lk/10.webp',
+      'buyUrl': 'https://www.daraz.lk/catalog/?q=janet+herbal+exfoliating+scrub',
     },
   ];
 
@@ -158,6 +154,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Serums', 'badge': 'Best Seller',
       'badgeColor': Color(0xFFE8708A), 'accent': Color(0xFFF8AFCB),
       'image': 'assets/images/products/intl/11.jpg',
+      'buyUrl': 'https://www.amazon.com/s?k=Medik8+Retinol+0.5+Serum',
     },
     {
       'name': 'Jade Facial Roller',
@@ -167,6 +164,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Tools', 'badge': 'Trending',
       'badgeColor': Color(0xFF7EC4A4), 'accent': Color(0xFFB4D4A8),
       'image': 'assets/images/products/intl/12.webp',
+      'buyUrl': 'https://www.amazon.com/s?k=Herbivore+Jade+Facial+Roller',
     },
     {
       'name': 'Hyaluronic Serum',
@@ -176,6 +174,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Serums', 'badge': 'Premium',
       'badgeColor': Color(0xFFB8A0C8), 'accent': Color(0xFFD4C0E8),
       'image': 'assets/images/products/intl/13.webp',
+      'buyUrl': 'https://www.amazon.com/s?k=SkinCeuticals+Hyaluronic+Acid+Intensifier+Serum',
     },
     {
       'name': 'Rose Clay Mask',
@@ -185,6 +184,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Masks', 'badge': 'New',
       'badgeColor': Color(0xFF9EB8D4), 'accent': Color(0xFFE8C8C8),
       'image': 'assets/images/products/intl/14.jpg',
+      'buyUrl': 'https://www.amazon.com/s?k=Fresh+Umbrian+Clay+Pore+Purifying+Face+Mask',
     },
     {
       'name': 'Rosewater Mist',
@@ -194,6 +194,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Mists', 'badge': 'Fan Fave',
       'badgeColor': Color(0xFFE8708A), 'accent': Color(0xFFF8AFCB),
       'image': 'assets/images/products/intl/15.jpg',
+      'buyUrl': 'https://www.amazon.com/s?k=Mario+Badescu+Facial+Spray+Rosewater',
     },
     {
       'name': 'Collagen Gummies',
@@ -203,6 +204,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Supplements', 'badge': 'Wellness',
       'badgeColor': Color(0xFFF5C97A), 'accent': Color(0xFFFFF0D6),
       'image': 'assets/images/products/intl/16.avif',
+      'buyUrl': 'https://www.amazon.com/s?k=HUM+Nutrition+Collagen+Love+Gummies',
     },
     {
       'name': 'LED Light Mask',
@@ -212,6 +214,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Tools', 'badge': 'Pro',
       'badgeColor': Color(0xFF9EB8D4), 'accent': Color(0xFFD4E4F8),
       'image': 'assets/images/products/intl/17.jpg',
+      'buyUrl': 'https://www.amazon.com/s?k=CurrentBody+Skin+LED+Light+Therapy+Mask',
     },
     {
       'name': 'Overnight Sleeping Mask',
@@ -221,6 +224,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Masks', 'badge': 'Best Seller',
       'badgeColor': Color(0xFFE8708A), 'accent': Color(0xFFF8AFCB),
       'image': 'assets/images/products/intl/18.jpg',
+      'buyUrl': 'https://www.amazon.com/s?k=Laneige+Water+Sleeping+Mask',
     },
   ];
 
@@ -249,7 +253,6 @@ class _ProductsPageState extends State<ProductsPage> {
     required String title,
     required Color accentColor,
   }) {
-    // Apply current sort to the full unfiltered list shown in See All
     final sorted = List<Map<String, dynamic>>.from(products);
     switch (_sortBy) {
       case 'Price: Low':
@@ -344,7 +347,6 @@ class _ProductsPageState extends State<ProductsPage> {
                       itemCount: sorted.length,
                       itemBuilder: (context, i) {
                         final p = sorted[i];
-                        // Use index within full list for wishlist key
                         final fullIdx = products.indexOf(p);
                         return _ProductCard(
                           name: p['name'] as String,
@@ -357,6 +359,7 @@ class _ProductsPageState extends State<ProductsPage> {
                           accent: p['accent'] as Color,
                           imagePath: p['image'] as String,
                           isLocal: isLocal,
+                          buyUrl: p['buyUrl'] as String,
                           inWishlist: wishlist.contains(fullIdx),
                           onWishlistToggle: () {
                             setSheetState(() {
@@ -649,6 +652,7 @@ class _ProductsPageState extends State<ProductsPage> {
             accent: p['accent'] as Color,
             imagePath: p['image'] as String,
             isLocal: isLocal,
+            buyUrl: p['buyUrl'] as String,
             inWishlist: wishlist.contains(idx),
             onWishlistToggle: () => setState(() {
               wishlist.contains(idx) ? wishlist.remove(idx) : wishlist.add(idx);
@@ -729,29 +733,23 @@ class _EmptyFilter extends StatelessWidget {
 }
 
 // ── Product Card ──────────────────────────────────────────────────────────────
-class _ProductCard extends StatefulWidget {
+class _ProductCard extends StatelessWidget {
   const _ProductCard({
-    required this.name,        required this.brand,
-    required this.displayPrice, required this.rating,
-    required this.reviews,     required this.badge,
-    required this.badgeColor,  required this.accent,
-    required this.imagePath,   required this.isLocal,
-    required this.inWishlist,  required this.onWishlistToggle,
+    required this.name,          required this.brand,
+    required this.displayPrice,  required this.rating,
+    required this.reviews,       required this.badge,
+    required this.badgeColor,    required this.accent,
+    required this.imagePath,     required this.isLocal,
+    required this.buyUrl,        required this.inWishlist,
+    required this.onWishlistToggle,
   });
 
-  final String name, brand, displayPrice, badge, imagePath;
+  final String name, brand, displayPrice, badge, imagePath, buyUrl;
   final double rating;
   final int reviews;
   final Color badgeColor, accent;
   final bool isLocal, inWishlist;
   final VoidCallback onWishlistToggle;
-
-  @override
-  State<_ProductCard> createState() => _ProductCardState();
-}
-
-class _ProductCardState extends State<_ProductCard> {
-  bool _inCart = false;
 
   @override
   Widget build(BuildContext context) {
@@ -774,14 +772,13 @@ class _ProductCardState extends State<_ProductCard> {
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [widget.accent.withOpacity(0.6),
-                            widget.accent.withOpacity(0.18)],
+                          colors: [accent.withOpacity(0.6), accent.withOpacity(0.18)],
                           begin: Alignment.topLeft, end: Alignment.bottomRight,
                         ),
                       ),
                     ),
                     Image.asset(
-                      widget.imagePath,
+                      imagePath,
                       fit: BoxFit.fill,
                       alignment: Alignment.center,
                       errorBuilder: (_, __, ___) => Center(
@@ -791,11 +788,11 @@ class _ProductCardState extends State<_ProductCard> {
                             color: Colors.white.withOpacity(0.75),
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [BoxShadow(
-                                color: widget.badgeColor.withOpacity(0.2),
+                                color: badgeColor.withOpacity(0.2),
                                 blurRadius: 10, offset: const Offset(0, 4))],
                           ),
                           child: Icon(Icons.image_not_supported_outlined,
-                              size: 26, color: widget.badgeColor.withOpacity(0.5)),
+                              size: 26, color: badgeColor.withOpacity(0.5)),
                         ),
                       ),
                     ),
@@ -804,13 +801,13 @@ class _ProductCardState extends State<_ProductCard> {
                       child: Row(children: [
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                          decoration: BoxDecoration(color: widget.badgeColor,
+                          decoration: BoxDecoration(color: badgeColor,
                               borderRadius: BorderRadius.circular(7)),
-                          child: Text(widget.badge,
+                          child: Text(badge,
                               style: const TextStyle(color: Colors.white, fontSize: 9,
                                   fontWeight: FontWeight.w700)),
                         ),
-                        if (widget.isLocal) ...[
+                        if (isLocal) ...[
                           const SizedBox(width: 4),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
@@ -826,17 +823,17 @@ class _ProductCardState extends State<_ProductCard> {
                     Positioned(
                       top: 8, right: 8,
                       child: GestureDetector(
-                        onTap: widget.onWishlistToggle,
+                        onTap: onWishlistToggle,
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle,
                               boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08),
                                   blurRadius: 6)]),
                           child: Icon(
-                            widget.inWishlist ? Icons.favorite_rounded
+                            inWishlist ? Icons.favorite_rounded
                                 : Icons.favorite_border_rounded,
                             size: 14,
-                            color: widget.inWishlist
+                            color: inWishlist
                                 ? const Color(0xFFE8708A) : const Color(0xFF9E8DA8),
                           ),
                         ),
@@ -852,23 +849,23 @@ class _ProductCardState extends State<_ProductCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(widget.name,
+                  Text(name,
                       style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700,
                           color: Color(0xFF1C1224)),
                       maxLines: 2, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 2),
-                  Text(widget.brand,
+                  Text(brand,
                       style: const TextStyle(fontSize: 11, color: Color(0xFF9E8DA8))),
                   const SizedBox(height: 6),
                   Row(children: [
                     const Icon(Icons.star_rounded, size: 11, color: Color(0xFFFFC107)),
                     const SizedBox(width: 2),
-                    Text('${widget.rating}',
+                    Text('$rating',
                         style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600,
                             color: Color(0xFF9E8DA8))),
                     const SizedBox(width: 4),
                     Flexible(
-                      child: Text('(${widget.reviews})',
+                      child: Text('($reviews)',
                           style: const TextStyle(fontSize: 10, color: Color(0xFF9E8DA8)),
                           overflow: TextOverflow.ellipsis),
                     ),
@@ -878,27 +875,30 @@ class _ProductCardState extends State<_ProductCard> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Flexible(
-                        child: Text(widget.displayPrice,
+                        child: Text(displayPrice,
                             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800,
                                 color: Color(0xFFC2516B)),
                             overflow: TextOverflow.ellipsis),
                       ),
+                      const SizedBox(width: 6),
                       GestureDetector(
-                        onTap: () => setState(() => _inCart = !_inCart),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                        onTap: () => _openUrl(context, buyUrl),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
                           decoration: BoxDecoration(
-                            gradient: _inCart ? const LinearGradient(
-                                colors: [Color(0xFFE8708A), Color(0xFFF8AFCB)]) : null,
-                            color: _inCart ? null
-                                : const Color(0xFFF8AFCB).withOpacity(0.2),
+                            gradient: const LinearGradient(
+                                colors: [Color(0xFFE8708A), Color(0xFFF8AFCB)]),
                             borderRadius: BorderRadius.circular(9),
+                            boxShadow: [BoxShadow(
+                                color: const Color(0xFFE8708A).withOpacity(0.3),
+                                blurRadius: 6, offset: const Offset(0, 2))],
                           ),
-                          child: Text(_inCart ? '✓ Added' : '+ Cart',
-                              style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700,
-                                  color: _inCart ? Colors.white
-                                      : const Color(0xFFE8708A))),
+                          child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                            Icon(Icons.shopping_bag_outlined, size: 11, color: Colors.white),
+                            SizedBox(width: 3),
+                            Text('Buy', style: TextStyle(fontSize: 10.5,
+                                fontWeight: FontWeight.w700, color: Colors.white)),
+                          ]),
                         ),
                       ),
                     ],

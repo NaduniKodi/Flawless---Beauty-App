@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:http/http.dart' as http;
+import 'package:tflite_flutter/tflite_flutter.dart';
 
 // ── Data Models ───────────────────────────────────────────────────────────────
 

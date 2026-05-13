@@ -9,11 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import '../interface/skin_report_page.dart';
 import 'package:flawless_beauty_app/services/skin_analysis_service.dart';
+import 'package:flawless_beauty_app/services/tflite_service.dart';
 
 // ── Colour tokens ─────────────────────────────────────────────────────────────
-const Color _rose       = Color(0xFFE8708A);
-const Color _orchid      = Color(0xFFF8AFCB);
-const Color _orchidDark  = Color.fromARGB(255, 255, 152, 191);
+const Color _rose = Color(0xFFE8708A);
+const Color _orchid = Color(0xFFF8AFCB);
+const Color _orchidDark = Color.fromARGB(255, 255, 152, 191);
 
 /// ================= FACE PAINTER =================
 class FacePainter extends CustomPainter {
@@ -33,57 +34,49 @@ class FacePainter extends CustomPainter {
     final scaleX = size.width / imageSize.width;
     final scaleY = size.height / imageSize.height;
 
-    // ── Bounding box ──────────────────────────────────────────────────────────
     final boxPaint = Paint()
       ..color = _orchid.withOpacity(0.9)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5;
 
-    // ── Landmarks ─────────────────────────────────────────────────────────────
     final landmarkPaint = Paint()
       ..color = _rose.withOpacity(0.9)
       ..style = PaintingStyle.fill;
 
-    // ── Contours ──────────────────────────────────────────────────────────────
     final contourPaint = Paint()
       ..color = Colors.cyanAccent.withOpacity(0.75)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
 
     for (final face in faces) {
-      final left   = _mirrorX(face.boundingBox.right, scaleX);
-      final right  = _mirrorX(face.boundingBox.left, scaleX);
-      final top    = face.boundingBox.top * scaleY;
+      final left = _mirrorX(face.boundingBox.right, scaleX);
+      final right = _mirrorX(face.boundingBox.left, scaleX);
+      final top = face.boundingBox.top * scaleY;
       final bottom = face.boundingBox.bottom * scaleY;
 
-      // Rounded rectangle instead of plain rect
       canvas.drawRRect(
         RRect.fromRectAndRadius(
-            Rect.fromLTRB(left, top, right, bottom), const Radius.circular(12)),
+          Rect.fromLTRB(left, top, right, bottom),
+          const Radius.circular(12),
+        ),
         boxPaint,
       );
 
-      // Corner accent marks
       final accentPaint = Paint()
         ..color = _orchid
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3.5
         ..strokeCap = StrokeCap.round;
       const len = 18.0;
-      // TL
       canvas.drawLine(Offset(left, top + len), Offset(left, top), accentPaint);
       canvas.drawLine(Offset(left, top), Offset(left + len, top), accentPaint);
-      // TR
       canvas.drawLine(Offset(right - len, top), Offset(right, top), accentPaint);
       canvas.drawLine(Offset(right, top), Offset(right, top + len), accentPaint);
-      // BL
       canvas.drawLine(Offset(left, bottom - len), Offset(left, bottom), accentPaint);
       canvas.drawLine(Offset(left, bottom), Offset(left + len, bottom), accentPaint);
-      // BR
       canvas.drawLine(Offset(right - len, bottom), Offset(right, bottom), accentPaint);
       canvas.drawLine(Offset(right, bottom), Offset(right, bottom - len), accentPaint);
 
-      // Landmarks
       for (final landmark in face.landmarks.values) {
         if (landmark == null) continue;
         final dx = _mirrorX(landmark.position.x.toDouble(), scaleX);
@@ -91,12 +84,10 @@ class FacePainter extends CustomPainter {
         canvas.drawCircle(Offset(dx, dy), 3.5, landmarkPaint);
       }
 
-      // Contours
       for (final contour in face.contours.values) {
         if (contour == null || contour.points.isEmpty) continue;
         final points = contour.points
-            .map((p) =>
-                Offset(_mirrorX(p.x.toDouble(), scaleX), p.y * scaleY))
+            .map((p) => Offset(_mirrorX(p.x.toDouble(), scaleX), p.y * scaleY))
             .toList();
         canvas.drawPoints(PointMode.polygon, points, contourPaint);
       }
@@ -129,8 +120,10 @@ class _AnalyzingScreenState extends State<_AnalyzingScreen>
       vsync: this,
       duration: const Duration(seconds: 1),
     )..repeat(reverse: true);
-    _pulse = Tween<double>(begin: 0.95, end: 1.05).animate(
-        CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
+    _pulse = Tween<double>(
+      begin: 0.95,
+      end: 1.05,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
     _analyze();
   }
 
@@ -142,11 +135,31 @@ class _AnalyzingScreenState extends State<_AnalyzingScreen>
 
   Future<void> _analyze() async {
     try {
+      // ── Stage 1: On-device TFLite pre-screening ──────────────────────────
+  
+      if (mounted) {
+        setState(() => _statusMessage = 'Running on-device skin pre-screening…');
+      }
+
+      final tfliteScore = await TFLiteService.runInference(
+        imagePath: widget.imagePath,
+      );
+      debugPrint('📊 TFLite preliminary score: ${tfliteScore.toStringAsFixed(3)}');
+
+      // ── Stage 2: Cloud AI deep analysis ─────────────────────────────────
+      if (mounted) {
+        setState(() => _statusMessage = 'Finding available AI model…');
+      }
+
       Future.delayed(const Duration(seconds: 5), () {
-        if (mounted) setState(() => _statusMessage = 'Finding available AI model…');
+        if (mounted) {
+          setState(() => _statusMessage = 'Performing deep skin analysis…');
+        }
       });
       Future.delayed(const Duration(seconds: 15), () {
-        if (mounted) setState(() => _statusMessage = 'Almost done, please wait…');
+        if (mounted) {
+          setState(() => _statusMessage = 'Almost done, please wait…');
+        }
       });
 
       final result = await SkinAnalysisService.analyzeImage(widget.imagePath);
@@ -155,45 +168,50 @@ class _AnalyzingScreenState extends State<_AnalyzingScreen>
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => SkinReportPage(
-              result: result,
-              imagePath: widget.imagePath,
-            ),
+            builder: (_) =>
+                SkinReportPage(result: result, imagePath: widget.imagePath),
           ),
         );
       }
     } catch (e) {
-      if (mounted) {
-        Navigator.pop(context);
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: const Text('Analysis Failed',
-                style: TextStyle(fontWeight: FontWeight.w700)),
-            content: const Text(
-              'All free AI models are currently busy.\nPlease wait 1 minute and try again.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: (){Navigator.pop(context);
-                Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-                },
-                child: const Text('Exit', style: TextStyle(color: Colors.white54)),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _analyze();
-                },
-                child: Text('Try Again',
-                    style: TextStyle(color: _orchidDark)),
-              ),
-            ],
+      if (!mounted) return;
+      Navigator.pop(context);
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-        );
-      }
+          title: const Text(
+            'Analysis Failed',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
+          content: const Text(
+            'All free AI models are currently busy.\nPlease wait 1 minute and try again.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/', (route) => false);
+              },
+              child: const Text(
+                'Exit',
+                style: TextStyle(color: Colors.white54),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _analyze();
+              },
+              child: Text('Try Again', style: TextStyle(color: _orchidDark)),
+            ),
+          ],
+        ),
+      );
     }
   }
 
@@ -208,7 +226,6 @@ class _AnalyzingScreenState extends State<_AnalyzingScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // ── Pulsing image preview ─────────────────────────────────────
                 ScaleTransition(
                   scale: _pulse,
                   child: Container(
@@ -234,8 +251,6 @@ class _AnalyzingScreenState extends State<_AnalyzingScreen>
                   ),
                 ),
                 const SizedBox(height: 40),
-
-                // ── Gradient progress indicator ───────────────────────────────
                 SizedBox(
                   width: 48,
                   height: 48,
@@ -246,8 +261,6 @@ class _AnalyzingScreenState extends State<_AnalyzingScreen>
                   ),
                 ),
                 const SizedBox(height: 24),
-
-                // ── Status text ───────────────────────────────────────────────
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 400),
                   child: Text(
@@ -281,6 +294,7 @@ class _AnalyzingScreenState extends State<_AnalyzingScreen>
 }
 
 /// ================= AI CAMERA PAGE =================
+
 class AICameraPage extends StatefulWidget {
   const AICameraPage({super.key});
 
@@ -299,7 +313,6 @@ class _AICameraPageState extends State<AICameraPage>
   DateTime _lastProcessed = DateTime.now();
   Size _imageSize = Size.zero;
 
-  // Capture button animation
   late AnimationController _btnCtrl;
   late Animation<double> _btnScale;
   bool _capturing = false;
@@ -313,8 +326,10 @@ class _AICameraPageState extends State<AICameraPage>
       lowerBound: 0.0,
       upperBound: 0.08,
     );
-    _btnScale = Tween<double>(begin: 1.0, end: 0.93).animate(
-        CurvedAnimation(parent: _btnCtrl, curve: Curves.easeOut));
+    _btnScale = Tween<double>(
+      begin: 1.0,
+      end: 0.93,
+    ).animate(CurvedAnimation(parent: _btnCtrl, curve: Curves.easeOut));
     _initCamera();
   }
 
@@ -369,9 +384,9 @@ class _AICameraPageState extends State<AICameraPage>
     if (_isDetecting) return;
     _isDetecting = true;
     try {
-      final camera   = _cameraController.description;
-      final rotation = InputImageRotationValue.fromRawValue(
-              camera.sensorOrientation) ??
+      final camera = _cameraController.description;
+      final rotation =
+          InputImageRotationValue.fromRawValue(camera.sensorOrientation) ??
           InputImageRotation.rotation0deg;
       final format = Platform.isAndroid
           ? InputImageFormat.nv21
@@ -379,7 +394,7 @@ class _AICameraPageState extends State<AICameraPage>
 
       final WriteBuffer allBytes = WriteBuffer();
       for (final plane in image.planes) allBytes.putUint8List(plane.bytes);
-      final bytes       = allBytes.done().buffer.asUint8List();
+      final bytes = allBytes.done().buffer.asUint8List();
       final bytesPerRow = Platform.isAndroid
           ? image.width
           : image.planes.first.bytesPerRow;
@@ -398,18 +413,18 @@ class _AICameraPageState extends State<AICameraPage>
 
       final rotatedSize =
           (rotation == InputImageRotation.rotation90deg ||
-                  rotation == InputImageRotation.rotation270deg)
-              ? Size(image.height.toDouble(), image.width.toDouble())
-              : Size(image.width.toDouble(), image.height.toDouble());
+              rotation == InputImageRotation.rotation270deg)
+          ? Size(image.height.toDouble(), image.width.toDouble())
+          : Size(image.width.toDouble(), image.height.toDouble());
 
       if (mounted) {
         setState(() {
-          _faces     = faces;
+          _faces = faces;
           _imageSize = rotatedSize;
         });
       }
     } catch (e) {
-      debugPrint("❌ Face detection error: $e");
+      debugPrint('❌ Face detection error: $e');
     } finally {
       _isDetecting = false;
     }
@@ -430,11 +445,12 @@ class _AICameraPageState extends State<AICameraPage>
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (_) => _AnalyzingScreen(imagePath: file.path)),
+            builder: (_) => _AnalyzingScreen(imagePath: file.path),
+          ),
         );
       }
     } catch (e) {
-      debugPrint("Capture error: $e");
+      debugPrint('Capture error: $e');
     } finally {
       _btnCtrl.reverse();
       if (mounted) setState(() => _capturing = false);
@@ -463,9 +479,11 @@ class _AICameraPageState extends State<AICameraPage>
               ),
               const SizedBox(height: 20),
               Text(
-                "Initializing camera…",
+                'Initializing camera…',
                 style: TextStyle(
-                    color: Colors.white.withOpacity(0.6), fontSize: 14),
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
@@ -473,20 +491,18 @@ class _AICameraPageState extends State<AICameraPage>
       );
     }
 
-    final previewSize   = _cameraController.value.previewSize!;
-    final previewWidth  = previewSize.height;
+    final previewSize = _cameraController.value.previewSize!;
+    final previewWidth = previewSize.height;
     final previewHeight = previewSize.width;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0E0818),
       body: Column(
         children: [
-          // ── Camera preview ─────────────────────────────────────────────────
           Expanded(
             child: Stack(
               fit: StackFit.expand,
               children: [
-                // Camera
                 FittedBox(
                   fit: BoxFit.cover,
                   child: SizedBox(
@@ -510,7 +526,6 @@ class _AICameraPageState extends State<AICameraPage>
                   ),
                 ),
 
-                // Top gradient + back button
                 Positioned(
                   top: 0,
                   left: 0,
@@ -530,7 +545,9 @@ class _AICameraPageState extends State<AICameraPage>
                     child: SafeArea(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         child: Row(
                           children: [
                             GestureDetector(
@@ -542,14 +559,15 @@ class _AICameraPageState extends State<AICameraPage>
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
-                                    Icons.arrow_back_ios_new_rounded,
-                                    color: Colors.white,
-                                    size: 18),
+                                  Icons.arrow_back_ios_new_rounded,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
                               ),
                             ),
                             const Expanded(
                               child: Text(
-                                "AI Face Scan",
+                                'AI Face Scan',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: Colors.white,
@@ -558,11 +576,12 @@ class _AICameraPageState extends State<AICameraPage>
                                 ),
                               ),
                             ),
-                            // Face count badge
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 300),
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
                                 color: _faces.isNotEmpty
                                     ? _orchid.withOpacity(0.85)
@@ -571,8 +590,8 @@ class _AICameraPageState extends State<AICameraPage>
                               ),
                               child: Text(
                                 _faces.isEmpty
-                                    ? "No face"
-                                    : "${_faces.length} face${_faces.length > 1 ? 's' : ''} ✓",
+                                    ? 'No face'
+                                    : '${_faces.length} face${_faces.length > 1 ? 's' : ''} ✓',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
@@ -587,7 +606,6 @@ class _AICameraPageState extends State<AICameraPage>
                   ),
                 ),
 
-                // Hint text overlay
                 if (_faces.isEmpty)
                   Positioned(
                     bottom: 20,
@@ -596,13 +614,15 @@ class _AICameraPageState extends State<AICameraPage>
                     child: Center(
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.45),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Text(
-                          "Position your face in the frame",
+                          'Position your face in the frame',
                           style: TextStyle(color: Colors.white70, fontSize: 13),
                         ),
                       ),
@@ -612,7 +632,6 @@ class _AICameraPageState extends State<AICameraPage>
             ),
           ),
 
-          // ── Bottom control panel ───────────────────────────────────────────
           Container(
             padding: const EdgeInsets.fromLTRB(28, 20, 28, 32),
             decoration: BoxDecoration(
@@ -627,12 +646,13 @@ class _AICameraPageState extends State<AICameraPage>
             ),
             child: Column(
               children: [
-                // Face detected status
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 350),
                   margin: const EdgeInsets.only(bottom: 18),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 18, vertical: 10),
+                    horizontal: 18,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: _faces.isNotEmpty
                         ? _orchid.withOpacity(0.12)
@@ -657,11 +677,10 @@ class _AICameraPageState extends State<AICameraPage>
                       const SizedBox(width: 8),
                       Text(
                         _faces.isNotEmpty
-                            ? "Face detected — ready to scan!"
-                            : "Waiting for face detection…",
+                            ? 'Face detected — ready to scan!'
+                            : 'Waiting for face detection…',
                         style: TextStyle(
-                          color:
-                              _faces.isNotEmpty ? _orchid : Colors.white38,
+                          color: _faces.isNotEmpty ? _orchid : Colors.white38,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -670,7 +689,6 @@ class _AICameraPageState extends State<AICameraPage>
                   ),
                 ),
 
-                // Capture button
                 ScaleTransition(
                   scale: _btnScale,
                   child: GestureDetector(
@@ -714,7 +732,7 @@ class _AICameraPageState extends State<AICameraPage>
                           ),
                           const SizedBox(width: 10),
                           Text(
-                            _capturing ? "Capturing…" : "Capture & Analyze",
+                            _capturing ? 'Capturing…' : 'Capture & Analyze',
                             style: const TextStyle(
                               fontSize: 16,
                               color: Colors.white,

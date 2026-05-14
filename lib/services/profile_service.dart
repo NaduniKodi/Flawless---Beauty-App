@@ -1,6 +1,7 @@
 // lib/services/profile_service.dart
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileService {
@@ -9,6 +10,12 @@ class ProfileService {
 
   SupabaseClient get _db => Supabase.instance.client;
   String? get _uid => _db.auth.currentUser?.id;
+
+   SharedPreferences? _prefs;
+
+  Future<SharedPreferences> _get() async {
+    return _prefs ??= await SharedPreferences.getInstance();
+  }
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
   Future<Map<String, dynamic>?> fetch() async {
@@ -38,10 +45,10 @@ class ProfileService {
     final uid = _uid;
     if (uid == null) return;
     try {
-      await _db.from('profiles').upsert(
-        {'id': uid, ...fields},
-        onConflict: 'id',
-      );
+      await _db.from('profiles').upsert({
+        'id': uid,
+        ...fields,
+      }, onConflict: 'id');
     } on PostgrestException catch (e) {
       debugPrint('[ProfileService] save PostgrestException: ${e.message}');
     } catch (e) {
@@ -56,18 +63,25 @@ class ProfileService {
     try {
       final bytes = await file.readAsBytes();
       final path = '$uid/avatar.jpg';
-      await _db.storage.from('avatars').uploadBinary(
-        path,
-        bytes,
-        fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
-      );
+      await _db.storage
+          .from('avatars')
+          .uploadBinary(
+            path,
+            bytes,
+            fileOptions: const FileOptions(
+              contentType: 'image/jpeg',
+              upsert: true,
+            ),
+          );
       final signedUrl = await _db.storage
           .from('avatars')
           .createSignedUrl(path, 315360000);
       await save({'avatar_url': signedUrl});
       return signedUrl;
     } on StorageException catch (e) {
-      debugPrint('[ProfileService] uploadAvatar StorageException: ${e.message}');
+      debugPrint(
+        '[ProfileService] uploadAvatar StorageException: ${e.message}',
+      );
       return null;
     } catch (e) {
       debugPrint('[ProfileService] uploadAvatar error: $e');
@@ -111,9 +125,10 @@ class ProfileService {
       // Sign out locally — the auth user is already gone on the server
       await _db.auth.signOut();
       return true;
-
     } on FunctionException catch (e) {
-      debugPrint('[ProfileService] deleteAccount FunctionException: ${e.details}');
+      debugPrint(
+        '[ProfileService] deleteAccount FunctionException: ${e.details}',
+      );
       return false;
     } catch (e) {
       debugPrint('[ProfileService] deleteAccount error: $e');

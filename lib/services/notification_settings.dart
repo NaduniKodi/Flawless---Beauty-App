@@ -45,10 +45,14 @@ class NotificationSettings extends ChangeNotifier {
 
   // ── Setters ────────────────────────────────────────────────────────────────
   void setPushAll(bool v) {
-    pushAll = pushMessages = pushLikes = pushComments = v;
+    pushAll = pushMessages = pushLikes = pushComments =  pushFollowers = pushPromos = v;
     ProfileService.instance.save({
-      'notif_push_all': v, 'notif_push_messages': v,
-      'notif_push_likes': v, 'notif_push_comments': v,
+      'notif_push_all': v,
+      'notif_push_messages': v,
+      'notif_push_likes': v, 
+      'notif_push_comments': v,
+      'notif_push_followers': v,
+      'notif_push_promos': v,
     });
     notifyListeners();
   }

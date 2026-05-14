@@ -125,17 +125,29 @@ class _MakeupReportPageState extends State<MakeupReportPage>
     );
   }
 
-  Widget _buildHeroImage() {
+ Widget _buildHeroImage() {
   final path = widget.imagePath;
+
+  // ── Empty path ────────────────────────────────────────────────────────────
   if (path.isEmpty) {
-    return Container(color: Colors.grey.shade200,
-        child: const Icon(Icons.face_retouching_natural, size: 60));
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.grey.shade300,
+      child: const Center(
+        child: Icon(Icons.face_retouching_natural,
+            size: 72, color: Colors.white54),
+      ),
+    );
   }
-  // Remote URL (loaded from Supabase history)
+
+  // ── Remote URL (Supabase / CDN) ───────────────────────────────────────────
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return Image.network(
       path,
       fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
       loadingBuilder: (_, child, progress) {
         if (progress == null) return child;
         return Container(
@@ -143,9 +155,11 @@ class _MakeupReportPageState extends State<MakeupReportPage>
           child: Center(
             child: CircularProgressIndicator(
               value: progress.expectedTotalBytes != null
-                  ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
+                  ? progress.cumulativeBytesLoaded /
+                      progress.expectedTotalBytes!
                   : null,
-              valueColor: const AlwaysStoppedAnimation<Color>(_orchid),
+              valueColor:
+                  const AlwaysStoppedAnimation<Color>(_orchid),
               strokeWidth: 2,
             ),
           ),
@@ -153,19 +167,41 @@ class _MakeupReportPageState extends State<MakeupReportPage>
       },
       errorBuilder: (_, __, ___) => Container(
         color: const Color(0xFFFDF7FA),
-        child: const Icon(Icons.broken_image_outlined,
-            color: _orchid, size: 48),
+        child: const Center(
+          child: Icon(Icons.broken_image_outlined,
+              color: _orchid, size: 48),
+        ),
       ),
     );
   }
-  // Local file (just captured)
+
+  // ── Local file (just captured) ────────────────────────────────────────────
+  final file = File(path);
+  if (!file.existsSync()) {
+    // File not yet flushed to disk; show a soft placeholder
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.grey.shade300,
+      child: const Center(
+        child: Icon(Icons.image_not_supported_outlined,
+            size: 52, color: Colors.white54),
+      ),
+    );
+  }
+
   return Image.file(
-    File(path),
+    file,
     fit: BoxFit.cover,
+    width: double.infinity,
+    height: double.infinity,
+    cacheWidth: 1080, // limit decode size for performance
     errorBuilder: (_, __, ___) => Container(
       color: const Color(0xFFFDF7FA),
-      child: const Icon(Icons.broken_image_outlined,
-          color: _orchid, size: 48),
+      child: const Center(
+        child: Icon(Icons.broken_image_outlined,
+            color: _orchid, size: 48),
+      ),
     ),
   );
 }
@@ -175,11 +211,12 @@ class _MakeupReportPageState extends State<MakeupReportPage>
       fit: StackFit.expand,
       children: [
         // Captured photo
-        ClipRRect(
+        Positioned.fill(
           child: _buildHeroImage(),
         ),
         // Soft light-mode gradient overlay
-        Container(
+        Positioned.fill(
+        child:Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -193,7 +230,7 @@ class _MakeupReportPageState extends State<MakeupReportPage>
             ),
           ),
         ),
-
+      ),
         // Content
         Positioned(
           bottom: 60,

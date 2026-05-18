@@ -130,7 +130,7 @@ class _ProductsPageState extends State<ProductsPage> {
       'category': 'Tools', 'badge': 'Luxury',
       'badgeColor': Color(0xFFD4A820), 'accent': Color(0xFFFFF8E1),
       'image': 'assets/images/products/lk/9.avif',
-      'buyUrl': 'https://spaceylon.com/collections/tools',
+      'buyUrl': 'https://www.daraz.lk/tag/guva-sha/',
     },
     {
       'name': 'Herbal Exfoliating Scrub',

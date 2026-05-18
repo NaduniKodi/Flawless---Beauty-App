@@ -55,7 +55,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'tag': 'Step 1', 'tagColor': Color(0xFF7EB8D4),
       'desc': 'Gentle Ayurvedic cleanser with raw coconut milk',
       'image': 'assets/images/skincare/lk/1.png',
-      'buyUrl': 'https://spaceylon.com/collections/cleansers',
+      'buyUrl': 'https://lk.spaceylon.com/products/virgin-coconut-gentle-cleansing-milk-100ml',
     },
     {
       'name': 'Neem & Turmeric Face Wash',
@@ -75,7 +75,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'tag': 'Step 1', 'tagColor': Color(0xFF7EB8D4),
       'desc': 'Brightening papaya extract for a natural glow',
       'image': 'assets/images/skincare/lk/3.webp',
-      'buyUrl': 'https://www.daraz.lk/catalog/?q=janet+papaya+face+wash',
+      'buyUrl': 'https://www.daraz.lk/products/janet-real-papaya-no-marks-face-wash-100ml-i925832-s2796655.html?c=&channelLpJumpArgs=&clickTrackInfo=query%253Ajanet%253Bnid%253A925832%253Bsrc%253ALazadaMainSrp%253Brn%253Ab3ba024dab850fb01ce78dfe9728f628%253Bregion%253Alk%253Bsku%253AJA375HB0L9R7GNAFAMZ%253Bprice%253A750%253Bclient%253Adesktop%253Bsupplier_id%253A9899%253Bsession_id%253A%253Bbiz_source%253Ah5_external%253Bslot%253A18%253Butlog_bucket_id%253A470687%253Basc_category_id%253A7280%253Bitem_id%253A925832%253Bsku_id%253A2796655%253Bshop_id%253A10048%253BtemplateInfo%253A&freeshipping=0&fs_ab=1&fuse_fs=&lang=en&location=Western&price=7.5E%202&priceCompare=skuId%3A2796655%3Bsource%3Alazada-search-voucher%3Bsn%3Ab3ba024dab850fb01ce78dfe9728f628%3BoriginPrice%3A75000%3BdisplayPrice%3A75000%3BsinglePromotionId%3A-1%3BsingleToolCode%3A-1%3BvoucherPricePlugin%3A0%3Btimestamp%3A1779025131313&ratingscore=4.733552631578948&request_id=b3ba024dab850fb01ce78dfe9728f628&review=304&sale=1327&search=1&source=search&spm=a2a0e.searchlist.list.18&stock=1',
     },
     {
       'name': 'Aloe Vera Toner',
@@ -85,7 +85,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'tag': 'Step 2', 'tagColor': Color(0xFFB4D4A8),
       'desc': 'Soothing aloe vera for balanced, calm skin',
       'image': 'assets/images/skincare/lk/4.webp',
-      'buyUrl': 'https://www.daraz.lk/catalog/?q=janet+aloe+vera+toner',
+      'buyUrl': 'https://www.daraz.lk/products/janet-cucumber-water-oil-control-facial-toner-i163143917-s1105176501.html?c=&channelLpJumpArgs=&clickTrackInfo=query%253Ajanet%253Bnid%253A163143917%253Bsrc%253ALazadaMainSrp%253Brn%253Ab3ba024dab850fb01ce78dfe9728f628%253Bregion%253Alk%253Bsku%253A163143917_LK%253Bprice%253A450%253Bclient%253Adesktop%253Bsupplier_id%253A9899%253Bsession_id%253A%253Bbiz_source%253Ah5_external%253Bslot%253A6%253Butlog_bucket_id%253A470687%253Basc_category_id%253A7280%253Bitem_id%253A163143917%253Bsku_id%253A1105176501%253Bshop_id%253A10048%253BtemplateInfo%253A&freeshipping=0&fs_ab=1&fuse_fs=&lang=en&location=Western&price=4.5E%202&priceCompare=skuId%3A1105176501%3Bsource%3Alazada-search-voucher%3Bsn%3Ab3ba024dab850fb01ce78dfe9728f628%3BoriginPrice%3A45000%3BdisplayPrice%3A45000%3BsinglePromotionId%3A-1%3BsingleToolCode%3A-1%3BvoucherPricePlugin%3A0%3Btimestamp%3A1779025131313&ratingscore=4.786821705426356&request_id=b3ba024dab850fb01ce78dfe9728f628&review=516&sale=2193&search=1&source=search&spm=a2a0e.searchlist.list.6&stock=1',
     },
     {
       'name': 'Herbal Brightening Serum',
@@ -95,7 +95,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'tag': 'Step 3', 'tagColor': Color(0xFFF8AFCB),
       'desc': 'Modern Ayurveda meets science for radiant skin',
       'image': 'assets/images/skincare/lk/5.jpg',
-      'buyUrl': 'https://www.swabhaceylon.com',
+      'buyUrl': 'https://swabhaceylon.com/shop/',
     },
     {
       'name': 'Nature\'s Secret Vitamin C Serum',
@@ -145,7 +145,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'tag': 'Body', 'tagColor': Color(0xFFD4C0E8),
       'desc': 'Designed specifically for Sri Lankan skin & climate',
       'image': 'assets/images/skincare/lk/10.jpg',
-      'buyUrl': 'https://www.daraz.lk/catalog/?q=velvet+body+lotion+sri+lanka',
+      'buyUrl': 'https://www.daraz.lk/catalog/?q=velvet',
     },
   ];
 

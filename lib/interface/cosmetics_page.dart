@@ -39,13 +39,13 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
       'name': 'Matte Lip Colour', 'brand': 'Viana', 'price': 'Rs. 580', 'rating': 4.7,
       'category': 'Lips', 'shade': Color(0xFFCC3D5A), 'tag': 'Best Seller',
       'image': 'assets/images/cosmetics/lk/viana_matte_lip.jpg',
-      'buyUrl': 'https://www.daraz.lk/catalog/?q=viana+matte+lip+colour',
+      'buyUrl': 'https://viana.lk/product/viana-matte-touch-lipstick/',
     },
     {
       'name': 'Glossy Lip Tint', 'brand': 'Viana', 'price': 'Rs. 490', 'rating': 4.5,
       'category': 'Lips', 'shade': Color(0xFFE8708A), 'tag': 'Trending',
       'image': 'assets/images/cosmetics/lk/viana_glossy_tint.jpg',
-      'buyUrl': 'https://www.daraz.lk/catalog/?q=viana+glossy+lip+tint',
+      'buyUrl': 'https://viana.lk/product/viana-liquid-gloss/',
     },
     {
       'name': 'Long-Wear Eyeliner', 'brand': 'Viana', 'price': 'Rs. 420', 'rating': 4.6,
@@ -69,31 +69,31 @@ class _CosmeticsPageState extends State<CosmeticsPage> {
       'name': 'Papaya Glow Foundation', 'brand': 'Janet', 'price': 'Rs. 680', 'rating': 4.4,
       'category': 'Face', 'shade': Color(0xFFDEC8A8), 'tag': 'Herbal',
       'image': 'assets/images/cosmetics/lk/janet_foundation.webp',
-      'buyUrl': 'https://www.daraz.lk/catalog/?q=janet+papaya+foundation',
+      'buyUrl': 'https://www.daraz.lk/catalog/?q=janet+foundation',
     },
     {
       'name': 'Herbal Kajal', 'brand': 'Viana', 'price': 'Rs. 820', 'rating': 4.5,
       'category': 'Eyes', 'shade': Color(0xFF2C2040), 'tag': 'Natural',
       'image': 'assets/images/cosmetics/lk/viana_kajal.jpg',
-      'buyUrl': 'https://www.daraz.lk/catalog/?q=viana+herbal+kajal',
+      'buyUrl': 'https://www.daraz.lk/catalog/?q=viana+kajal',
     },
     {
       'name': 'Ayurvedic Lip Balm', 'brand': 'Spa Ceylon', 'price': 'Rs. 1,600', 'rating': 4.9,
       'category': 'Lips', 'shade': Color(0xFFD4A1C0), 'tag': 'Luxury',
       'image': 'assets/images/cosmetics/lk/spaceylon_lip_balm.png',
-      'buyUrl': 'https://spaceylon.com/collections/lip-care',
+      'buyUrl': 'https://lk.spaceylon.com/collections/lip-balms?srsltid=AfmBOorAFSwrnCnOAe8YEqqMoPLZHboobwrwk6wnf8AoD0lrtUnme9aH',
     },
     {
       'name': 'Compact Powder', 'brand': 'Janet', 'price': 'Rs. 1,200', 'rating': 4.3,
       'category': 'Face', 'shade': Color(0xFFE8D0B0), 'tag': 'Value',
       'image': 'assets/images/cosmetics/lk/janet_compact.webp',
-      'buyUrl': 'https://www.daraz.lk/catalog/?q=janet+compact+powder',
+      'buyUrl': 'https://janet.lk/collections/face-powders?srsltid=AfmBOooasEmB2SJlDNiPB-tPPifopDtlI2ueHLtaQxL1NVdoQcVjItm7',
     },
     {
       'name': 'Eye Shadow Palette', 'brand': 'Viana', 'price': 'Rs. 1,430', 'rating': 4.2,
       'category': 'Eyes', 'shade': Color(0xFFC2516B), 'tag': 'Affordable',
       'image': 'assets/images/cosmetics/lk/viana_eyeshadow.jpg',
-      'buyUrl': 'https://www.daraz.lk/catalog/?q=viana+eyeshadow+palette',
+      'buyUrl': 'https://viana.lk/product/makeup-eyes-viana-3-color-eye-shadow/',
     },
   ];
 

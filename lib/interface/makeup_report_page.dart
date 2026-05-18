@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/makeup_analysis_service.dart';
 
-// ── Theme (matches HomePage palette exactly) ──────────────────────────────────
+// ── Theme ─────────────────────────────────────────────────────────────────────
 const Color _rose        = Color(0xFFE8708A);
 const Color _roseDark    = Color(0xFFC2516B);
 const Color _orchid      = Color(0xFFF8AFCB);
@@ -14,6 +14,9 @@ const Color _surface     = Color(0xFFFDF7FA);
 const Color _card        = Color(0xFFFFFFFF);
 const Color _textPrimary = Color(0xFF1C1224);
 const Color _textMuted   = Color(0xFF9E8DA8);
+
+// ── Hero image height — single source of truth ────────────────────────────────
+const double _heroHeight = 310;
 
 /// ================= MAKEUP REPORT PAGE =================
 class MakeupReportPage extends StatefulWidget {
@@ -47,16 +50,16 @@ class _MakeupReportPageState extends State<MakeupReportPage>
   }
 
   MakeupAnalysisResult get r => widget.result;
-  FaceFeatures get f => r.features;
+  FaceFeatures         get f => r.features;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _surface,
       body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) => [
+        headerSliverBuilder: (context, _) => [
           SliverAppBar(
-            expandedHeight: 310,
+            expandedHeight: _heroHeight,
             pinned: true,
             backgroundColor: _surface,
             elevation: 0,
@@ -80,7 +83,11 @@ class _MakeupReportPageState extends State<MakeupReportPage>
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
-              background: _buildHeroHeader(),
+              collapseMode: CollapseMode.pin,
+              background: _HeroHeader(
+                imagePath: widget.imagePath,
+                overallStyle: r.overallStyle,
+              ),
             ),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(52),
@@ -89,8 +96,8 @@ class _MakeupReportPageState extends State<MakeupReportPage>
                 child: TabBar(
                   controller: _tabCtrl,
                   indicator: BoxDecoration(
-                    gradient: const LinearGradient(
-                        colors: [_rose, _orchidDark]),
+                    gradient:
+                        const LinearGradient(colors: [_rose, _orchidDark]),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   indicatorSize: TabBarIndicatorSize.label,
@@ -124,175 +131,183 @@ class _MakeupReportPageState extends State<MakeupReportPage>
       ),
     );
   }
+}
 
- Widget _buildHeroImage() {
-  final path = widget.imagePath;
+// ── Hero header extracted to its own StatefulWidget ──────────────────────────
+// This ensures the image always has explicit size constraints from its own
+// SizedBox parent rather than relying on FlexibleSpaceBar's implicit layout.
+class _HeroHeader extends StatelessWidget {
+  final String imagePath;
+  final String overallStyle;
 
-  // ── Empty path ────────────────────────────────────────────────────────────
-  if (path.isEmpty) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      color: Colors.grey.shade300,
-      child: const Center(
-        child: Icon(Icons.face_retouching_natural,
-            size: 72, color: Colors.white54),
-      ),
-    );
-  }
+  const _HeroHeader({
+    required this.imagePath,
+    required this.overallStyle,
+  });
 
-  // ── Remote URL (Supabase / CDN) ───────────────────────────────────────────
-  if (path.startsWith('http://') || path.startsWith('https://')) {
-    return Image.network(
-      path,
+  // ── Decide which image widget to use ────────────────────────────────────
+  Widget _image() {
+    const placeholder = _ImagePlaceholder();
+
+    if (imagePath.isEmpty) return placeholder;
+
+    // Remote signed URL (loaded from Supabase history)
+    if (imagePath.startsWith('http://') ||
+        imagePath.startsWith('https://')) {
+      return Image.network(
+        imagePath,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        // Show a shimmer-style loader while downloading
+        loadingBuilder: (_, child, progress) {
+          if (progress == null) return child;
+          return Container(
+            color: const Color(0xFFF0E8F0),
+            child: Center(
+              child: CircularProgressIndicator(
+                value: progress.expectedTotalBytes != null
+                    ? progress.cumulativeBytesLoaded /
+                        progress.expectedTotalBytes!
+                    : null,
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(_orchid),
+                strokeWidth: 2.5,
+              ),
+            ),
+          );
+        },
+        errorBuilder: (_, __, ___) => placeholder,
+      );
+    }
+
+    // Local file (just captured in this session)
+    final file = File(imagePath);
+    return Image.file(
+      file,
       fit: BoxFit.cover,
       width: double.infinity,
       height: double.infinity,
-      loadingBuilder: (_, child, progress) {
-        if (progress == null) return child;
-        return Container(
-          color: const Color(0xFFFDF7FA),
-          child: Center(
-            child: CircularProgressIndicator(
-              value: progress.expectedTotalBytes != null
-                  ? progress.cumulativeBytesLoaded /
-                      progress.expectedTotalBytes!
-                  : null,
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(_orchid),
-              strokeWidth: 2,
-            ),
-          ),
-        );
-      },
-      errorBuilder: (_, __, ___) => Container(
-        color: const Color(0xFFFDF7FA),
-        child: const Center(
-          child: Icon(Icons.broken_image_outlined,
-              color: _orchid, size: 48),
-        ),
-      ),
+      cacheWidth: 1080,
+      errorBuilder: (_, __, ___) => placeholder,
     );
   }
 
-  // ── Local file (just captured) ────────────────────────────────────────────
-  final file = File(path);
-  if (!file.existsSync()) {
-    // File not yet flushed to disk; show a soft placeholder
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: _heroHeight,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // ── Photo ──────────────────────────────────────────────────────
+          _image(),
+
+          // ── Gradient overlay ───────────────────────────────────────────
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withOpacity(0.28),
+                  Colors.black.withOpacity(0.04),
+                  _surface.withOpacity(0.96),
+                ],
+                stops: const [0.0, 0.44, 1.0],
+              ),
+            ),
+          ),
+
+          // ── Text content ───────────────────────────────────────────────
+          Positioned(
+            bottom: 64,
+            left: 20,
+            right: 20,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Style badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                        colors: [_rose, _orchidDark]),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _rose.withOpacity(0.32),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    '✨  $overallStyle',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Your Feature Report',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black26,
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Personalised tutorials curated for you',
+                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Placeholder shown when no image is available ──────────────────────────────
+class _ImagePlaceholder extends StatelessWidget {
+  const _ImagePlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: Colors.grey.shade300,
-      child: const Center(
-        child: Icon(Icons.image_not_supported_outlined,
-            size: 52, color: Colors.white54),
-      ),
-    );
-  }
-
-  return Image.file(
-    file,
-    fit: BoxFit.cover,
-    width: double.infinity,
-    height: double.infinity,
-    cacheWidth: 1080, // limit decode size for performance
-    errorBuilder: (_, __, ___) => Container(
-      color: const Color(0xFFFDF7FA),
-      child: const Center(
-        child: Icon(Icons.broken_image_outlined,
-            color: _orchid, size: 48),
-      ),
-    ),
-  );
-}
-
-  Widget _buildHeroHeader() {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // Captured photo
-        Positioned.fill(
-          child: _buildHeroImage(),
-        ),
-        // Soft light-mode gradient overlay
-        Positioned.fill(
-        child:Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withOpacity(0.25),
-                Colors.black.withOpacity(0.05),
-                _surface.withOpacity(0.95),
-              ],
-              stops: const [0.0, 0.45, 1.0],
-            ),
+      color: const Color(0xFFF0E8F0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.face_retouching_natural,
+              size: 64, color: _orchid.withOpacity(0.6)),
+          const SizedBox(height: 8),
+          Text(
+            'No photo available',
+            style: TextStyle(
+                color: _textMuted.withOpacity(0.7), fontSize: 13),
           ),
-        ),
+        ],
       ),
-        // Content
-        Positioned(
-          bottom: 60,
-          left: 20,
-          right: 20,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Style badge — gradient pill
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                      colors: [_rose, _orchidDark]),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _rose.withOpacity(0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Text(
-                  '✨  ${r.overallStyle}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Your Feature Report',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black26,
-                      blurRadius: 8,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'Personalised tutorials curated for you',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
@@ -308,12 +323,12 @@ class _FeaturesTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      _FeatureItem('Face Shape',    features.faceShape,    '🫶', _faceShapeDesc(features.faceShape)),
-      _FeatureItem('Eye Shape',     features.eyeShape,     '👁️', _eyeDesc(features.eyeShape)),
-      _FeatureItem('Lip Shape',     features.lipShape,     '💋', _lipDesc(features.lipShape)),
-      _FeatureItem('Nose Shape',    features.noseShape,    '👃', _noseDesc(features.noseShape)),
-      _FeatureItem('Eyebrows',      features.eyebrowShape, '〰️', _browDesc(features.eyebrowShape)),
-      _FeatureItem('Skin Undertone',features.skinUndertone,'🌟', _undertoneDesc(features.skinUndertone)),
+      _FeatureItem('Face Shape',     features.faceShape,    '🫶', _faceShapeDesc(features.faceShape)),
+      _FeatureItem('Eye Shape',      features.eyeShape,     '👁️', _eyeDesc(features.eyeShape)),
+      _FeatureItem('Lip Shape',      features.lipShape,     '💋', _lipDesc(features.lipShape)),
+      _FeatureItem('Nose Shape',     features.noseShape,    '👃', _noseDesc(features.noseShape)),
+      _FeatureItem('Eyebrows',       features.eyebrowShape, '〰️', _browDesc(features.eyebrowShape)),
+      _FeatureItem('Skin Undertone', features.skinUndertone,'🌟', _undertoneDesc(features.skinUndertone)),
     ];
 
     return ListView(
@@ -370,17 +385,14 @@ class _FeatureCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Emoji in a soft pill
           Container(
-            width: 38,
-            height: 38,
+            width: 38, height: 38,
             decoration: BoxDecoration(
               color: _orchid.withOpacity(0.18),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
-              child: Text(item.emoji,
-                  style: const TextStyle(fontSize: 20)),
+              child: Text(item.emoji, style: const TextStyle(fontSize: 20)),
             ),
           ),
           const SizedBox(height: 8),
@@ -406,9 +418,7 @@ class _FeatureCard extends StatelessWidget {
           Text(
             item.description,
             style: const TextStyle(
-              color: _textMuted,
-              fontSize: 10.5,
-              height: 1.4,
+              color: _textMuted, fontSize: 10.5, height: 1.4,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -440,8 +450,7 @@ class _AIAnalysisCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 36, height: 36,
             decoration: BoxDecoration(
               color: _rose.withOpacity(0.12),
               borderRadius: BorderRadius.circular(10),
@@ -457,9 +466,7 @@ class _AIAnalysisCard extends StatelessWidget {
                   ? 'AI detected your facial features using geometric analysis of landmark points and contour data.'
                   : text,
               style: const TextStyle(
-                color: _textPrimary,
-                fontSize: 13.5,
-                height: 1.55,
+                color: _textPrimary, fontSize: 13.5, height: 1.55,
               ),
             ),
           ),
@@ -510,10 +517,16 @@ class _TutorialCard extends StatelessWidget {
       };
 
   Future<void> _openYouTube(String query) async {
-    final uri = Uri.parse(
-        'https://www.youtube.com/results?search_query=${Uri.encodeComponent(query)}');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    final appUri = Uri.parse(
+      'youtube://www.youtube.com/results?search_query=${Uri.encodeComponent(query)}',
+    );
+    final webUri = Uri.parse(
+      'https://www.youtube.com/results?search_query=${Uri.encodeComponent(query)}',
+    );
+    if (await canLaunchUrl(appUri)) {
+      await launchUrl(appUri);
+    } else {
+      await launchUrl(webUri, mode: LaunchMode.externalApplication);
     }
   }
 
@@ -535,22 +548,20 @@ class _TutorialCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Coloured top accent strip ────────────────────────────────────
           Container(
             height: 4,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [_rose, _orchidDark]),
+              gradient:
+                  const LinearGradient(colors: [_rose, _orchidDark]),
               borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(20)),
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Feature tag
                 Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
@@ -570,13 +581,11 @@ class _TutorialCard extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                // Difficulty
                 Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _diffColor(tutorial.difficulty)
-                        .withOpacity(0.12),
+                    color: _diffColor(tutorial.difficulty).withOpacity(0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -591,7 +600,6 @@ class _TutorialCard extends StatelessWidget {
               ],
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
             child: Text(
@@ -604,7 +612,6 @@ class _TutorialCard extends StatelessWidget {
               ),
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
             child: Text(
@@ -613,8 +620,6 @@ class _TutorialCard extends StatelessWidget {
                   color: _textMuted, fontSize: 13, height: 1.45),
             ),
           ),
-
-          // Channel + duration
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: Row(
@@ -625,8 +630,8 @@ class _TutorialCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     tutorial.channel,
-                    style: const TextStyle(
-                        color: _textMuted, fontSize: 11.5),
+                    style:
+                        const TextStyle(color: _textMuted, fontSize: 11.5),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -639,8 +644,6 @@ class _TutorialCard extends StatelessWidget {
               ],
             ),
           ),
-
-          // Product chips
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
             child: Wrap(
@@ -663,8 +666,6 @@ class _TutorialCard extends StatelessWidget {
                   .toList(),
             ),
           ),
-
-          // YouTube button
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
             child: GestureDetector(
@@ -736,7 +737,7 @@ class _TipsTab extends StatelessWidget {
               child: _TipCard(tip: e.value, index: e.key),
             )),
         const SizedBox(height: 8),
-        _ProTipBanner(),
+        const _ProTipBanner(),
       ],
     );
   }
@@ -747,7 +748,6 @@ class _TipCard extends StatelessWidget {
   final int index;
   const _TipCard({required this.tip, required this.index});
 
-  // Rose-orchid tinted accent palette for each card
   static const List<Color> _accents = [
     Color(0xFFE8708A),
     Color(0xFFFF98C0),
@@ -776,8 +776,7 @@ class _TipCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 46,
-            height: 46,
+            width: 46, height: 46,
             decoration: BoxDecoration(
               color: accent.withOpacity(0.1),
               borderRadius: BorderRadius.circular(14),
@@ -822,9 +821,7 @@ class _TipCard extends StatelessWidget {
                 Text(
                   tip.body,
                   style: const TextStyle(
-                    color: _textMuted,
-                    fontSize: 13,
-                    height: 1.45,
+                    color: _textMuted, fontSize: 13, height: 1.45,
                   ),
                 ),
               ],
@@ -837,6 +834,8 @@ class _TipCard extends StatelessWidget {
 }
 
 class _ProTipBanner extends StatelessWidget {
+  const _ProTipBanner();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -854,8 +853,7 @@ class _ProTipBanner extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 36, height: 36,
             decoration: BoxDecoration(
               color: _rose.withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
@@ -864,11 +862,11 @@ class _ProTipBanner extends StatelessWidget {
                 child: Text('💡', style: TextStyle(fontSize: 18))),
           ),
           const SizedBox(width: 12),
-          Expanded(
+          const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Pro Reminder',
                   style: TextStyle(
                     color: _textPrimary,
@@ -876,8 +874,8 @@ class _ProTipBanner extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 5),
-                const Text(
+                SizedBox(height: 5),
+                Text(
                   'Good lighting and clean, moisturized skin are the foundations of any makeup look — no technique or product can replace them.',
                   style: TextStyle(
                       color: _textMuted, fontSize: 12.5, height: 1.5),
@@ -891,7 +889,7 @@ class _ProTipBanner extends StatelessWidget {
   }
 }
 
-// ── Shared ────────────────────────────────────────────────────────────────────
+// ── Shared helpers ────────────────────────────────────────────────────────────
 
 class _SectionHeader extends StatelessWidget {
   final String text;
@@ -922,12 +920,12 @@ String _faceShapeDesc(String s) => {
     }[s] ?? 'Balanced proportions';
 
 String _eyeDesc(String s) => {
-      'almond':    'Tapers at both corners',
-      'round':     'Circular, prominent iris',
-      'hooded':    'Crease hidden when open',
-      'monolid':   'No visible crease',
-      'upturned':  'Outer corner tilts up',
-      'downturned':'Outer corner tilts down',
+      'almond':     'Tapers at both corners',
+      'round':      'Circular, prominent iris',
+      'hooded':     'Crease hidden when open',
+      'monolid':    'No visible crease',
+      'upturned':   'Outer corner tilts up',
+      'downturned': 'Outer corner tilts down',
     }[s] ?? 'Classic eye shape';
 
 String _lipDesc(String s) => {

@@ -124,8 +124,8 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['Oily', 'Combination'],
       'tag': 'Step 4', 'tagColor': Color(0xFFE8C4A0),
       'desc': 'Designed for Sri Lankan humidity & oily skin',
-      'image': 'assets/images/skincare/lk/8.jpg',
-      'buyUrl': 'https://www.daraz.lk/catalog/?q=british+cosmetics+oil+control+moisturiser',
+      'image': 'assets/images/skincare/lk/8.webp',
+      'buyUrl': 'https://www.daraz.lk/catalog/?q=prevense+oil+control+moisturiser',
     },
     {
       'name': 'Daily SPF 50 Sunscreen',
@@ -144,7 +144,7 @@ class _SkinCarePageState extends State<SkinCarePage> {
       'skinType': ['All', 'Dry', 'Normal'],
       'tag': 'Body', 'tagColor': Color(0xFFD4C0E8),
       'desc': 'Designed specifically for Sri Lankan skin & climate',
-      'image': 'assets/images/skincare/lk/10.jpg',
+      'image': 'assets/images/skincare/lk/10.png',
       'buyUrl': 'https://www.daraz.lk/catalog/?q=velvet',
     },
   ];

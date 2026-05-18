@@ -4,12 +4,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flawless_beauty_app/services/makeup_analysis_service.dart';
-import 'package:flawless_beauty_app/services/makeup_history.dart';
 
 // ── Model ─────────────────────────────────────────────────────────────────────
 class MakeupRecord {
   final String id;
-  final String imagePath; // local path OR remote Supabase Storage URL
+  final String imagePath; // local path OR remote Supabase signed URL
   final MakeupAnalysisResult result;
   final DateTime scannedAt;
   final bool isRemote;
@@ -76,18 +75,27 @@ class MakeupHistory extends ChangeNotifier {
 
     String? imageUrl;
 
-    // 1. Upload image to the shared scan-images bucket
+    // 1. Upload image to Supabase Storage and get a long-lived signed URL
+    //    (10 years = 315,360,000 seconds — same pattern as ProfileService)
     try {
       final file     = File(localImagePath);
       final fileName = 'makeup/$uid/${DateTime.now().millisecondsSinceEpoch}.jpg';
+
       await _storage.from('scan-images').upload(
             fileName,
             file,
             fileOptions: const FileOptions(contentType: 'image/jpeg'),
           );
-      imageUrl = _storage.from('scan-images').getPublicUrl(fileName);
+
+      // ✅ Use createSignedUrl instead of getPublicUrl — works on private buckets
+      imageUrl = await _storage
+          .from('scan-images')
+          .createSignedUrl(fileName, 315360000); // 10 years in seconds
+
+      debugPrint('✅ MakeupHistory image uploaded: $imageUrl');
     } catch (e) {
       debugPrint('⚠️ MakeupHistory image upload failed: $e');
+      // imageUrl stays null — we fall back to local path for this session
     }
 
     // 2. Insert DB row
@@ -104,7 +112,7 @@ class MakeupHistory extends ChangeNotifier {
             'skin_undertone'  : result.features.skinUndertone,
             'overall_style'   : result.overallStyle,
             'raw_ai_analysis' : result.features.rawAIAnalysis,
-            'image_url'       : imageUrl,
+            'image_url'       : imageUrl, // signed URL stored in DB
           })
           .select()
           .single();
@@ -148,8 +156,8 @@ class MakeupHistory extends ChangeNotifier {
       if (record.isRemote) {
         final uid = _db.auth.currentUser?.id;
         if (uid != null) {
-          final uri        = Uri.parse(record.imagePath);
-          final segments   = uri.pathSegments;
+          final uri         = Uri.parse(record.imagePath);
+          final segments    = uri.pathSegments;
           final afterBucket = segments
               .skipWhile((s) => s != 'scan-images')
               .skip(1)
@@ -186,7 +194,6 @@ class MakeupHistory extends ChangeNotifier {
       rawAIAnalysis : row['raw_ai_analysis']?.toString() ?? '',
     );
 
-    // Rebuild tutorials + tips from stored features so the report page still works
     final fullResult = MakeupAnalysisResult(
       features    : features,
       tutorials   : MakeupAnalysisService.buildTutorialsPublic(features),
@@ -195,14 +202,17 @@ class MakeupHistory extends ChangeNotifier {
     );
 
     final imageUrl  = row['image_url'] as String?;
-    final imagePath = imageUrl ?? localFallback ?? '';
+    // Prefer the remote signed URL; fall back to local path if upload failed
+    final imagePath = (imageUrl != null && imageUrl.isNotEmpty)
+        ? imageUrl
+        : (localFallback ?? '');
 
     return MakeupRecord(
       id        : row['id'] as String,
       imagePath : imagePath,
       result    : fullResult,
       scannedAt : DateTime.parse(row['scanned_at'] as String),
-      isRemote  : imageUrl != null,
+      isRemote  : imageUrl != null && imageUrl.isNotEmpty,
     );
   }
 }

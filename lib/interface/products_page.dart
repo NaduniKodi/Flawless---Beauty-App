@@ -124,12 +124,12 @@ class _ProductsPageState extends State<ProductsPage> {
     },
     {
       'name': 'Gua Sha Stone',
-      'brand': 'Spa Ceylon',
+      'brand': 'Daraz',
       'price': 3800.0, 'displayPrice': 'Rs. 3,800',
       'rating': 4.8, 'reviews': 412,
       'category': 'Tools', 'badge': 'Luxury',
       'badgeColor': Color(0xFFD4A820), 'accent': Color(0xFFFFF8E1),
-      'image': 'assets/images/products/lk/9.avif',
+      'image': 'assets/images/products/lk/9.jpeg',
       'buyUrl': 'https://www.daraz.lk/tag/guva-sha/',
     },
     {

@@ -156,7 +156,7 @@ class _FaceYogaPageState extends State<FaceYogaPage>
 
   final List<Map<String, dynamic>> _videos = [
     {
-      'id':       'G8oR8PGYqco',
+      'id':       'Nlv-QuY2bl0',  
       'title':    '5-Min Morning Face Yoga',
       'channel':  'Danielle Collins',
       'duration': '5:02',
@@ -164,7 +164,7 @@ class _FaceYogaPageState extends State<FaceYogaPage>
       'tagColor': const Color(0xFF7EC4A4),
     },
     {
-      'id':       'PKoMEHCyVag',
+      'id':       'EujC5Df5ago',
       'title':    'Face Yoga for Cheeks and Smile Lines',
       'channel':  'Face Yoga Method',
       'duration': '8:44',
@@ -172,7 +172,7 @@ class _FaceYogaPageState extends State<FaceYogaPage>
       'tagColor': const Color(0xFFE8708A),
     },
     {
-      'id':       'DUbGkgAv3mc',
+      'id':       'nnUpOW3yDAQ', 
       'title':    'Jawline and Neck Firming Routine',
       'channel':  'Danielle Collins',
       'duration': '9:52',
@@ -180,7 +180,7 @@ class _FaceYogaPageState extends State<FaceYogaPage>
       'tagColor': const Color(0xFFE8708A),
     },
     {
-      'id':       'vs5gFh3qFPo',
+      'id':       'ppAVry7AfyU',
       'title':    'Reduce Eye Wrinkles Naturally',
       'channel':  'Face Yoga Method',
       'duration': '6:58',
@@ -188,7 +188,7 @@ class _FaceYogaPageState extends State<FaceYogaPage>
       'tagColor': const Color(0xFF7EC4A4),
     },
     {
-      'id':       'VGsRO9sI1EQ',
+      'id':        '-3Br7b1mPcs',
       'title':    'Full Face Lift 15-Min Workout',
       'channel':  'Yoga Face',
       'duration': '15:10',

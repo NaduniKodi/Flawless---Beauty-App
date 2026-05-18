@@ -88,9 +88,12 @@ class MakeupHistory extends ChangeNotifier {
           );
 
       // ✅ Use createSignedUrl instead of getPublicUrl — works on private buckets
-      imageUrl = await _storage
+      /*imageUrl = await _storage
           .from('scan-images')
           .createSignedUrl(fileName, 315360000); // 10 years in seconds
+      */
+      
+      imageUrl = _storage.from('scan-images').getPublicUrl(fileName);
 
       debugPrint('✅ MakeupHistory image uploaded: $imageUrl');
     } catch (e) {

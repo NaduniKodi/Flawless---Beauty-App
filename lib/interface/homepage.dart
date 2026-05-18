@@ -12,7 +12,11 @@ import 'package:flawless_beauty_app/interface/face_yoga.dart';
 import 'package:flawless_beauty_app/interface/products_page.dart';
 import 'package:flawless_beauty_app/interface/interests_page.dart';
 import 'package:flawless_beauty_app/services/interest_data.dart';
-import 'package:flawless_beauty_app/widgets/user_avatar.dart'; // ✅ fixes avatar sync
+import 'package:flawless_beauty_app/widgets/user_avatar.dart'; 
+import 'package:flawless_beauty_app/services/skin_advisor.dart';
+import 'package:flawless_beauty_app/interface/my_routine_page.dart';
+
+
 
 // ── Colour tokens ─────────────────────────────────────────────────────────────
 const Color _rose = Color(0xFFE8708A);
@@ -265,16 +269,35 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 14),
                 _buildSearchResults(),
               ] else ...[
-                const SizedBox(height: 20),
-                _buildInterestsStrip(),
+                
+                /*_buildInterestsStrip(),
                 const SizedBox(height: 24),
+                _buildBanner(),*/
+                const SizedBox(height: 20),
+                 _buildInterestsStrip(),
+                const SizedBox(height: 20),
+
+              
+                const SizedBox(height: 20),
                 _buildBanner(),
+
                 const SizedBox(height: 28),
                 _buildScanButton(),
-                const SizedBox(height: 32),
+                
+                const SizedBox(height: 30),
                 _buildSectionTitle('Browse Categories'),
-                const SizedBox(height: 14),
+                
+                const SizedBox(height: 10),
                 _buildCategoriesGrid(),
+
+                 if (SkinAdvisor.hasSkinProfile) ...[
+                  _buildDailyTipCard(),
+                  const SizedBox(height: 10),
+                ],
+
+                _buildRoutineCTASection(),
+                const SizedBox(height: 2),
+
               ],
             ],
           ),
@@ -720,6 +743,7 @@ class _HomePageState extends State<HomePage>
     );
   }
 
+
   // ── Scan button ───────────────────────────────────────────────────────────
   Widget _buildScanButton() {
     return GestureDetector(
@@ -831,6 +855,13 @@ class _HomePageState extends State<HomePage>
         ? _categories
         : _categories.where((c) => c.$4 == _activeFilter).toList();
 
+        // Order categories by user's interests when no filter is active
+      /* final ordered = _activeFilter == 'All'
+        ? _orderedCategories()
+        : _categories.where((c) => c.$4 == _activeFilter).toList();
+      final filtered = ordered;*/
+
+
     if (filtered.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(24),
@@ -891,6 +922,340 @@ class _HomePageState extends State<HomePage>
       },
     );
   }
+
+  
+    // ── Personalised section (tip card + routine CTA) ─────────────────────────
+    Widget _buildRoutineCTASection() {
+    return ListenableBuilder(
+      listenable: UserData.instance,
+      builder: (_, __) {
+        if (SkinAdvisor.hasSkinProfile) {
+          return _buildRoutineCTA();
+        }
+        return _buildProfileNudge();
+      },
+    );
+  }
+ 
+  // ── Daily Tip Card ────────────────────────────────────────────────────────
+  Widget _buildDailyTipCard() {
+    final tip = SkinAdvisor.dailyTip;
+ 
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFF8AFCB).withOpacity(0.4)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFE8708A).withOpacity(0.07),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFE96A85), Color(0xFFF8AFCB)],
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.lightbulb_outline_rounded,
+              color: Colors.white,
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "TODAY'S SKIN TIP",
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: _textMuted,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  tip,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: _textPrimary,
+                    height: 1.45,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+ 
+  // ── Routine CTA banner ────────────────────────────────────────────────────
+  Widget _buildRoutineCTA() {
+    final u        = UserData.instance;
+    final skinType = u.skinType;
+    final concerns = u.skinConcerns;
+    final hour     = DateTime.now().hour;
+    final isAM     = hour < 18;
+    final label    = isAM ? '☀️  View Morning Routine' : '🌙  View Evening Routine';
+ 
+    return GestureDetector(
+      onTap: () => Navigator.push(context, _fadeRoute(const MyRoutinePage())),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: isAM
+                ? [const Color(0xFFE96A85), const Color(0xFFF8AFCB)]
+                : [const Color(0xFF7C4DBA), const Color(0xFFE96A85)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFE8708A).withOpacity(0.35),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Skin type + concerns badges
+                  if (skinType.isNotEmpty)
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        _routineBadge(skinType),
+                        ...concerns.take(2).map(_routineBadge),
+                        if (concerns.length > 2)
+                          _routineBadge('+${concerns.length - 2} more'),
+                      ],
+                    ),
+                  if (skinType.isNotEmpty) const SizedBox(height: 10),
+                  const Text(
+                    'Your Personalised\nSkin Routine',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      height: 1.2,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          label,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFFC2516B),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 14,
+                          color: Color(0xFFC2516B),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Step count bubble
+            Column(
+              children: [
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      isAM
+                          ? '${SkinAdvisor.amRoutine.length}'
+                          : '${SkinAdvisor.pmRoutine.length}',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'steps',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+ 
+  Widget _routineBadge(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+ 
+  // ── Profile nudge (no skin data yet) ─────────────────────────────────────
+  Widget _buildProfileNudge() {
+    return GestureDetector(
+      onTap: () => Navigator.push(context, _fadeRoute(const MyRoutinePage())),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: const Color(0xFFF8AFCB).withOpacity(0.5),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFE96A85), Color(0xFFF8AFCB)],
+                ),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.face_retouching_natural_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Get Your Personalised Routine',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: _textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    'Complete your beauty profile to unlock AM/PM routines, daily skin tips, and ingredient guides tailored to you.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: _textMuted,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: _orchidDark,
+              size: 22,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+ 
+  // ── Interest-ordered categories ───────────────────────────────────────────
+  // Reorders the categories grid so the ones most relevant to
+  // the user's interests appear first.
+  List<(String, String, String, String)> _orderedCategories() {
+    final preferredOrder = SkinAdvisor.prioritisedCategories;
+ 
+    // Map label → tuple
+    final catMap = {
+      for (final c in _categories) c.$1: c,
+    };
+ 
+    // Also handle the slight label mismatch ('Make up' vs 'Make up')
+    final result = <(String, String, String, String)>[];
+ 
+    for (final name in preferredOrder) {
+      // SkinAdvisor returns 'Make up', 'Skin Care', 'Face Yoga', 'Products', 'Cosmetics'
+      final match = _categories.where((c) => c.$1 == name || c.$1 == 'Make up' && name == 'Make up').firstOrNull;
+      if (match != null && !result.contains(match)) result.add(match);
+    }
+ 
+    // Append any not already added
+    for (final c in _categories) {
+      if (!result.contains(c)) result.add(c);
+    }
+ 
+    return result;
+  }
+
 
   // ── Bottom nav ────────────────────────────────────────────────────────────
   Widget _buildBottomNav() {

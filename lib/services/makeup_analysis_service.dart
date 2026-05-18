@@ -6,6 +6,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 // ── Data Models ───────────────────────────────────────────────────────────────
 
@@ -344,7 +346,7 @@ class MakeupAnalysisService {
   // TODO: Replace the empty string below with your OpenRouter API key.
   // Until you do, the app uses the geometric analysis above, which is already
   // significantly more accurate than the previous version.
-  static const String _openRouterKey = ''; // ← paste your key here
+  static final String _openRouterKey = dotenv.env['openrouterai'] ?? 'MISSING_API_KEY'; 
 
   static Future<FaceFeatures> _enrichWithAI(
       String imagePath, FaceFeatures geometric) async {
@@ -378,16 +380,16 @@ class MakeupAnalysisService {
                 {
                   'type': 'text',
                   'text': '''Analyze this face image and return ONLY a JSON object
-(no markdown, no extra text) with these exact keys:
-{
-  "face_shape": "oval|round|square|heart|oblong|diamond",
-  "nose_shape": "button|roman|snub|wide|narrow|aquiline",
-  "eye_shape": "almond|round|hooded|monolid|upturned|downturned",
-  "lip_shape": "full|thin|cupids-bow|wide|small|pouty",
-  "eyebrow_shape": "arched|straight|rounded|s-shaped|bushy",
-  "skin_undertone": "warm|cool|neutral",
-  "analysis": "2-sentence description of overall features"
-}''',
+                (no markdown, no extra text) with these exact keys:
+                {
+                  "face_shape": "oval|round|square|heart|oblong|diamond",
+                  "nose_shape": "button|roman|snub|wide|narrow|aquiline",
+                  "eye_shape": "almond|round|hooded|monolid|upturned|downturned",
+                  "lip_shape": "full|thin|cupids-bow|wide|small|pouty",
+                  "eyebrow_shape": "arched|straight|rounded|s-shaped|bushy",
+                  "skin_undertone": "warm|cool|neutral",
+                  "analysis": "2-sentence description of overall features"
+                }''',
                 },
               ],
             }

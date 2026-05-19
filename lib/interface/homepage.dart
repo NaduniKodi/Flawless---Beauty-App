@@ -275,9 +275,7 @@ class _HomePageState extends State<HomePage>
                 _buildBanner(),*/
                 const SizedBox(height: 20),
                  _buildInterestsStrip(),
-                const SizedBox(height: 20),
-
-              
+                
                 const SizedBox(height: 20),
                 _buildBanner(),
 
@@ -287,16 +285,17 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 30),
                 _buildSectionTitle('Browse Categories'),
                 
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 _buildCategoriesGrid(),
+                 const SizedBox(height: 12),
 
                  if (SkinAdvisor.hasSkinProfile) ...[
                   _buildDailyTipCard(),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 14),
                 ],
 
                 _buildRoutineCTASection(),
-                const SizedBox(height: 2),
+                const SizedBox(height: 12),
 
               ],
             ],
@@ -849,19 +848,11 @@ class _HomePageState extends State<HomePage>
     ),
   ];
 
-  Widget _buildCategoriesGrid() {
-    // When a filter is active but no search text, filter the grid too
+   Widget _buildCategoriesGrid() {
     final filtered = _activeFilter == 'All'
-        ? _categories
+        ? _categories.toList()
         : _categories.where((c) => c.$4 == _activeFilter).toList();
-
-        // Order categories by user's interests when no filter is active
-      /* final ordered = _activeFilter == 'All'
-        ? _orderedCategories()
-        : _categories.where((c) => c.$4 == _activeFilter).toList();
-      final filtered = ordered;*/
-
-
+ 
     if (filtered.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(24),
@@ -872,56 +863,80 @@ class _HomePageState extends State<HomePage>
         child: Center(
           child: Text(
             'No categories match "$_activeFilter"',
-            style: TextStyle(color: _textMuted, fontSize: 13),
+            style: const TextStyle(color: _textMuted, fontSize: 13),
           ),
         ),
       );
     }
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 14,
-        mainAxisSpacing: 14,
-        childAspectRatio: 0.88,
-      ),
-      itemCount: filtered.length,
-      itemBuilder: (context, i) {
-        final (title, sub, img, _) = filtered[i];
-        VoidCallback? onTap;
-        switch (title) {
-          case 'Make up':
-            onTap = () =>
-                Navigator.push(context, _fadeRoute(const MakeupPage()));
-            break;
-          case 'Cosmetics':
-            onTap = () =>
-                Navigator.push(context, _fadeRoute(const CosmeticsPage()));
-            break;
-          case 'Face Yoga':
-            onTap = () =>
-                Navigator.push(context, _fadeRoute(const FaceYogaPage()));
-            break;
-          case 'Skin Care':
-            onTap = () =>
-                Navigator.push(context, _fadeRoute(const SkinCarePage()));
-            break;
-          case 'Products':
-            onTap = () =>
-                Navigator.push(context, _fadeRoute(const ProductsPage()));
-            break;
-        }
-        return _CategoryCard(
-          title: title,
-          subtitle: sub,
-          imgPath: img,
-          onTap: onTap,
+ 
+        final rows = <Widget>[];
+ 
+    for (int i = 0; i < filtered.length; i += 2) {
+      final isLastOdd = i + 1 >= filtered.length;
+ 
+      if (isLastOdd) {
+        // Single card — natural height, no paired constraint needed
+        rows.add(_buildCard(filtered[i]));
+      } else {
+        // Pair — IntrinsicHeight makes both cards match the taller one
+        rows.add(
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: _buildCard(filtered[i])),
+                const SizedBox(width: 14),
+                Expanded(child: _buildCard(filtered[i + 1])),
+              ],
+            ),
+          ),
         );
-      },
+      }
+
+ 
+      // Gap between rows, but NOT after the last row
+      if (i + 2 < filtered.length) {
+        rows.add(const SizedBox(height: 14));
+      }
+    }
+ 
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: rows,
     );
   }
+ 
+  // Card height that matches the old childAspectRatio: 0.88 at full width.
+  // Screen width ≈ 360 dp minus 2×20 padding = 320 dp.
+  // Half width ≈ (320 - 14) / 2 ≈ 153 dp → height = 153 / 0.88 ≈ 174 dp.
+  //static const double _gridCardHeight = 180;
+ 
+  Widget _buildCard(
+    (String, String, String, String) cat, {
+    bool fullWidth = false,
+  }) {
+    final (title, sub, img, _) = cat;
+    VoidCallback? onTap;
+    switch (title) {
+      case 'Make up':
+        onTap = () => Navigator.push(context, _fadeRoute(const MakeupPage()));
+      case 'Cosmetics':
+        onTap = () => Navigator.push(context, _fadeRoute(const CosmeticsPage()));
+      case 'Face Yoga':
+        onTap = () => Navigator.push(context, _fadeRoute(const FaceYogaPage()));
+      case 'Skin Care':
+        onTap = () => Navigator.push(context, _fadeRoute(const SkinCarePage()));
+      case 'Products':
+        onTap = () => Navigator.push(context, _fadeRoute(const ProductsPage()));
+    }
+    return _CategoryCard(
+      title: title,
+      subtitle: sub,
+      imgPath: img,
+      onTap: onTap,
+    );
+  }
+
 
   
     // ── Personalised section (tip card + routine CTA) ─────────────────────────

@@ -8,7 +8,8 @@ import 'package:flawless_beauty_app/services/makeup_analysis_service.dart';
 // ── Model ─────────────────────────────────────────────────────────────────────
 class MakeupRecord {
   final String id;
-  final String imagePath; // local path OR remote Supabase signed URL
+  /// Remote signed URL when loaded from DB, or local file path for this session
+  final String imagePath;
   final MakeupAnalysisResult result;
   final DateTime scannedAt;
   final bool isRemote;
@@ -59,6 +60,7 @@ class MakeupHistory extends ChangeNotifier {
         _records.add(_fromRow(row as Map<String, dynamic>));
       }
       _loaded = true;
+      debugPrint('✅ MakeupHistory loaded ${_records.length} records');
     } catch (e) {
       error = e.toString();
       debugPrint('❌ MakeupHistory.load error: $e');
@@ -71,38 +73,58 @@ class MakeupHistory extends ChangeNotifier {
   // ── Save a new makeup scan ─────────────────────────────────────────────────
   Future<void> add(MakeupAnalysisResult result, String localImagePath) async {
     final uid = _db.auth.currentUser?.id;
-    if (uid == null) return;
+    if (uid == null) {
+      debugPrint('⚠️ MakeupHistory.add: no signed-in user');
+      return;
+    }
+
+    // Verify the local file actually exists before trying to upload
+    final localFile = File(localImagePath);
+    final fileExists = await localFile.exists();
+    debugPrint('📁 Local file exists: $fileExists | path: $localImagePath');
 
     String? imageUrl;
 
-    // 1. Upload image to Supabase Storage and get a long-lived signed URL
-    //    (10 years = 315,360,000 seconds — same pattern as ProfileService)
-    try {
-      final file     = File(localImagePath);
-      final fileName = 'makeup/$uid/${DateTime.now().millisecondsSinceEpoch}.jpg';
+    // ── 1. Upload image to Supabase Storage ──────────────────────────────────
+    if (fileExists) {
+      try {
+        final fileName =
+            'makeup/$uid/${DateTime.now().millisecondsSinceEpoch}.jpg';
 
-      await _storage.from('scan-images').upload(
-            fileName,
-            file,
-            fileOptions: const FileOptions(contentType: 'image/jpeg'),
-          );
+        debugPrint('📤 Uploading to scan-images/$fileName ...');
 
-      // ✅ Use createSignedUrl instead of getPublicUrl — works on private buckets
-      /*imageUrl = await _storage
-          .from('scan-images')
-          .createSignedUrl(fileName, 315360000); // 10 years in seconds
-      */
-      
-      imageUrl = _storage.from('scan-images').getPublicUrl(fileName);
+        await _storage.from('scan-images').upload(
+              fileName,
+              localFile,
+              fileOptions: const FileOptions(contentType: 'image/jpeg'),
+            );
 
-      debugPrint('✅ MakeupHistory image uploaded: $imageUrl');
-    } catch (e) {
-      debugPrint('⚠️ MakeupHistory image upload failed: $e');
-      // imageUrl stays null — we fall back to local path for this session
+        debugPrint('✅ Upload complete, generating signed URL...');
+
+        imageUrl = await _storage
+            .from('scan-images')
+            .createSignedUrl(fileName, 315360000); // 10 years
+
+        debugPrint('✅ Signed URL generated successfully');
+      } on StorageException catch (e) {
+        // StorageException gives the most useful error message
+        debugPrint('❌ Storage upload FAILED');
+        debugPrint('   status: ${e.statusCode}');
+        debugPrint('   message: ${e.message}');
+        debugPrint('   error: ${e.error}');
+        debugPrint('   → Fix: Check scan-images bucket exists in Supabase Storage');
+        debugPrint('   → Fix: Add Storage RLS policies for insert + select');
+      } catch (e) {
+        debugPrint('❌ Unexpected upload error: $e');
+      }
+    } else {
+      debugPrint('⚠️ Skipping upload: local file not found at $localImagePath');
     }
 
-    // 2. Insert DB row
+    // ── 2. Insert DB row ──────────────────────────────────────────────────────
     try {
+      debugPrint('💾 Inserting row (image_url: ${imageUrl != null ? "set" : "NULL"})');
+
       final row = await _db
           .from('makeup_reports')
           .insert({
@@ -115,14 +137,21 @@ class MakeupHistory extends ChangeNotifier {
             'skin_undertone'  : result.features.skinUndertone,
             'overall_style'   : result.overallStyle,
             'raw_ai_analysis' : result.features.rawAIAnalysis,
-            'image_url'       : imageUrl, // signed URL stored in DB
+            'image_url'       : imageUrl,
           })
           .select()
           .single();
 
+      debugPrint('✅ DB insert success, id: ${row['id']}');
+
+      // For in-memory record: prefer signed URL, fall back to local path
+      // so the image shows immediately in this session even if upload failed
       _records.insert(
         0,
-        _fromRow(row as Map<String, dynamic>, localFallback: localImagePath),
+        _fromRow(
+          row as Map<String, dynamic>,
+          localFallback: localImagePath,
+        ),
       );
       notifyListeners();
     } catch (e) {
@@ -132,7 +161,7 @@ class MakeupHistory extends ChangeNotifier {
         0,
         MakeupRecord(
           id        : 'local_${DateTime.now().millisecondsSinceEpoch}',
-          imagePath : localImagePath,
+          imagePath : localImagePath, // always show local image in-session
           result    : result,
           scannedAt : DateTime.now(),
           isRemote  : false,
@@ -167,6 +196,7 @@ class MakeupHistory extends ChangeNotifier {
               .join('/');
           if (afterBucket.isNotEmpty) {
             await _storage.from('scan-images').remove([afterBucket]);
+            debugPrint('✅ Deleted storage file: $afterBucket');
           }
         }
       }
@@ -204,11 +234,19 @@ class MakeupHistory extends ChangeNotifier {
       overallStyle: row['overall_style']?.toString() ?? 'Natural Glow',
     );
 
-    final imageUrl  = row['image_url'] as String?;
-    // Prefer the remote signed URL; fall back to local path if upload failed
-    final imagePath = (imageUrl != null && imageUrl.isNotEmpty)
-        ? imageUrl
-        : (localFallback ?? '');
+    final imageUrl = row['image_url'] as String?;
+
+    // Priority: signed URL > local file path > empty (shows placeholder)
+    final String imagePath;
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      imagePath = imageUrl;
+    } else if (localFallback != null && localFallback.isNotEmpty) {
+      imagePath = localFallback;
+      debugPrint('⚠️ Record ${row['id']}: no remote URL, using local fallback');
+    } else {
+      imagePath = '';
+      debugPrint('⚠️ Record ${row['id']}: no image available (will show placeholder)');
+    }
 
     return MakeupRecord(
       id        : row['id'] as String,

@@ -7,7 +7,7 @@ import 'package:flawless_beauty_app/services/skin_analysis_service.dart';
 
 // ── Local model ───────────────────────────────────────────────────────────────
 class ScanRecord {
-  final String id;           // Supabase row UUID  (or 'local_<ts>' if offline)
+  final String id;           
   final SkinAnalysisResult result;
   final String imagePath;    // local file path OR remote Supabase Storage URL
   final DateTime scannedAt;

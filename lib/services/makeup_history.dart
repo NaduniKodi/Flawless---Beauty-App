@@ -8,7 +8,6 @@ import 'package:flawless_beauty_app/services/makeup_analysis_service.dart';
 // ── Model ─────────────────────────────────────────────────────────────────────
 class MakeupRecord {
   final String id;
-  /// Remote signed URL when loaded from DB, or local file path for this session
   final String imagePath;
   final MakeupAnalysisResult result;
   final DateTime scannedAt;
@@ -78,52 +77,76 @@ class MakeupHistory extends ChangeNotifier {
       return;
     }
 
-    // Verify the local file actually exists before trying to upload
+    // ── FIX: Read file bytes immediately before any other async work ─────────
+    // Camera temp files can be moved/deleted between async gaps. Reading bytes
+    // here guarantees we have the data regardless of what happens to the path.
     final localFile = File(localImagePath);
-    final fileExists = await localFile.exists();
-    debugPrint('📁 Local file exists: $fileExists | path: $localImagePath');
+    List<int>? imageBytes;
+
+    try {
+      if (await localFile.exists()) {
+        imageBytes = await localFile.readAsBytes();
+        debugPrint('📁 Read ${imageBytes.length} bytes from: $localImagePath');
+      } else {
+        debugPrint('⚠️ Local file not found at: $localImagePath');
+      }
+    } catch (e) {
+      debugPrint('❌ Could not read local file: $e');
+    }
 
     String? imageUrl;
 
-    // ── 1. Upload image to Supabase Storage ──────────────────────────────────
-    if (fileExists) {
+    // ── 1. Upload image bytes to Supabase Storage ─────────────────────────────
+    if (imageBytes != null && imageBytes.isNotEmpty) {
+      final fileName =
+          'makeup/$uid/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      debugPrint('📤 Uploading ${imageBytes.length} bytes → scan-images/$fileName');
+
       try {
-        final fileName =
-            'makeup/$uid/${DateTime.now().millisecondsSinceEpoch}.jpg';
-
-        debugPrint('📤 Uploading to scan-images/$fileName ...');
-
-        await _storage.from('scan-images').upload(
+        // Upload using bytes so the original file path no longer matters
+        await _storage.from('scan-images').uploadBinary(
               fileName,
-              localFile,
-              fileOptions: const FileOptions(contentType: 'image/jpeg'),
+              Uint8List.fromList(imageBytes),
+              fileOptions: const FileOptions(
+                contentType: 'image/jpeg',
+                upsert: false,
+              ),
             );
-
-        debugPrint('✅ Upload complete, generating signed URL...');
+        debugPrint('✅ Upload complete');
 
         imageUrl = await _storage
             .from('scan-images')
-            .createSignedUrl(fileName, 315360000); // 10 years
-
-        debugPrint('✅ Signed URL generated successfully');
+            .createSignedUrl(fileName, 315360000); // ~10 years
+        debugPrint('✅ Signed URL: $imageUrl');
       } on StorageException catch (e) {
-        // StorageException gives the most useful error message
+        // Surface the real reason so it's easy to fix
         debugPrint('❌ Storage upload FAILED');
-        debugPrint('   status: ${e.statusCode}');
-        debugPrint('   message: ${e.message}');
-        debugPrint('   error: ${e.error}');
-        debugPrint('   → Fix: Check scan-images bucket exists in Supabase Storage');
-        debugPrint('   → Fix: Add Storage RLS policies for insert + select');
+        debugPrint('   status  : ${e.statusCode}');
+        debugPrint('   message : ${e.message}');
+        debugPrint('   error   : ${e.error}');
+        debugPrint('');
+        debugPrint('   Common causes:');
+        debugPrint('   • Bucket "scan-images" does not exist in Supabase Storage');
+        debugPrint('   • Missing INSERT Storage RLS policy for authenticated users');
+        debugPrint('   • Missing SELECT Storage RLS policy for authenticated users');
+        debugPrint('');
+        debugPrint('   Required SQL policies:');
+        debugPrint('   CREATE POLICY "upload own images"');
+        debugPrint('   ON storage.objects FOR INSERT TO authenticated');
+        debugPrint('   WITH CHECK (');
+        debugPrint('     bucket_id = \'scan-images\' AND');
+        debugPrint('     (storage.foldername(name))[2] = auth.uid()::text');
+        debugPrint('   );');
       } catch (e) {
         debugPrint('❌ Unexpected upload error: $e');
       }
     } else {
-      debugPrint('⚠️ Skipping upload: local file not found at $localImagePath');
+      debugPrint('⚠️ Skipping upload: no image bytes available');
     }
 
     // ── 2. Insert DB row ──────────────────────────────────────────────────────
     try {
-      debugPrint('💾 Inserting row (image_url: ${imageUrl != null ? "set" : "NULL"})');
+      debugPrint('💾 Inserting row — image_url: ${imageUrl ?? "NULL (upload failed)"}');
 
       final row = await _db
           .from('makeup_reports')
@@ -137,15 +160,15 @@ class MakeupHistory extends ChangeNotifier {
             'skin_undertone'  : result.features.skinUndertone,
             'overall_style'   : result.overallStyle,
             'raw_ai_analysis' : result.features.rawAIAnalysis,
-            'image_url'       : imageUrl,
+            'image_url'       : imageUrl, // null if upload failed
           })
           .select()
           .single();
 
       debugPrint('✅ DB insert success, id: ${row['id']}');
 
-      // For in-memory record: prefer signed URL, fall back to local path
-      // so the image shows immediately in this session even if upload failed
+      // Show image immediately in this session using the local file path
+      // as a fallback even if the upload failed.
       _records.insert(
         0,
         _fromRow(
@@ -156,12 +179,12 @@ class MakeupHistory extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('❌ MakeupHistory.add DB error: $e');
-      // Keep in memory for this session even if DB write failed
+      // Keep in memory so the user still sees the result this session
       _records.insert(
         0,
         MakeupRecord(
           id        : 'local_${DateTime.now().millisecondsSinceEpoch}',
-          imagePath : localImagePath, // always show local image in-session
+          imagePath : localImagePath,
           result    : result,
           scannedAt : DateTime.now(),
           isRemote  : false,
@@ -236,7 +259,6 @@ class MakeupHistory extends ChangeNotifier {
 
     final imageUrl = row['image_url'] as String?;
 
-    // Priority: signed URL > local file path > empty (shows placeholder)
     final String imagePath;
     if (imageUrl != null && imageUrl.isNotEmpty) {
       imagePath = imageUrl;

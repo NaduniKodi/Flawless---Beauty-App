@@ -400,20 +400,51 @@ class _ScanCardState extends State<_ScanCard> {
   }
 
   Widget _thumbnail() {
-    final path = widget.record.imagePath;
-    if (path.isEmpty) return _thumbFallback();
-    final isRemote = widget.record.isRemote;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: isRemote
-          ? Image.network(path,
-              width: 66, height: 66, fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _thumbFallback())
-          : Image.file(File(path),
-              width: 66, height: 66, fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _thumbFallback()),
-    );
-  }
+  final path = widget.record.imagePath;
+  if (path.isEmpty) return _thumbFallback();
+  final isRemote = widget.record.isRemote;
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(14),
+    child: isRemote
+        ? Image.network(
+            path,
+            width: 66,
+            height: 66,
+            fit: BoxFit.cover,
+            loadingBuilder: (_, child, progress) {
+              if (progress == null) return child;
+              return Container(
+                width: 66,
+                height: 66,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [_rose.withOpacity(0.1), _orchid.withOpacity(0.15)],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    value: progress.expectedTotalBytes != null
+                        ? progress.cumulativeBytesLoaded /
+                            progress.expectedTotalBytes!
+                        : null,
+                    valueColor: const AlwaysStoppedAnimation<Color>(_orchidDark),
+                    strokeWidth: 2,
+                  ),
+                ),
+              );
+            },
+            errorBuilder: (_, __, ___) => _thumbFallback(),
+          )
+        : Image.file(
+            File(path),
+            width: 66,
+            height: 66,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => _thumbFallback(),
+          ),
+  );
+}
 
   Widget _thumbFallback() => Container(
         width: 66,
@@ -741,19 +772,51 @@ class _MakeupCardState extends State<_MakeupCard> {
   bool _pressed = false;
 
   Widget _thumbnail() {
-    final path = widget.record.imagePath;
-    if (path.isEmpty) return _thumbFallback();
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: Image.file(
-        File(path),
-        width: 66,
-        height: 66,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _thumbFallback(),
-      ),
-    );
-  }
+  final path = widget.record.imagePath;
+  if (path.isEmpty) return _thumbFallback();
+  final isRemote = widget.record.isRemote;
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(14),
+    child: isRemote
+        ? Image.network(
+            path,
+            width: 66,
+            height: 66,
+            fit: BoxFit.cover,
+            loadingBuilder: (_, child, progress) {
+              if (progress == null) return child;
+              return Container(
+                width: 66,
+                height: 66,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [_rose.withOpacity(0.1), _orchid.withOpacity(0.15)],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    value: progress.expectedTotalBytes != null
+                        ? progress.cumulativeBytesLoaded /
+                            progress.expectedTotalBytes!
+                        : null,
+                    valueColor: const AlwaysStoppedAnimation<Color>(_orchidDark),
+                    strokeWidth: 2,
+                  ),
+                ),
+              );
+            },
+            errorBuilder: (_, __, ___) => _thumbFallback(),
+          )
+        : Image.file(
+            File(path),
+            width: 66,
+            height: 66,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => _thumbFallback(),
+          ),
+  );
+}
 
   Widget _thumbFallback() => Container(
         width: 66,
